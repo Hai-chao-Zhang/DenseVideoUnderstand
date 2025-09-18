@@ -40,45 +40,18 @@ The **first-ever benchmark** dedicated to **Dense Video Understanding**, focusin
 <p align="center">
   <sub><b>1</b> Northeastern University &nbsp;|&nbsp; <b>2</b> Princeton University &nbsp;|&nbsp; <b>3</b> University of Maryland, College Park</sub>
 </p>
-<div align="center">
-  <table border="0" cellspacing="20" cellpadding="0">
-    <tr align="center" valign="middle">
-      <td>
-        <svg width="96" height="96" xmlns="http://www.w3.org/2000/svg">
-          <image href="https://brand.northeastern.edu/wp-content/uploads/2025/01/seal-yellow.svg"
-                 width="96" height="96" preserveAspectRatio="xMidYMid meet"/>
-        </svg>
-        &nbsp;
-        <svg width="140" height="36" xmlns="http://www.w3.org/2000/svg">
-          <image href="https://commons.wikimedia.org/wiki/Special:FilePath/Northeastern_University_wordmark.svg"
-                 width="140" height="36" preserveAspectRatio="xMidYMid meet"/>
-        </svg>
-      </td>
-      <td>
-        <svg width="96" height="96" xmlns="http://www.w3.org/2000/svg">
-          <image href="https://commons.wikimedia.org/wiki/Special:FilePath/Princeton_University_Shield.svg"
-                 width="96" height="96" preserveAspectRatio="xMidYMid meet"/>
-        </svg>
-        &nbsp;
-        <svg width="140" height="36" xmlns="http://www.w3.org/2000/svg">
-          <image href="https://commons.wikimedia.org/wiki/Special:FilePath/Princeton_text_logo.svg"
-                 width="140" height="36" preserveAspectRatio="xMidYMid meet"/>
-        </svg>
-      </td>
-      <td>
-        <svg width="96" height="96" xmlns="http://www.w3.org/2000/svg">
-          <image href="https://prg.cs.umd.edu/img/logo/umd-logo-transparent.png"
-                 width="96" height="96" preserveAspectRatio="xMidYMid meet"/>
-        </svg>
-        &nbsp;
-        <svg width="140" height="36" xmlns="http://www.w3.org/2000/svg">
-          <image href="https://commons.wikimedia.org/wiki/Special:FilePath/University_of_Maryland_wordmark.svg"
-                 width="140" height="36" preserveAspectRatio="xMidYMid meet"/>
-        </svg>
-      </td>
-    </tr>
-  </table>
-</div>
+<p align="center">
+  <img src="https://brand.northeastern.edu/wp-content/uploads/2025/01/seal-yellow.svg" height="60" alt="NEU Seal"/>
+  <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Northeastern_University_wordmark.svg" height="30" alt="NEU Wordmark"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Princeton_University_Shield.svg" height="60" alt="Princeton Shield"/>
+  <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Princeton_text_logo.svg" height="32" alt="Princeton Wordmark"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="https://prg.cs.umd.edu/img/logo/umd-logo-transparent.png" height="60" alt="UMD Logo"/>
+  <img src="https://commons.wikimedia.org/wiki/Special:FilePath/University_of_Maryland_wordmark.svg" height="32" alt="UMD Wordmark"/>
+</p>
+
+
 
 ---
 
