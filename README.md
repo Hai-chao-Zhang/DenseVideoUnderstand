@@ -24,7 +24,7 @@ The **first-ever benchmark** dedicated to **Dense Video Understanding**, focusin
 
 <p align="center">
 <img src="https://cdn-uploads.huggingface.co/production/uploads/66393f5a1231260674ae798e/uOmH6pKW5yqk6PstJ4H8R.jpeg"
-     alt="DIVE" height="200">
+     alt="DIVE" width="1080">
 </p>
 
 ---
