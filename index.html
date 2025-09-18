@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DIVE — Dense Video Understanding with Gated Residual Tokenization</title>
+  <meta name="description" content="DIVE (Dense Information Video Evaluation): the first benchmark for dense video understanding. Includes links to arXiv, Hugging Face dataset, and GitHub code.">
+  <meta property="og:title" content="DIVE — Dense Video Understanding">
+  <meta property="og:description" content="First benchmark for QA-driven high-FPS dense video understanding. Test split released; model coming soon.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://cdn-uploads.huggingface.co/production/uploads/66393f5a1231260674ae798e/uOmH6pKW5yqk6PstJ4H8R.jpeg">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A4%BF%3C/text%3E%3C/svg%3E">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b1220; --card:#111827; --muted:#8a93a6; --text:#e7ecf5; --accent:#60a5fa; --accent2:#22d3ee; --chip:#1f2937;
+      --badgeBorder:#2b3446;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{opacity:.9}
+    .container{max-width:1100px;margin:0 auto;padding:28px 18px}
+    .hero{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding:36px 0 10px}
+    .title{font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:.2px}
+    .subtitle{font-size:clamp(18px,2.2vw,22px);font-weight:600;color:var(--accent2)}
+    .lead{max-width:900px;font-size:18px;color:var(--muted);line-height:1.6}
+    .badges{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+    .badges a img{height:36px}
+    .card{background:linear-gradient(180deg,#0e1627 0%, #0c1423 100%);border:1px solid var(--badgeBorder);border-radius:16px;padding:22px;margin:22px 0}
+    .section-title{font-size:22px;font-weight:700;margin:6px 0 14px}
+    .authors{text-align:center}
+    .authors .names{font-size:16px}
+    .affils{color:var(--muted);margin-top:6px}
+    .logo-row{display:flex;gap:28px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:14px}
+    .logo-row img{height:46px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    @media (max-width:880px){.grid{grid-template-columns:1fr}}
+    pre{background:#0a0f1b;border:1px solid var(--badgeBorder);padding:14px;border-radius:12px;overflow:auto}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;color:#c8e1ff}
+    .timeline table{width:100%;border-collapse:collapse;font-size:15px}
+    .timeline th,.timeline td{border-bottom:1px solid var(--badgeBorder);padding:10px 8px;text-align:left}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+    .chip{background:var(--chip);color:#cbd5e1;border:1px solid var(--badgeBorder);font-size:12px;padding:6px 10px;border-radius:999px}
+    footer{color:var(--muted);text-align:center;padding:26px 0 44px}
+  </style>
+</head>
+<body>
+  <header class="container hero">
+    <div class="title">🤿 DENSE VIDEO UNDERSTANDING WITH GATED RESIDUAL TOKENIZATION</div>
+    <div class="subtitle">Dense Information Video Evaluation (DIVE) Benchmark</div>
+    <p class="lead">
+      The first benchmark dedicated to <b>QA‑driven high‑frame‑rate</b> comprehension, where <b>answer‑relevant information</b> appears in nearly every frame. 
+      <br><b>Status:</b> <u>Benchmark test split released</u> • Model &amp; training code <i>coming soon</i>.
+    </p>
+    <div class="badges">
+      <a href="https://arxiv.org/pdf/2509.14199"><img alt="ArXiv" src="https://img.shields.io/badge/ArXiv-2509.14199-red?style=for-the-badge&logo=arxiv"></a>
+      <a href="https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation"><img alt="HuggingFace Dataset" src="https://img.shields.io/badge/Dataset-HuggingFace-ffcc4d?style=for-the-badge&logo=huggingface"></a>
+      <a href="https://github.com/hai-chao-zhang/DenseVideoUnderstand/"><img alt="GitHub" src="https://img.shields.io/badge/Code-GitHub-black?style=for-the-badge&logo=github"></a>
+      <a href="https://zhanghaichao.xyz/DenseVideoUnderstand/"><img alt="Project Site" src="https://img.shields.io/badge/Project-Website-blue?style=for-the-badge&logo=google-chrome"></a>
+    </div>
+    <div class="chips">
+      <span class="chip">Dense Video QA</span>
+      <span class="chip">High‑FPS</span>
+      <span class="chip">VLM</span>
+      <span class="chip">Gated Tokenization</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card authors">
+      <div class="section-title">Authors</div>
+      <div class="names">
+        <b><a href="https://zhanghaichao.xyz">Haichao Zhang<sup>1</sup></a></b> ·
+        <b><a href="https://wenhaochai.com/">Wenhao Chai<sup>2</sup></a></b> ·
+        <b><a href="https://shwai-he.github.io/">Shwai He<sup>3</sup></a></b> ·
+        <b><a href="https://www.ang-li.com/">Ang Li<sup>3</sup></a></b> ·
+        <b><a href="https://www1.ece.neu.edu/~yunfu/">Yun Fu<sup>1</sup></a></b>
+      </div>
+      <div class="affils">
+        <b>1</b> Northeastern University &nbsp;|&nbsp; <b>2</b> Princeton University &nbsp;|&nbsp; <b>3</b> University of Maryland, College Park
+      </div>
+      <div class="logo-row">
+        <img src="https://brand.northeastern.edu/wp-content/uploads/2025/01/seal-yellow.svg" alt="NEU">
+        <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Princeton_University_Shield.svg" alt="Princeton">
+        <img src="https://prg.cs.umd.edu/img/logo/umd-logo-transparent.png" alt="UMD">
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <div class="section-title">What is DIVE?</div>
+        <p>
+          <b>DIVE</b> (Dense Information Video Evaluation) targets scenarios where content is dense across frames
+          (e.g., educational videos, surgical procedures, sign language). Conventional VLLMs rely on low‑FPS sampling
+          and keyframes, dropping critical temporal details needed for frame‑by‑frame reasoning.
+        </p>
+        <p>
+          See the paper for motivation and task definition. <a href="https://arxiv.org/pdf/2509.14199">[PDF]</a>
+        </p>
+      </div>
+      <div class="card">
+        <div class="section-title">GRT in a Nutshell</div>
+        <ul>
+          <li><b>Motion‑Compensated Gated Inter‑Tokenization</b>: use motion masks to skip static regions during tokenization → <i>sub‑linear growth</i> in token count/time.</li>
+          <li><b>Semantic‑Scene Intra‑Tokenization Merging</b>: merge redundant tokens within a scene while preserving dynamic semantics.</li>
+        </ul>
+        <p>Together, <b>Gated Residual Tokenization (GRT)</b> enables scalable high‑FPS understanding on DIVE. See <a href="https://arxiv.org/html/2509.14199">arXiv HTML</a>.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">Dataset</div>
+      <p><b>Released:</b> DIVE <u>test split</u> on 🤗 Hugging Face.</p>
+      <p><a href="https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation"><b>haichaozhang/DenseVideoEvaluation</b></a></p>
+      <pre><code class="language-python">from datasets import load_dataset
+ds = load_dataset("haichaozhang/DenseVideoEvaluation", split="test")
+print(ds[0])</code></pre>
+    </section>
+
+    <section class="card">
+      <div class="section-title">Evaluate via LMMS‑EVAL</div>
+      <p>We are preparing a PR to integrate DIVE into <a href="https://github.com/EvolvingLMMs-Lab/lmms-eval">LMMS‑EVAL</a>.</p>
+      <pre><code class="language-bash">git clone https://github.com/EvolvingLMMs-Lab/lmms-eval.git
+cd lmms-eval
+pip install -e .</code></pre>
+      <pre><code class="language-bash">accelerate launch \
+  --num_processes=1 \
+  -m lmms_eval \
+  --model llava_onevision \
+  --model_args "pretrained=lmms-lab/llava-onevision-qwen2-0.5b-ov,conv_template=qwen_1_5,model_name=llava_qwen" \
+  --tasks mme \
+  --batch_size 1 \
+  --log_samples \
+  --output_path ./logs/ \
+  --verbosity=DEBUG</code></pre>
+      <pre><code class="language-bash"># Placeholder for dense-video variant
+accelerate launch \
+  --num_processes=1 \
+  -m lmms_eval \
+  --model llava_ov_dense_video \
+  --model_args "pretrained=lmms-lab/llava-onevision-qwen2-0.5b-ov,conv_template=qwen_1_5,model_name=llava_qwen,use_gated_tok=True,use_vision_merge=False,profiling=False,dense_frame_fps=0.001" \
+  --tasks mvbench \
+  --batch_size 1 \
+  --log_samples \
+  --output_path ./logs/ \
+  --verbosity=DEBUG</code></pre>
+    </section>
+
+    <section class="card timeline">
+      <div class="section-title">Timeline</div>
+      <table>
+        <thead><tr><th>Date</th><th>Status</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><b>2025/09/18</b></td><td>✅</td><td>Release DIVE benchmark (test split)</td></tr>
+          <tr><td>TBD</td><td>⭕</td><td>Merge DIVE into LMMS‑EVAL (PR in prep)</td></tr>
+          <tr><td>TBD</td><td>⭕</td><td>Release multi‑FPS dataset variants</td></tr>
+          <tr><td>TBD</td><td>⭕</td><td>Add more dense‑video task categories</td></tr>
+          <tr><td>TBD</td><td>⭕</td><td><b>Release full GRT model + training/inference code</b></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <div class="section-title">Citation</div>
+      <pre><code class="language-bibtex">@article{zhang2025dive,
+  title={Dense Video Understanding with Gated Residual Tokenization},
+  author={Haichao Zhang and Wenhao Chai and Shwai He and Ang Li and Yun Fu},
+  journal={arXiv preprint arXiv:2509.14199},
+  year={2025}
+}</code></pre>
+    </section>
+  </main>
+
+  <footer class="container">
+    <div>© 2025 DIVE Authors. Dataset under OpenRAIL. Code to be released with the model.</div>
+  </footer>
+</body>
+</html>
