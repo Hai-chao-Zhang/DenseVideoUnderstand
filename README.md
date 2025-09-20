@@ -60,7 +60,7 @@ The **first-ever benchmark** dedicated to **Dense Video Understanding**, focusin
 | Date | Status | Description |
 |------|--------|-------------|
 | **2025/09/18** | ✅ | Release the **DIVE benchmark (test split only)** |
-| *TBD* | ⭕ | Release **evaluation/test code** on [GitHub](https://github.com/hai-chao-zhang/DenseVideoUnderstand/) |
+| *TBD* | ✅ | Release **evaluation/test code** on [GitHub](https://github.com/hai-chao-zhang/DenseVideoUnderstand/) |
 | *TBD* | ⭕ | Merge DIVE into **LMMS-EVAL** VLM test kit |
 | *TBD* | ⭕ | Release **multi-FPS versions** of the dataset |
 | *TBD* | ⭕ | Add **diverse dense video task categories** |
