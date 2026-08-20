@@ -1,275 +1,323 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DIVE — Dense Video Understanding with Gated Residual Tokenization</title>
-  <meta name="description" content="DIVE (Dense Information Video Evaluation): the first benchmark for dense video understanding. Includes links to arXiv, Hugging Face dataset, and GitHub code.">
-  <meta property="og:title" content="DIVE — Dense Video Understanding">
-  <meta property="og:description" content="First benchmark for QA-driven high-FPS dense video understanding. Test split released; model open source once upon acceptance.">
+  <title>DIVE-Bench — Codec-Style High-FPS Video Understanding</title>
+  <meta name="description" content="DIVE-Bench evaluates dense educational and high-motion video understanding. Explore the benchmark, Gated Residual Tokenization, and public leaderboards.">
+  <meta name="theme-color" content="#f4f1e8">
+  <meta property="og:title" content="DIVE-Bench — Dense Video Understanding">
+  <meta property="og:description" content="Two complementary tracks for dense, high-FPS video reasoning, with an inspectable public result snapshot.">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="https://cdn-uploads.huggingface.co/production/uploads/66393f5a1231260674ae798e/uOmH6pKW5yqk6PstJ4H8R.jpeg">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A4%BF%3C/text%3E%3C/svg%3E">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#0b1220; --bg2:#0b1220;
-      --card:#0e1627;
-      --muted:#97a2b7; --text:#e7ecf5;
-      --accent:#60a5fa; --accent2:#22d3ee; --accent3:#a78bfa;
-      --chip:#111827; --chipBorder:#233048;
-      --stroke:#223049; --glow:rgba(96,165,250,.25);
-      --shadow:0 10px 30px rgba(0,0,0,.35);
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;padding:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1200px 800px at 10% -10%, rgba(34,211,238,.06), transparent 60%), radial-gradient(1200px 800px at 110% 10%, rgba(96,165,250,.06), transparent 60%), var(--bg);color:var(--text)}
-    a{color:var(--accent);text-decoration:none}
-    a:hover{opacity:.92}
-    .container{max-width:1180px;margin:0 auto;padding:28px 18px}
-    .hero{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding:42px 0 14px}
-    .title{font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:.2px}
-    .subtitle{font-size:clamp(18px,2.2vw,22px);font-weight:700;color:var(--accent2)}
-    .lead{max-width:900px;font-size:18px;color:var(--muted);line-height:1.65}
-    .badges{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:14px}
-    .badges a img{height:36px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))}
-    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-    .chip{background:linear-gradient(180deg,#101a2e 0%, #0b1324 100%);color:#cfe4ff;border:1px solid var(--chipBorder);font-size:12px;padding:6px 10px;border-radius:999px}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.03) 100%);backdrop-filter: blur(8px); border:1px solid var(--stroke);border-radius:16px;padding:22px;margin:22px 0;box-shadow:var(--shadow)}
-    .section-title{font-size:22px;font-weight:800;margin:6px 0 14px;letter-spacing:.2px}
-    .authors{text-align:center}
-    .authors .names{font-size:16px}
-    .affils{color:var(--muted);margin-top:6px}
-    .logo-row{display:flex;gap:28px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:14px}
-    .logo-row img{height:46px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))}
-    .grid{display:grid;grid-template-columns:1.08fr .92fr;gap:18px}
-    @media (max-width:980px){.grid{grid-template-columns:1fr}}
-    pre{background:#0a0f1b;border:1px solid var(--stroke);padding:14px 40px 14px 14px;border-radius:12px;overflow:auto;position:relative}
-    code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;color:#c8e1ff}
-    .btn-copy{position:absolute;right:8px;top:8px;background:#111a2e;border:1px solid var(--stroke);color:#cfe4ff;font-size:12px;border-radius:8px;padding:6px 8px;cursor:pointer}
-    .btn-copy:hover{box-shadow:0 0 0 3px var(--glow)}
-    .timeline table{width:100%;border-collapse:collapse;font-size:15px}
-    .timeline th,.timeline td{border-bottom:1px solid var(--stroke);padding:10px 8px;text-align:left}
-    footer{color:var(--muted);text-align:center;padding:26px 0 44px}
-
-    /* ===== TEASER ===== */
-    .teaser{display:grid;grid-template-columns:1.3fr .7fr;gap:18px;align-items:stretch}
-    @media (max-width:980px){.teaser{grid-template-columns:1fr}}
-    .teaser-media{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--stroke);box-shadow:var(--shadow)}
-    .teaser-media::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.03)}
-    .teaser video,.teaser img{display:block;width:100%;height:100%;object-fit:cover;aspect-ratio:16/9;background:#050913}
-    .teaser-side{display:flex;flex-direction:column;gap:14px}
-    .pill{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(120deg, rgba(34,211,238,.18), rgba(96,165,250,.18));border:1px solid var(--stroke); color:#dff6ff;border-radius:999px;padding:8px 12px;font-size:12px;width:max-content}
-    .points{display:grid;gap:12px}
-    .point{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(180deg,#0d1629,#0b1324);border:1px solid var(--stroke);border-radius:12px;padding:12px}
-    .point .icon{width:28px;height:28px;display:grid;place-items:center;border-radius:8px;background:#0f1a30;border:1px solid var(--stroke)}
-    .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px}
-    @media (max-width:640px){.metrics{grid-template-columns:1fr 1fr}}
-    .metric{background:#0f172a;border:1px solid var(--stroke);border-radius:12px;padding:12px;text-align:center}
-    .metric b{font-size:18px;letter-spacing:.2px}
-    .metric span{display:block;color:var(--muted);font-size:12px;margin-top:4px}
-  </style>
+  <meta property="og:url" content="https://www.zhanghaichao.xyz/DenseVideoUnderstand/">
+  <meta property="og:image" content="https://www.zhanghaichao.xyz/DenseVideoUnderstand/assets/DIVE.jpeg">
+  <link rel="canonical" href="https://www.zhanghaichao.xyz/DenseVideoUnderstand/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Newsreader:opsz,wght@6..72,500;6..72,600&amp;display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect rx='20' width='100' height='100' fill='%2312212f'/%3E%3Cpath d='M20 64V29h25c20 0 33 12 33 35S65 91 45 91H20V64zm18 11h7c10 0 15-3 15-13 0-12-6-17-16-17h-6v30z' fill='%23f4f1e8'/%3E%3Ccircle cx='78' cy='23' r='9' fill='%23df5d3b'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css?v=1f1b5a79c74ff763">
 </head>
 <body>
-  <header class="container hero">
-    <div class="title">🤿 DENSE VIDEO UNDERSTANDING WITH GATED RESIDUAL TOKENIZATION</div>
-    <div class="subtitle">Dense Information Video Evaluation (DIVE) Benchmark</div>
-    <p class="lead">
-      The first benchmark dedicated to <b>QA-driven high-frame-rate</b> comprehension, where <b>answer-relevant information</b> appears in nearly every frame. 
-      <br><b>Status:</b> <u>Benchmark test split released</u> • Model will release after acceptance.
-    </p>
-    <div class="badges">
-      <a href="https://arxiv.org/pdf/2509.14199"><img alt="ArXiv" src="https://img.shields.io/badge/ArXiv-2509.14199-red?style=for-the-badge&logo=arxiv"></a>
-      <a href="https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation"><img alt="HuggingFace Dataset" src="https://img.shields.io/badge/Dataset-HuggingFace-ffcc4d?style=for-the-badge&logo=huggingface"></a>
-      <a href="https://github.com/hai-chao-zhang/DenseVideoUnderstand/"><img alt="GitHub" src="https://img.shields.io/badge/Code-GitHub-black?style=for-the-badge&logo=github"></a>
-      <a href="https://zhanghaichao.xyz/DenseVideoUnderstand/"><img alt="Project Site" src="https://img.shields.io/badge/Project-Website-blue?style=for-the-badge&logo=google-chrome"></a>
-    </div>
-    <div class="chips">
-      <span class="chip">Dense Video QA</span>
-      <span class="chip">High-FPS</span>
-      <span class="chip">VLM</span>
-      <span class="chip">Gated Tokenization</span>
-    </div>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="site-header" id="top">
+    <a class="brand" href="#top" aria-label="DIVE-Bench home">
+      <span class="brand-mark" aria-hidden="true">D</span>
+      <span>DIVE<span class="brand-light">–Bench</span></span>
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+      <span class="sr-only">Toggle navigation</span>
+      <span></span><span></span>
+    </button>
+    <nav class="site-nav" id="site-nav" aria-label="Primary navigation">
+      <a href="#benchmark">Benchmark</a>
+      <a href="#method">Method</a>
+      <a href="#leaderboard">Leaderboard</a>
+      <a href="#evaluate">Evaluate</a>
+      <a class="nav-paper" href="https://arxiv.org/abs/2509.14199">Paper <span aria-hidden="true">↗</span></a>
+    </nav>
   </header>
 
-  <main class="container">
-
-    <!-- ===== TEASER SECTION ===== -->
-    <section class="teaser" aria-label="Teaser">
-      <div class="teaser-media">
-        <!-- 如果有视频，保留 video；没有就删掉 video，用下面 img 作为占位 -->
-<!--         <video
-          src="assets/teaser.mp4"
-          poster="assets/teaser.jpg"
-          playsinline
-          muted
-          autoplay
-          loop
-          aria-label="DIVE Teaser">
-        </video> -->
-<!--         图片占位（无视频时可用）：  -->
-        <img src="assets/DIVE.jpeg" alt="DIVE Teaser">
+  <main id="main-content">
+    <section class="hero section-shell" aria-labelledby="hero-title">
+      <div class="hero-copy reveal">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> A benchmark for information-dense video</div>
+        <h1 id="hero-title">Understand the frames<br><em>others skip.</em></h1>
+        <p class="hero-lead">DIVE-Bench tests video-language models when evidence is not confined to a few keyframes—from long-form educational content to precise high-motion trajectories.</p>
+        <div class="hero-actions" role="group" aria-label="Project resources">
+          <a class="button button-primary" href="https://arxiv.org/pdf/2509.14199">Read the paper <span aria-hidden="true">↗</span></a>
+          <span class="button button-secondary button-disabled" aria-disabled="true">Code forthcoming</span>
+          <a class="button button-text" href="https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation">Get dataset <span aria-hidden="true">↗</span></a>
+        </div>
+        <p class="hero-meta">Haichao Zhang<sup>1</sup>, Wenhao Chai<sup>2</sup>, Shwai He<sup>3</sup>, Ang Li<sup>3</sup>, Yun Fu<sup>1</sup></p>
+        <p class="affiliations"><sup>1</sup>Northeastern University &nbsp; <sup>2</sup>Princeton University &nbsp; <sup>3</sup>University of Maryland</p>
       </div>
 
-      <div class="teaser-side">
-        <span class="pill">🎬 Teaser · Dense frames, high-FPS, QA-centric</span>
-        <h3 class="section-title" style="margin:0;">High-Frame-Rate Understanding, Without the Token Tax</h3>
-        <div class="points">
-          <div class="point">
-            <div class="icon">📚</div>
-            <div><b>DIVE Benchmark</b><br><span style="color:var(--muted)">First dataset tailored for dense information across frames: educational videos, sign language, procedures, sports breakdowns.</span></div>
+      <div class="hero-visual reveal" role="group" aria-label="Dense video sampling illustration">
+        <div class="visual-label"><span>00:00</span><span>32:14</span></div>
+        <div class="filmstrip" aria-hidden="true">
+          <div class="frame frame-a"><span>OCR</span></div>
+          <div class="frame frame-b"><span>diagram</span></div>
+          <div class="frame frame-c"><span>subtitle</span></div>
+          <div class="frame frame-d"><span>motion</span></div>
+          <div class="frame frame-e"><span>detail</span></div>
+        </div>
+        <svg class="sampling-curve" viewBox="0 0 640 190" role="img" aria-labelledby="curve-title curve-desc">
+          <title id="curve-title">Dense evidence over time</title>
+          <desc id="curve-desc">A signal varies across a long timeline, with sampling markers retaining evidence throughout the video.</desc>
+          <defs>
+            <linearGradient id="signal" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#177d78"/>
+              <stop offset="1" stop-color="#df5d3b"/>
+            </linearGradient>
+          </defs>
+          <line x1="18" y1="150" x2="622" y2="150" class="curve-axis"/>
+          <path d="M18 132 C55 130 62 72 100 75 S145 137 180 118 S224 33 265 67 S303 145 348 105 S400 50 438 76 S484 132 520 99 S572 38 622 57" class="curve-line"/>
+          <g class="sample-points">
+            <circle cx="50" cy="106" r="6"/><circle cx="98" cy="75" r="6"/><circle cx="151" cy="125" r="6"/><circle cx="214" cy="72" r="6"/><circle cx="265" cy="67" r="6"/><circle cx="324" cy="132" r="6"/><circle cx="385" cy="66" r="6"/><circle cx="443" cy="80" r="6"/><circle cx="510" cy="107" r="6"/><circle cx="580" cy="49" r="6"/>
+          </g>
+          <text x="18" y="177">evidence is distributed—not episodic</text>
+        </svg>
+        <div class="visual-note">
+          <span class="pulse" aria-hidden="true"></span>
+          <span><strong>Dense evidence</strong><br>requires temporal coverage</span>
+          <span class="visual-arrow" aria-hidden="true">→</span>
+          <span><strong>GRT</strong><br>reuses what stays static</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="stat-band" aria-label="Benchmark at a glance">
+      <div class="stat-band-inner">
+        <div class="stat"><strong>317</strong><span>long-form source videos</span></div>
+        <div class="stat"><strong>634</strong><span>educational QA items</span></div>
+        <div class="stat"><strong>1,000</strong><span>high-motion preview items</span></div>
+        <div class="stat"><strong id="lpm-method-count">—</strong><span>evaluated LPM methods</span></div>
+      </div>
+    </section>
+
+    <section class="section-shell benchmark-section" id="benchmark" aria-labelledby="benchmark-title">
+      <div class="section-kicker">01 / Benchmark</div>
+      <div class="section-heading reveal">
+        <h2 id="benchmark-title">Two tracks. One missing capability.</h2>
+        <p>Most video benchmarks reward sparse glimpses. DIVE-Bench isolates the harder case: details accumulate over long timelines, or change faster than sparse sampling can preserve.</p>
+      </div>
+
+      <div class="track-grid">
+        <article class="track-card track-lpm reveal">
+          <div class="track-index">A</div>
+          <div>
+            <p class="track-label">Educational dense video · LPM</p>
+            <h3>Read, listen, and reason across long-form video.</h3>
+            <p>Questions target visible text and spoken subtitles distributed across educational videos. The public split contains 634 evaluation items, with two prompts per source video.</p>
+            <ul class="tag-list">
+              <li>OCR</li><li>Subtitles</li><li>Long-form</li><li>Open-ended QA</li>
+            </ul>
           </div>
-          <div class="point">
-            <div class="icon">⚙️</div>
-            <div><b>GRT (Gated Residual Tokenization)</b><br><span style="color:var(--muted)">Skip static regions during tokenization + merge redundant tokens within scenes → scalable high-FPS reasoning.</span></div>
+          <div class="track-metric"><span>Primary ranking</span><strong>Open MOS ↑</strong></div>
+        </article>
+
+        <article class="track-card track-motion reveal">
+          <div class="track-index">B</div>
+          <div>
+            <p class="track-label">High-motion dense video · preview</p>
+            <h3>Track fine motion at frame-level precision.</h3>
+            <p>Models predict a hand trajectory over a semantic 3×3 image grid. The current result snapshot evaluates 1,000 examples from the 3,243-example test split; public mirror access will accompany the evaluation-code release.</p>
+            <ul class="tag-list">
+              <li>Trajectory</li><li>3×3 grid</li><li>Transitions</li><li>High FPS</li>
+            </ul>
           </div>
-          <div class="point">
-            <div class="icon">🧠</div>
-            <div><b>VLM-Ready</b><br><span style="color:var(--muted)">Sub-linear token/time growth under dense sampling; compatible with LLaVA-OV style pipelines.</span></div>
+          <div class="track-metric"><span>Primary ranking</span><strong>Grid Accuracy ↑</strong></div>
+        </article>
+      </div>
+
+      <figure class="benchmark-figure reveal">
+        <img src="assets/DIVE.jpeg" alt="DIVE-Bench overview showing dense video question answering and Gated Residual Tokenization">
+        <figcaption><span>Figure 1.</span> DIVE-Bench couples information-dense evaluation with a token-efficient model pathway. Source: project paper.</figcaption>
+      </figure>
+    </section>
+
+    <section class="method-section" id="method" aria-labelledby="method-title">
+      <div class="section-shell">
+        <div class="section-kicker section-kicker-light">02 / Method</div>
+        <div class="section-heading section-heading-light reveal">
+          <h2 id="method-title">Spend computation on what changed.</h2>
+          <p>Gated Residual Tokenization (GRT) treats video more like a codec: preserve a full visual reference, then selectively recompute residual content while consolidating repeated scene semantics.</p>
+        </div>
+
+        <div class="pipeline reveal" role="img" aria-label="GRT pipeline: video frames enter a motion-compensated gate, changed regions are tokenized, semantically redundant scene tokens are merged, and tokens are passed to a vision-language model">
+          <div class="pipeline-node pipeline-input">
+            <span class="node-number">01</span>
+            <div class="mini-frames" aria-hidden="true"><i></i><i></i><i></i></div>
+            <h3>Dense frames</h3>
+            <p>High temporal coverage</p>
+          </div>
+          <div class="pipeline-link"><span>motion cues</span><svg viewBox="0 0 96 20" aria-hidden="true"><path d="M1 10h88m-8-7 8 7-8 7"/></svg></div>
+          <div class="pipeline-node pipeline-gate">
+            <span class="node-number">02</span>
+            <div class="gate-grid" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <h3>Inter-token gate</h3>
+            <p>Reuse static regions; recompute residual change</p>
+          </div>
+          <div class="pipeline-link"><span>residual tokens</span><svg viewBox="0 0 96 20" aria-hidden="true"><path d="M1 10h88m-8-7 8 7-8 7"/></svg></div>
+          <div class="pipeline-node pipeline-merge">
+            <span class="node-number">03</span>
+            <div class="token-stack" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+            <h3>Scene merge</h3>
+            <p>Consolidate semantically redundant tokens</p>
+          </div>
+          <div class="pipeline-link"><span>compact context</span><svg viewBox="0 0 96 20" aria-hidden="true"><path d="M1 10h88m-8-7 8 7-8 7"/></svg></div>
+          <div class="pipeline-node pipeline-output">
+            <span class="node-number">04</span>
+            <div class="answer-lines" aria-hidden="true"><i></i><i></i><i></i></div>
+            <h3>Video LLM</h3>
+            <p>Answer with temporally dense evidence</p>
           </div>
         </div>
-        <div class="metrics">
-          <div class="metric"><b>Dense QA</b><span>Answer in nearly every frame</span></div>
-          <div class="metric"><b>High-FPS</b><span>Fine-grained temporal cues</span></div>
-          <div class="metric"><b>Token-Smart</b><span>Skip &amp; Merge by GRT</span></div>
+
+        <div class="method-notes">
+          <div><span>Inter-tokenization</span><p>Motion-aware gating reuses selected patch projections for visual regions that remain stable from frame to frame.</p></div>
+          <div><span>Intra-tokenization</span><p>Semantic-scene merging reduces redundant context after visual encoding while retaining dynamic evidence.</p></div>
+          <div><span>Measured efficiency</span><p>Recompute ratio measures patch-projection reuse; sampling density (fps) is sampled frames divided by source duration, not end-to-end throughput.</p></div>
         </div>
       </div>
     </section>
 
-    <!-- ===== AUTHORS ===== -->
-    <section class="card authors">
-      <div class="section-title">Authors</div>
-      <div class="names">
-        <b><a href="https://zhanghaichao.xyz">Haichao Zhang<sup>1</sup></a></b> ·
-        <b><a href="https://wenhaochai.com/">Wenhao Chai<sup>2</sup></a></b> ·
-        <b><a href="https://shwai-he.github.io/">Shwai He<sup>3</sup></a></b> ·
-        <b><a href="https://www.ang-li.com/">Ang Li<sup>3</sup></a></b> ·
-        <b><a href="https://www1.ece.neu.edu/~yunfu/">Yun Fu<sup>1</sup></a></b>
+    <section class="section-shell leaderboard-section" id="leaderboard" aria-labelledby="leaderboard-title">
+      <div class="section-kicker">03 / Leaderboard</div>
+      <div class="section-heading leaderboard-heading reveal">
+        <div>
+          <h2 id="leaderboard-title">Public results, inspectable by metric.</h2>
+          <p>Switch tracks, search models, filter sources, and sort any metric. A dash means that the current public artifact did not report that field. For the LPM default rank, methods without Open MOS are placed after all scored methods, then ordered by Token F1.</p>
+        </div>
+        <div class="snapshot">
+          <span class="snapshot-dot" aria-hidden="true"></span>
+          <div><strong>Result snapshot</strong><span id="snapshot-date">17 Aug 2026</span></div>
+        </div>
       </div>
-      <div class="affils">
-        <b>1</b> Northeastern University &nbsp;|&nbsp; <b>2</b> Princeton University &nbsp;|&nbsp; <b>3</b> University of Maryland, College Park
+
+      <div class="leader-summary" id="leader-summary" aria-live="polite"></div>
+
+      <section class="provenance-note" id="grt-family-qualification" aria-labelledby="grt-family-qualification-title" hidden>
+        <h3 id="grt-family-qualification-title">Four-family GRT qualification</h3>
+        <p id="grt-family-qualification-count" aria-live="polite">—</p>
+        <ul class="leader-summary" id="grt-family-qualification-list" aria-label="GRT family qualification results"></ul>
+      </section>
+
+      <div class="leaderboard-panel reveal">
+        <div class="leaderboard-toolbar">
+          <div class="track-tabs" role="group" aria-label="Leaderboard track">
+            <button id="tab-lpm" class="track-tab is-active" type="button" aria-pressed="true" data-track="lpm">Educational / LPM <span>634</span></button>
+            <button id="tab-highmotion" class="track-tab" type="button" aria-pressed="false" data-track="highmotion">High-Motion Preview <span>1,000</span></button>
+          </div>
+          <div class="leaderboard-filters">
+            <label class="search-field">
+              <span class="sr-only">Search model or method</span>
+              <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"></circle><path d="m13 13 4 4"></path></svg>
+              <input id="model-search" type="search" placeholder="Search models" autocomplete="off">
+            </label>
+            <label class="source-field">
+              <span class="sr-only">Filter by source</span>
+              <select id="source-filter">
+                <option value="all">All sources</option>
+                <option value="open">Open models</option>
+                <option value="gemini">Gemini API</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="table-scroll" role="region" tabindex="0" aria-label="Scrollable leaderboard table">
+          <table id="leaderboard-table">
+            <caption id="leaderboard-caption">DIVE-Bench Educational Dense Video leaderboard</caption>
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <p id="table-count">Showing — methods</p>
+          <p>Default rank: <strong id="ranking-rule">Open MOS (reported first; missing last), then Token F1</strong></p>
+        </div>
       </div>
-      <div class="logo-row">
-        <img src="https://brand.northeastern.edu/wp-content/uploads/2025/01/seal-yellow.svg" alt="NEU">
-        <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Princeton_University_Shield.svg" alt="Princeton">
-        <img src="https://prg.cs.umd.edu/img/logo/umd-logo-transparent.png" alt="UMD">
+
+      <section class="metric-glossary" aria-labelledby="glossary-title">
+        <div class="glossary-intro">
+          <p class="mini-label">How to read the table</p>
+          <h3 id="glossary-title">Metric glossary</h3>
+          <p>There is no hidden composite score. Each track exposes its task metric and supporting quality or efficiency measures.</p>
+        </div>
+        <dl id="metric-definitions"></dl>
+      </section>
+
+      <p class="provenance-note"><strong>Result provenance.</strong> This static snapshot was generated from <span id="source-artifact-count">20</span> evaluation artifacts on <span id="snapshot-date-long">17 August 2026</span>. LPM Open MOS uses <code id="open-mos-judge">Qwen/Qwen3-VL-32B-Instruct</code> as the open text judge. Re-run details and exact model arguments will ship with the forthcoming evaluation-code release.</p>
+    </section>
+
+    <section class="section-shell evaluate-section" id="evaluate" aria-labelledby="evaluate-title">
+      <div class="section-kicker">04 / Protocol preview</div>
+      <div class="section-heading reveal">
+        <h2 id="evaluate-title">Evaluation recipe, pending code release.</h2>
+        <p>The integration follows LMMS-Eval conventions and uses an explicit eight-frame budget with deterministic generation. Commands are shown for protocol inspection; the evaluation repository and High-Motion mirror are not public yet.</p>
+      </div>
+
+      <div class="code-layout reveal">
+        <div class="code-tabs" role="tablist" aria-label="Reproduction commands">
+          <button id="code-tab-setup" class="code-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="code-panel" tabindex="0" data-code="setup">Setup</button>
+          <button id="code-tab-lpm" class="code-tab" type="button" role="tab" aria-selected="false" aria-controls="code-panel" tabindex="-1" data-code="lpm">Run LPM</button>
+          <button id="code-tab-motion" class="code-tab" type="button" role="tab" aria-selected="false" aria-controls="code-panel" tabindex="-1" data-code="motion">Run High-Motion</button>
+        </div>
+        <div class="code-window" id="code-panel" role="tabpanel" aria-labelledby="code-tab-setup" tabindex="0">
+          <div class="code-window-bar"><span></span><span></span><span></span><p id="code-filename">setup.sh</p><button class="copy-button" type="button" data-copy-target="active-code">Copy</button></div>
+          <pre tabindex="0"><code id="active-code"># Evaluation code release in progress.
+# The pinned installation recipe will include:
+conda create -n dive python=3.10 -y
+conda activate dive
+python -m pip install qwen-vl-utils
+hf auth login</code></pre>
+        </div>
+        <div class="reproduce-aside">
+          <p class="mini-label">Protocol notes</p>
+          <ol>
+            <li><span>01</span> Code repository and High-Motion mirror: release forthcoming.</li>
+            <li><span>02</span> Keep model-specific frame budgets explicit in <code>--model_args</code>.</li>
+            <li><span>03</span> Save sample logs and aggregate summaries for auditable submissions.</li>
+          </ol>
+          <p class="release-notice"><strong>Release status</strong><br>Paper and LPM data are available; pinned code and the High-Motion mirror are being prepared.</p>
+        </div>
       </div>
     </section>
 
-    <!-- ===== WHAT & GRT ===== -->
-    <section class="grid" aria-label="Overview">
-      <div class="card">
-        <div class="section-title">What is DIVE?</div>
-        <p>
-          <b>DIVE</b> (Dense Information Video Evaluation) targets scenarios where content is dense across frames
-          (e.g., educational videos, surgical procedures, sign language). Conventional VLLMs rely on low-FPS sampling
-          and keyframes, dropping critical temporal details needed for frame-by-frame reasoning.
-        </p>
-        <p>
-          See the paper for motivation and task definition. <a href="https://arxiv.org/pdf/2509.14199">[PDF]</a>
-        </p>
-      </div>
-      <div class="card">
-        <div class="section-title">GRT in a Nutshell</div>
-        <ul>
-          <li><b>Motion-Compensated Gated Inter-Tokenization</b>: motion masks skip static regions during tokenization → <i>sub-linear growth</i> in token count/time.</li>
-          <li><b>Semantic-Scene Intra-Tokenization Merging</b>: merge redundant tokens within a scene while preserving dynamic semantics.</li>
-        </ul>
-        <p>Together, <b>Gated Residual Tokenization (GRT)</b> enables scalable high-FPS understanding on DIVE. See <a href="https://arxiv.org/html/2509.14199">arXiv HTML</a>.</p>
-      </div>
-    </section>
-
-    <!-- ===== DATASET ===== -->
-    <section class="card">
-      <div class="section-title">Dataset</div>
-      <p><b>Released:</b> DIVE <u>test split</u> on 🤗 Hugging Face.</p>
-      <p><a href="https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation"><b>haichaozhang/DenseVideoEvaluation</b></a></p>
-      <pre><button class="btn-copy" data-target="#snip1">Copy</button><code id="snip1" class="language-python">from datasets import load_dataset
-ds = load_dataset("haichaozhang/DenseVideoEvaluation", split="test")
-print(ds[0])</code></pre>
-    </section>
-
-    <!-- ===== EVAL ===== -->
-    <section class="card">
-      <div class="section-title">Evaluate via LMMS-EVAL</div>
-      <p>We are preparing a PR to integrate DIVE into <a href="https://github.com/EvolvingLMMs-Lab/lmms-eval">LMMS-EVAL</a>.</p>
-      <pre><button class="btn-copy" data-target="#snip2">Copy</button><code id="snip2" class="language-bash">git clone https://github.com/EvolvingLMMs-Lab/lmms-eval.git
-cd lmms-eval
-pip install -e .</code></pre>
-      <pre><button class="btn-copy" data-target="#snip3">Copy</button><code id="snip3" class="language-bash">accelerate launch \
-  --num_processes=1 \
-  -m lmms_eval \
-  --model llava_onevision \
-  --model_args "pretrained=lmms-lab/llava-onevision-qwen2-0.5b-ov,conv_template=qwen_1_5,model_name=llava_qwen" \
-  --tasks mme \
-  --batch_size 1 \
-  --log_samples \
-  --output_path ./logs/ \
-  --verbosity=DEBUG</code></pre>
-      <pre><button class="btn-copy" data-target="#snip4">Copy</button><code id="snip4" class="language-bash"># Dense-video variant (placeholder)
-accelerate launch \
-  --num_processes=1 \
-  -m lmms_eval \
-  --model llava_ov_dense_video \
-  --model_args "pretrained=lmms-lab/llava-onevision-qwen2-0.5b-ov,conv_template=qwen_1_5,model_name=llava_qwen,use_gated_tok=True,use_vision_merge=False,profiling=False,dense_frame_fps=0.001" \
-  --tasks mvbench \
-  --batch_size 1 \
-  --log_samples \
-  --output_path ./logs/ \
-  --verbosity=DEBUG</code></pre>
-    </section>
-
-    <!-- ===== TIMELINE ===== -->
-    <section class="card timeline">
-      <div class="section-title">Timeline</div>
-      <table>
-        <thead><tr><th>Date</th><th>Status</th><th>Description</th></tr></thead>
-        <tbody>
-          <tr><td><b>2025/09/18</b></td><td>✅</td><td>Release DIVE benchmark (test split)</td></tr>
-          <tr><td>TBD</td><td>⭕</td><td>Merge DIVE into LMMS-EVAL (PR in prep)</td></tr>
-          <tr><td>TBD</td><td>⭕</td><td>Release multi-FPS dataset variants</td></tr>
-          <tr><td>TBD</td><td>⭕</td><td>Add more dense-video task categories</td></tr>
-          <tr><td>TBD</td><td>⭕</td><td><b>Release full GRT model + training/inference code</b></td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <!-- ===== CITATION ===== -->
-    <section class="card">
-      <div class="section-title">Citation</div>
-      <pre><button class="btn-copy" data-target="#snip5">Copy</button><code id="snip5" class="language-bibtex">@article{zhang2025dive,
-  title={Dense Video Understanding with Gated Residual Tokenization},
-  author={Haichao Zhang and Wenhao Chai and Shwai He and Ang Li and Yun Fu},
-  journal={arXiv preprint arXiv:2509.14199},
-  year={2025}
+    <section class="citation-section" id="citation" aria-labelledby="citation-title">
+      <div class="section-shell citation-layout">
+        <div>
+          <div class="section-kicker section-kicker-light">05 / Cite</div>
+          <h2 id="citation-title">Build on DIVE-Bench.</h2>
+          <p>If the benchmark or GRT is useful in your research, please cite the project paper.</p>
+        </div>
+        <div class="bibtex-card">
+          <button class="copy-button copy-bibtex" type="button" data-copy-target="bibtex-code">Copy BibTeX</button>
+          <pre tabindex="0"><code id="bibtex-code">@article{zhang2025dive,
+  title   = {Dense Video Understanding with
+             Gated Residual Tokenization},
+  author  = {Zhang, Haichao and Chai, Wenhao and
+             He, Shwai and Li, Ang and Fu, Yun},
+  journal = {arXiv preprint arXiv:2509.14199},
+  year    = {2025}
 }</code></pre>
+        </div>
+      </div>
     </section>
   </main>
 
-  <footer class="container">
-    <div>© 2025 DIVE Authors. Dataset under OpenRAIL. Code to be released with the model.</div>
+  <footer class="site-footer">
+    <div class="section-shell footer-inner">
+      <div><a class="brand footer-brand" href="#top"><span class="brand-mark" aria-hidden="true">D</span><span>DIVE–Bench</span></a><p>Dense evidence deserves dense understanding.</p></div>
+      <div class="footer-links"><a href="https://arxiv.org/abs/2509.14199">Paper</a><span>Code · forthcoming</span><a href="https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation">LPM dataset</a><a href="#leaderboard">Leaderboard</a></div>
+      <p class="footer-meta">© 2026 DIVE-Bench authors<br>Last result sync: <span id="footer-sync-date">17 Aug 2026</span></p>
+    </div>
   </footer>
 
-  <script>
-    // 复制代码按钮
-    document.querySelectorAll('.btn-copy').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const sel = btn.getAttribute('data-target');
-        const code = document.querySelector(sel)?.innerText ?? '';
-        navigator.clipboard.writeText(code).then(()=>{
-          btn.textContent = 'Copied!';
-          setTimeout(()=>btn.textContent='Copy', 1500);
-        });
-      });
-    });
-
-    // 若用户偏好减少动画，则暂停视频自动播放
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (mq.matches) {
-      document.querySelectorAll('video[autoplay]').forEach(v=>{
-        v.removeAttribute('autoplay');
-        v.pause?.();
-      });
-    }
-  </script>
+  <script src="data/leaderboard.js?v=1f1b5a79c74ff763" defer></script>
+  <script src="app.js?v=1f1b5a79c74ff763" defer></script>
 </body>
 </html>

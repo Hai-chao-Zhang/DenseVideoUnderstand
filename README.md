@@ -1,6 +1,121 @@
 # 🤿 **DENSE VIDEO UNDERSTANDING WITH GATED RESIDUAL TOKENIZATION**
 ### **Dense Information Video Evaluation (DIVE) Benchmark**
 
+## Project website
+
+The webpage branch is a dependency-free static research site. It separates content, presentation, interaction, and the published result snapshot into index.html, styles.css, app.js, and data/leaderboard.js.
+
+Preview it locally from the repository root:
+
+    python -m http.server 8000
+
+Then open http://localhost:8000. Leaderboard values live in data/leaderboard.js and are synchronized from verified release artifacts with `scripts/sync_leaderboard.py`.
+
+Run the dependency-free site contract checks with:
+
+    python -m unittest discover -s tests -v
+
+The Qwen dual-route GRT wrapper lives in the evaluation repository as an
+additive `lmms_eval` plugin. In that repository, install the package and enable
+the plugin before using the `qwen2_5_vl_dual_route` model name:
+
+    python -m pip install -e .
+    export LMMS_EVAL_PLUGINS=densevideo_qwen_dual_plugin
+
+For an uninstalled source checkout, also export the repository root on
+`PYTHONPATH`. The environment variable remains required after installation;
+it makes plugin activation explicit and keeps the upstream registry additive.
+
+### Publish an additive release-v2 snapshot
+
+Release v2 is an honest mixed-disposition contract. It always audits the four
+families `route31`, `llava7`, `qwen3`, and `qwen7`. A `promoted` family carries
+a passed full selection and may add or replace a leaderboard row; a
+`not_promoted` family remains visible in provenance with hashed failure
+evidence but contributes no candidate row.
+
+The frozen baseline contains 27 LPM rows. Route31 replaces its legacy 0.5B GRT
+row, Qwen2.5-VL 3B adds one verified row, LLaVA7 remains `not_promoted`, and
+Qwen7 contributes a row only if its terminal 634-sample completion passes.
+Consequently, the v2 manifest computes the final LPM count as 28 or 29; neither
+the builder nor the site sync should hard-code that choice.
+
+The published 20 Aug 2026 snapshot records Qwen7 as `promoted`, so the current
+site contains 29 LPM rows, three verified GRT methods, and one explicit
+`not_promoted` LLaVA7 family audit.
+
+Create the manifest in the evaluation repository only after Qwen7 has a
+terminal result. If its full completion passes, use the completion form:
+
+    python tools/densevideo/create_grt_release_manifest_v2.py \
+      --route31-selection /path/to/hf_route31_full/selection.json \
+      --llava7-failed-root /path/to/llava7_full_campaign \
+      --qwen3-completed /path/to/qwen3_full/completed.json \
+      --qwen7-completed /path/to/qwen7_full/full_completed.json \
+      --output /path/to/release/dive_grt_multifamily_release_v2.json
+
+If the terminal Qwen7 gate fails, use the failure form instead; both failure
+arguments are required together:
+
+    python tools/densevideo/create_grt_release_manifest_v2.py \
+      --route31-selection /path/to/hf_route31_full/selection.json \
+      --llava7-failed-root /path/to/llava7_full_campaign \
+      --qwen3-completed /path/to/qwen3_full/completed.json \
+      --qwen7-failed-root /path/to/qwen7_full_campaign \
+      --qwen7-failed-selection /path/to/qwen7_full/selection.json \
+      --output /path/to/release/dive_grt_multifamily_release_v2.json
+
+Build the release with the atomic legacy MOS completion. `--summary-csv` is
+repeatable when the 27 baseline summaries are split across files:
+
+    python tools/densevideo/build_public_leaderboard_complete.py \
+      --model-config configs/densevideo/leaderboard_models_extended.yaml \
+      --summary-csv /path/to/release_inputs/baseline_summaries.csv \
+      --output-base /path/to/evaluation_outputs \
+      --output-dir /path/to/release \
+      --expected-mos-judge-model Qwen/Qwen3-VL-32B-Instruct \
+      --expected-mos-judge-revision 0cfaf48183f594c314753d30a4c4974bc75f3ccb \
+      --expected-mos-judge-fingerprint 64c644b2bd2696677afd3507a6bd6efa03e902d712c0e55e26ab9ab144c0a76d \
+      --grt-release-manifest /path/to/release/dive_grt_multifamily_release_v2.json \
+      --legacy-open-mos-completed /path/to/legacy_open_mos_rejudge_v1/completed.json
+
+The completion injects exactly nine disjoint 634-row legacy score files. The
+builder records their completion, contract, matrix, method paths, row counts,
+and hashes in `leaderboard_sources.json`. Do not combine
+`--legacy-open-mos-completed` with manual `--open-mos-csv` or `--mos-dir`
+arguments. Omitting `--expected-lpm-rows` and `--expected-highmotion-rows` is
+intentional: the builder reads and validates both counts from the v2 manifest.
+
+Stage the site payload rather than overwriting the published snapshot during
+review:
+
+    python scripts/sync_leaderboard.py \
+      --site-data data/leaderboard.js \
+      --leaderboard-csv /path/to/release/leaderboard.csv \
+      --metadata-json /path/to/release/leaderboard_sources.json \
+      --grt-release-manifest /path/to/release/dive_grt_multifamily_release_v2.json \
+      --output data/leaderboard.next.js
+
+The site independently re-hashes the manifest, all four audit dispositions,
+the promoted artifacts, every `not_promoted` evidence bundle, and the legacy
+MOS completion before writing. Omitting `--expected-lpm-count` and
+`--expected-highmotion-count` is also intentional: sync derives them from the
+same manifest. Validate the staged result before replacing
+`data/leaderboard.js`:
+
+    node --check data/leaderboard.next.js
+    python -m unittest discover -s tests -v
+
+### Legacy v1 compatibility
+
+The original one-selection workflow remains available for an authenticated
+historical snapshot by using `--selection-json` instead of
+`--grt-release-manifest`. The legacy
+`create_grt_multifamily_release_manifest.py` v1 schema is also still accepted
+for previously produced artifacts, but it means that all four families passed
+and therefore has a fixed 30-row LPM contract. It cannot represent
+`not_promoted` families and must not be used for a new mixed pass/fail release.
+
 
 
 <p align="center">
