@@ -1,11 +1,13 @@
 # Complete protocol-screened leaderboard
 
-The complete public view contains 47 results: 29 Educational methods and 18
-High-Motion methods on the fixed 1,000-item preview. A separate educational GRT
-comparison shows all 12 candidate/control rows; the CSV therefore contains 59
-records, not 59 unique main-leaderboard methods. Nine non-aligned High-Motion runs
-are excluded from every leaderboard view and CSV, including legacy High-Motion
-GRT, midpoint-sampled InternVL, and full-trajectory-scored Gemini API runs.
+As of the 2026-09-14 [target/reference consistency hold](HIGHMOTION_TARGET_HOLD.md),
+the current public view contains 29 Educational results. A separate Educational
+GRT comparison shows all 12 candidate/control rows; the CSV therefore contains
+41 records, not 41 unique main-leaderboard methods. All High-Motion results are
+withheld, including the 18 previously protocol-screened archive candidates.
+There is no ranked or unranked High-Motion numeric table or current CSV row.
+The standalone High-Motion section explains the review and retains its existing
+`highmotion-aligned` anchor for link compatibility.
 
 Run with Python/PyYAML from a checkout, or with the installed minimal package:
 
@@ -22,6 +24,8 @@ directories; concurrently created or replaced paths are preserved. This is not
 atomic publication or crash durability. Open `leaderboard.html`
 in the new directory: its CSS is inline, JavaScript is not required, and all
 relative data links point to included files.
+Links to current CSV and public-audit JSON carry `?v=20260914-target-hold` so cached
+pre-hold assets are not reused; immutable historical artifact links are unchanged.
 
 ## Source contract
 
@@ -40,10 +44,23 @@ coverage, and byte hashes of two new canonical inputs:
   hashes are cross-checked against the older provenance. Archived baselines have
   no invented telemetry. These are historical per-request aggregate measurements,
   not repeated hardware speed measurements.
-- `highmotion-audit.json`: the complete 27-run source/protocol audit. Only its 18
-  eligible methods produce browser rows. Ordered identities, eight-endpoint input
-  and target policies, sample coverage, metric checks, and exact eligible-method
-  membership are validated. Excluded evidence remains intact, outside rankings.
+- `highmotion-audit.json`: the immutable historical 27-run source/protocol audit.
+  Ordered identities, eight-endpoint input and target policies, sample coverage,
+  metric checks, and the exact historical 18-candidate membership are still
+  validated. Historical `rank_eligible` flags do not confer current release
+  eligibility. No High-Motion method produces a current browser or CSV row.
+
+The historical manifest remains byte-identical, including its earlier
+47-result/12-control (59-record CSV) coverage contract from 2026-09-14 before the
+target hold. Current release policy is separate and hardcoded in the generator,
+with no user override flag. Current `public-audit.json` and its JavaScript contain
+an empty `highmotion_additional`, status
+`highmotion_release_status: "held_target_reference_consistency_review"`,
+`highmotion_hold_date`, a nonempty `highmotion_hold_reason`,
+`highmotion_historical_protocol_screened_candidates: 18`, and
+`highmotion_release_eligible_rows: 0`. The current CSV has 29 + 12 = 41 records.
+The retained `data/leaderboard.js` and `data/highmotion-audit.json` are explicitly
+historical artifacts; neither is a current result payload or release permission.
 
 Generated `data/public-audit.json`, browser JavaScript and CSV are never accepted
 as independent numeric inputs. The website's `scripts/build_audit_page.py` is a
@@ -53,10 +70,12 @@ asset byte-for-byte without maintaining separate ranking or numeric logic.
 ## Limits
 
 This is reproduction and validation of archived artifacts, not fresh inference.
-The High-Motion audit checks saved identities, prompts, targets, scores and wrapper
-policies; it does not certify decoded-frame bytes, fully pinned model revisions,
-identical hardware or a fresh GPU replay. The first 1,000 items are not the full
-3,243-item High-Motion evaluation.
+The historical High-Motion audit checks saved identities, prompts, targets,
+scores and wrapper policies; it does not establish whether reference trajectories
+follow the body part requested in the question. It also does not certify decoded
+frame bytes, fully pinned model revisions, identical hardware or a fresh GPU
+replay. The first 1,000 items are not the full 3,243-item evaluation. The new
+bounded four-reference finding does not characterize every item or GRT performance.
 
 All three promoted educational GRT profiles exceed their contracted Open MOS and
 Token F1 floors and use fewer patch projections. This is not a significance claim

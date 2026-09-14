@@ -19,6 +19,14 @@ That row is retained only in the historical evidence archive and is excluded
 from the current leaderboard and CSV; numeric reconstruction alone does not
 validate model inputs.
 
+As of 2026-09-14, **all High-Motion results are withheld from current release**
+pending a [target/reference consistency review](docs/HIGHMOTION_TARGET_HOLD.md).
+An initial bounded check of four canonical construction references found stored
+trajectories matching a left-index joint projection while the task asks for a
+right-hand target. This is not a finding about all 3,243 items or GRT performance.
+The historical 27-run audit and 32-row snapshot remain immutable evidence, not
+current release eligibility; Educational scores, ranks and GRT gates are unchanged.
+
 On 2026-09-14, all three supported Educational profiles completed a
 [two-item, nine-arm GPU smoke check](docs/GPU_SMOKE_VALIDATION.md), including
 fresh Open MOS and matching consumed input tensors. Full 634-example inference
@@ -55,11 +63,11 @@ python -m tools.densevideo.build_complete_leaderboard --verify-only
 python -m tools.densevideo.build_complete_leaderboard --output outputs/complete
 ```
 
-Open `outputs/complete/leaderboard.html`. This rebuilds the current 47-result
-view (29 Educational and 18 protocol-screened High-Motion methods), plus all 12
-Educational GRT comparison rows. The CSV contains 59 records. Nine non-aligned
-High-Motion runs are excluded from every table and CSV, not displayed in an
-unranked section. The standalone HTML needs no JavaScript or external assets.
+Open `outputs/complete/leaderboard.html`. This rebuilds the current 29-result
+Educational view, plus all 12 Educational GRT comparison rows. The CSV contains
+41 records. All High-Motion runs are withheld from every current table and CSV,
+including previously protocol-screened candidates; there is no unranked section.
+The standalone HTML explains the hold and needs no JavaScript or external assets.
 The [complete generation contract](docs/COMPLETE_LEADERBOARD.md) explains its
 pinned evidence, checks and limits. This is archived-result verification, not
 new GPU inference.
@@ -76,7 +84,7 @@ all three contracted quality floors, patch counts, the 1,000-item High-Motion
 metrics, frozen CSV/website agreement, and exact Markdown regeneration. Add
 `--website` to compare the website's retained historical `data/leaderboard.js`
 against the pinned 32-row snapshot. It does not audit the complete HTML page's
-new 47-result/12-control overlay; the complete command above verifies that view.
+current 29-result/12-control view and High-Motion hold; the complete command above verifies that view.
 An existing output directory is refused. This
 bundle contains numeric scores and hashed identities, not reference answers,
 predictions, videos, or credentials. Non-GRT rows are preserved from the public

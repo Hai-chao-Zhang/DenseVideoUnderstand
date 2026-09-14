@@ -1,9 +1,10 @@
-"""Rebuild the complete protocol-screened leaderboard from pinned release evidence.
+"""Rebuild the current release-policy-screened leaderboard from pinned evidence.
 
 This verifies historical artifacts, not fresh inference. The educational quality
-means are independently recomputed by the frozen-bundle verifier; the screened
-High-Motion overlay is derived from a single immutable 27-run audit, never from
-the generated website JSON. No datasets, credentials, network or GPU are needed.
+means are independently recomputed by the frozen-bundle verifier. The immutable
+27-run High-Motion audit is still verified, but its historical protocol screening
+does not establish current release eligibility: all High-Motion results are held
+pending target/reference consistency review. No data, network or GPU are needed.
 """
 from __future__ import annotations
 
@@ -30,6 +31,16 @@ from tools.densevideo.release_resources import resolve_release_bundle
 
 RELEASE = "2026-09-14"
 MANIFEST_SHA256 = "5767bd60a3d8efe24722d9d4b12a374c7e566d50c370cbacdc02cdfab3162232"
+HIGHMOTION_RELEASE_STATUS = "held_target_reference_consistency_review"
+HIGHMOTION_HOLD_DATE = "2026-09-14"
+HIGHMOTION_HOLD_REASON = (
+    "2026-09-14 target/reference consistency hold: an initial bounded check of four "
+    "canonical construction references found stored trajectories matching a left-index "
+    "joint projection while the task asks for a right-hand target. Constructor/target "
+    "consistency requires review; this is not a finding about all 3,243 items or GRT "
+    "performance. All High-Motion results are withheld, including previously "
+    "protocol-screened archive candidates."
+)
 CODE_URL = "https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/release/dive-bench-minimal"
 STANDALONE_CSS = """
 :root{color-scheme:light;font-family:system-ui,sans-serif;color:#172938;background:#f6f3ec}
@@ -62,7 +73,7 @@ def finite_number(value, label, *, lower=0, upper=None):
 
 
 def validate_contract(manifest, provenance, telemetry, evidence):
-    """Check structural/semantic invariants in addition to the outer byte hashes."""
+    """Verify the historical contract; its eligibility flags are not release policy."""
     require(manifest["schema_version"] == telemetry["schema_version"] == evidence["schema_version"] == 1,
             "Unsupported complete-leaderboard schema")
     require(manifest["historical_leaderboard_sha256"] == SNAPSHOT_SHA256
@@ -219,27 +230,20 @@ def load_data(bundle=None, *, historical_bundle=None):
         audit["families"].append({
             "family": family["family"], "label": contract["label"], "methods": methods,
         })
+    # Dated current release policy, intentionally without an override flag.
+    # Do not rewrite the historical audit's 18 protocol-screened candidates or
+    # treat saved prompt/score agreement as proof of target-reference semantics.
     aligned = []
-    for source in evidence["rows"]:
-        if not source["rank_eligible"]:
-            continue
-        row = {key: source[key] for key in (
-            "model", "method", "samples", "source", "effective_fps", "protocol_status",
-            "protocol_note", "samples_sha256", "ordered_identity_sha256", "result_sha256",
-        )}
-        for key in ("grid_acc", "grid_ade", "grid_fde", "token_f1"):
-            row[key] = source["metrics"][key]
-        row["transition_acc"] = source["metrics"]["grid_transition_acc"]
-        row["rank_eligible"] = True
-        aligned.append(row)
-    aligned.sort(key=lambda r: (-r["grid_acc"], -r["token_f1"], r["method"]))
-    for rank, row in enumerate(aligned, 1):
-        row["rank"] = rank
-    audit["highmotion_additional"] = aligned
+    audit["highmotion_additional"] = []
+    audit["highmotion_release_status"] = HIGHMOTION_RELEASE_STATUS
+    audit["highmotion_hold_date"] = HIGHMOTION_HOLD_DATE
+    audit["highmotion_hold_reason"] = HIGHMOTION_HOLD_REASON
+    audit["highmotion_historical_protocol_screened_candidates"] = 18
+    audit["highmotion_release_eligible_rows"] = 0
     audit["highmotion_evidence_file"] = "highmotion-audit.json"
     audit["highmotion_evidence_sha256"] = manifest["files"]["highmotion-audit.json"]
-    require(len(frozen["tracks"]["lpm"]) == 29 and len(aligned) == 18,
-            "Incomplete screened leaderboard")
+    require(len(frozen["tracks"]["lpm"]) == 29 and not aligned,
+            "Current release must retain Educational results and withhold High-Motion")
     return frozen, audit, aligned, frozen_bytes, source_bytes["highmotion-audit.json"]
 
 
@@ -260,26 +264,28 @@ def table(rows, columns, caption):
 
 
 def render_outputs(frozen, audit, aligned):
+    require(aligned == [] and audit.get("highmotion_additional") == []
+            and audit.get("highmotion_release_status") == HIGHMOTION_RELEASE_STATUS
+            and audit.get("highmotion_release_eligible_rows") == 0,
+            "High-Motion release hold forbids ranked or unranked numeric rows")
     lpm_columns = [("rank", "Rank"), ("model", "Model"), ("method", "Method ID"), ("samples", "Items"), ("open_mos", "Open MOS ↑"), ("token_f1", "Token F1 ↑"), ("cer", "CER ↓"), ("wer", "WER ↓"), ("exact_match", "Exact match ↑"), ("recompute_ratio", "Patch recompute ↓"), ("reference_recompute_ratio", "Reference patch compute ↓"), ("effective_fps", "Sampling density (fps)"), ("throughput_fps", "Mean throughput (fps) ↑"), ("source", "Source")]
-    hm_columns = [("rank", "Rank"), ("model", "Model"), ("method", "Method ID"), ("samples", "Items"), ("grid_acc", "Grid accuracy ↑"), ("grid_ade", "Grid ADE ↓"), ("grid_fde", "Grid FDE ↓"), ("transition_acc", "Transition accuracy ↑"), ("token_f1", "Token F1 ↑"), ("protocol_note", "Protocol / status"), ("source", "Source")]
     control_columns = [("family_label", "Family"), ("label", "Control"), ("method", "Method ID"), ("samples", "Items"), ("open_mos", "Open MOS ↑"), ("token_f1", "Token F1 ↑"), ("patch_ratio", "Patch recompute ↓"), ("throughput_fps", "Mean throughput (fps) ↑"), ("mean_wall_time_s", "Mean request time (s) ↓")]
     controls = [dict(row, family_label=family["label"]) for family in audit["families"] for row in family["methods"]]
     pieces = ["<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>DIVE-Bench — Complete Protocol-Screened Leaderboard</title><style>" + STANDALONE_CSS + "</style></head><body><main class=\"section-shell audit-page\">",
               '<a href="https://www.zhanghaichao.xyz/DenseVideoUnderstand/#leaderboard">← Interactive project page</a><h1>Complete protocol-screened leaderboard</h1>',
-              '<p>Audit: 14 September 2026. Educational scores retain the 20 August snapshot; additional High-Motion runs are from 21–23 August. These are historical artifacts, not a fresh GPU rerun. <a href="data/leaderboard-complete.csv">Download CSV</a> · <a href="data/public-audit.json">Source hashes and protocol evidence</a> · <a href="' + CODE_URL + '">Public reproduction code</a>.</p>',
-              '<p><strong>47 protocol-screened results: 29 Educational + 18 High-Motion, plus 12 educational GRT comparison rows (59 CSV records).</strong> Read by protocol, not as a single composite score. Educational: 634 QA / 317 videos. High-Motion: fixed first 1,000 of 3,243 items, not a full-split evaluation. A dash means unreported, not zero. All numeric cells retain full precision in their title and downloadable data.</p>',
-              '<nav aria-label="Tables"><a href="#educational">Educational</a> · <a href="#highmotion-aligned">Aligned High-Motion preview</a> · <a href="#grt-controls">GRT vs all controls</a></nav>',
+              '<p>Audit and release hold: 14 September 2026. Educational scores retain the 20 August snapshot. These are historical artifacts, not a fresh GPU rerun. <a href="data/leaderboard-complete.csv?v=20260914-target-hold">Download CSV</a> · <a href="data/public-audit.json?v=20260914-target-hold">Source hashes and release status</a> · <a href="' + CODE_URL + '">Public reproduction code</a>.</p>',
+              '<p><strong>29 Educational results, plus 12 educational GRT comparison rows (41 CSV records). No High-Motion results are currently released.</strong> Educational: 634 QA / 317 videos. A dash means unreported, not zero. All numeric cells retain full precision in their title and downloadable data.</p>',
+              '<nav aria-label="Tables and release status"><a href="#educational">Educational</a> · <a href="#highmotion-aligned">High-Motion release hold</a> · <a href="#grt-controls">GRT vs all controls</a></nav>',
               '<h2 id="educational">Educational High-FPS Videos</h2><p>29 published methods. Rank by reported Open MOS, then Token F1; missing Open MOS sorts last and is never filled in. Open MOS judge: Qwen/Qwen3-VL-32B-Instruct. The verified GRT profiles use eight sampled frames, not a measured high-FPS operating point.</p>',
               table(frozen["tracks"]["lpm"], lpm_columns, "29 educational methods; 634 items each"),
-              '<h2 id="highmotion-aligned">High-Motion High-FPS Videos: aligned preview archive</h2><p>Saved wrappers/configurations specify endpoint-inclusive uniform eight-frame input and an eight-position target for the same fixed 1,000 items. Identities, prompts, targets and every saved sample metric were checked. This is a protocol-compatible archive, not a new GPU replay or an exact saved frame-byte audit. Model revisions were not fully pinned; hardware, image resolution and decoding may differ across families. <a href="data/highmotion-audit.json">Full protocol audit and source hashes</a>.</p>',
-              table(aligned, hm_columns, f"{len(aligned)} aligned High-Motion methods; 1,000 items each"),
-              '<p>Nine non-aligned High-Motion runs, including legacy GRT, are excluded from all leaderboard tables and the CSV. Their evidence is retained only in the <a href="data/highmotion-audit.json">complete 27-run protocol audit</a>, not as leaderboard results. Malformed predictions in the retained cohort remain scored penalties; no such samples were silently dropped.</p>',
+              '<h2 id="highmotion-aligned">High-Motion High-FPS Videos: target/reference consistency audit</h2><p>' + html.escape(HIGHMOTION_HOLD_REASON) + '</p>',
+              '<p>There is no ranked or unranked High-Motion results table, and no High-Motion CSV entry. The immutable <a href="data/highmotion-audit.json">historical 27-run protocol audit</a> still verifies 18 archived protocol-screened candidates; those historical eligibility flags are not current release permission. Matching saved prompts, target labels and recomputed scores does not establish that the reference trajectory follows the body part requested by the question.</p>',
               '<h2 id="grt-controls">GRT vs archived and matched controls</h2><p>All three promoted educational candidates exceed every contracted Open MOS and Token F1 floor, with 11.43–15.23% fewer patch projections than the matched all-patch route. LLaVA-OneVision 7B failed its MOS gate and is not promoted. These are observed point estimates, not statistical-significance claims. Archived Qwen baselines differ from stronger matched controls: their entire gap must not be attributed to GRT.</p>',
               table(controls, control_columns, "All 12 educational comparison rows; 634 items and eight sampled frames per method"),
               '<p><strong>Not all metrics improve.</strong> Qwen 3B GRT reports mean throughput 1.67264 fps versus 1.74994 for its all-patch control (about 4.42% lower), even though its Open MOS, Token F1 and patch reuse improve. Route31 mean request time is essentially unchanged versus its all-patch control. Throughput is the mean of per-request sampled-frame rates, not total frames divided by total campaign time, and these single historical runs do not establish repeated speedup. Patch ratios measure patch projection only, not end-to-end FLOPs.</p>',
-              '<p><a href="data/leaderboard.js">Original immutable 32-row snapshot</a> remains byte-identical to the released numerical bundle. The new protocol audit does not rewrite that historical evidence or present incompatible rows as matched wins. Full dataset access, GPU/judge reproduction and manuscript alignment remain separate release checks.</p></main></body></html>']
+              '<p><a href="data/leaderboard.js">Original immutable 32-row historical snapshot</a> remains byte-identical to the archived numerical bundle; it is not the current release-policy view. The hold does not rewrite historical evidence or change Educational scores, ranks or GRT gates. Full dataset access, GPU/judge reproduction and manuscript alignment remain separate release checks.</p></main></body></html>']
     records = []
-    for cohort, rows in [("educational_published", frozen["tracks"]["lpm"]), ("highmotion_aligned_preview1000", aligned), ("educational_grt_controls", controls)]:
+    for cohort, rows in [("educational_published", frozen["tracks"]["lpm"]), ("educational_grt_controls", controls)]:
         records.extend(dict(row, cohort=cohort) for row in rows)
     fields = ["cohort"] + sorted({key for row in records for key in row if key != "cohort"})
     buffer = io.StringIO()
@@ -388,13 +394,16 @@ def main(argv=None):
             "status": "verified",
             "verification": "source-bound historical artifacts; no fresh inference",
             "release": RELEASE,
-            "leaderboard_rows": 47,
+            "leaderboard_rows": 29,
             "educational_rows": 29,
-            "highmotion_rows": 18,
+            "highmotion_rows": 0,
             "highmotion_evidence_rows": 27,
-            "highmotion_excluded_rows": 9,
+            "highmotion_excluded_rows": 27,
+            "highmotion_historical_protocol_screened_candidates": 18,
+            "highmotion_release_status": HIGHMOTION_RELEASE_STATUS,
+            "highmotion_hold_reason": HIGHMOTION_HOLD_REASON,
             "comparison_rows": 12,
-            "csv_rows": 59,
+            "csv_rows": 41,
             "html": "leaderboard.html",
             "manifest_sha256": MANIFEST_SHA256,
             "output_sha256": {

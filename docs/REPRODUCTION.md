@@ -44,7 +44,8 @@ distributed in the numeric bundle.
 
 ## Offline published scores
 
-Generate the current 47-result view and its 12 comparison rows:
+Generate the current 29-result Educational view and its 12 comparison rows
+(41 CSV records; all High-Motion results held):
 
 ```bash
 dive-leaderboard-complete --verify-only
@@ -53,7 +54,8 @@ dive-leaderboard-complete --output /tmp/dive-complete-table
 
 Open the generated `leaderboard.html` without needing JavaScript or external
 assets. The [complete generation contract](COMPLETE_LEADERBOARD.md) describes
-which archived inputs are verified and which nine High-Motion runs are excluded.
+which archived inputs are verified and why all High-Motion results are withheld
+pending [target/reference consistency review](HIGHMOTION_TARGET_HOLD.md).
 For the separate immutable 32-row historical snapshot:
 
 ```bash

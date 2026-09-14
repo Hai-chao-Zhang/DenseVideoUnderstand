@@ -4,6 +4,13 @@ Audit date: 2026-09-13. Audited evaluation-code commit:
 `78284318c9c8664df5fc6785410a0a9c4e494436`.
 Public source: [DIVE-Bench leaderboard](https://www.zhanghaichao.xyz/DenseVideoUnderstand/).
 
+Current-status addendum (2026-09-14): all High-Motion results are withheld pending
+[target/reference consistency review](HIGHMOTION_TARGET_HOLD.md), including the
+18 previously protocol-screened candidates. Earlier High-Motion statements and
+numeric comparisons below document historical audits, not current release
+eligibility or semantic correctness. The current view contains 29 Educational
+results plus 12 controls (41 CSV records); Educational numbers and gates are unchanged.
+
 The three promoted LPM GRT scores agree with the website and the frozen
 per-sample evidence. This establishes historical score consistency. No model
 inference or Open MOS judge was rerun during this audit, and this audit does
@@ -43,15 +50,16 @@ is wall-clock processing throughput.
   byte: SHA256 `c88492ec535a3bc4f47fe9e91f66bc050a857f757cd2c478db598e889d9dc1b1`.
   It contains 29 LPM rows, three High-Motion rows, and three promoted GRT
   families.
-  The 2026-09-14 complete HTML update retains that historical file unchanged
-  and adds separate audited assets for 29 Educational plus 18 protocol-screened
-  High-Motion results and all 12 educational candidate/control rows. Nine
-  incompatible High-Motion runs are excluded from the current leaderboard,
-  HTML tables and CSV; their evidence remains only in the audit archive. The minimal
+  The earlier 2026-09-14 complete HTML update, before the target-consistency hold,
+  retained that historical file unchanged and added 29 Educational plus 18
+  protocol-screened High-Motion results and 12 educational candidate/control rows.
+  That 47-result/12-control view is superseded: all High-Motion runs are now
+  withheld from current HTML tables and CSV, and their evidence remains historical.
+  The minimal
   verifier's `--website` option checks the retained historical file, not the
   additional complete-page assets. The new `dive-leaderboard-complete` command
   verifies both dated evidence bundles and generates all six complete-page
-  assets offline, including the 59-record CSV. See its
+  assets offline, now including the 41-record CSV and explicit hold status. See its
   [source contract](COMPLETE_LEADERBOARD.md).
 - The audited commit's `leaderboard.md` equals the frozen Markdown byte for
   byte. The original workspace's uncommitted 2026-08-23 `leaderboard.md`
@@ -109,7 +117,8 @@ The historical GRT Grid Accuracy is 0.10125 versus 0.142875 for the 0.5B HF
 baseline (minus 4.1625 percentage points); its ADE, FDE, transition accuracy
 and Token-F1 are also worse. Their wrappers and input policies differ, so this
 is not a matched GRT ablation and does not establish a causal loss or gain.
-An aligned new run is required before claiming a high-motion GRT improvement.
+Target/reference consistency must now be resolved as well as obtaining an aligned
+new run before claiming a High-Motion GRT improvement.
 The old numeric archive remains unchanged for provenance, but this row must
 not appear in the current protocol-screened leaderboard. Six newer InternVL rows use
 midpoint rather than endpoint sampling, and two historical Gemini rows score
@@ -136,7 +145,8 @@ framework dependencies, and appropriate hardware. Regenerating judge
 scores requires the original predictions/reference text and the pinned
 judge protocol, which are not included in this numeric-only package.
 
-The High-Motion website row is a historical 1,000-item preview. Its GRT
+The archived High-Motion website row is a historical 1,000-item preview, not a
+currently released result. Its GRT
 wrapper is `llava_ov_dense_video`; the saved run used Decord, an eight-frame maximum,
 `dense_frame_fps=1`, a ten-second clip limit, threshold 0.05, and enabled
 scene merging. The original general leaderboard config now has different

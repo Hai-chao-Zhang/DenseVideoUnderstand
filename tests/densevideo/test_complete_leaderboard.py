@@ -7,6 +7,7 @@ import shutil
 from copy import deepcopy
 from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import pytest
 
@@ -16,10 +17,10 @@ from tools.densevideo.release_resources import resolve_release_bundle
 BUNDLE = resolve_release_bundle(release="2026-09-14")
 HISTORICAL = resolve_release_bundle(release="2026-08-20")
 OUTPUT_HASHES = {
-    "leaderboard.html": "1d0ae49af95d005522dddb6ce66e499de459ea55af4ca29b9755ff7a3608b4cd",
-    "data/leaderboard-complete.csv": "28b52958ab58761c3124f8b74ceb2dd64fa832f5d6551a50b19f591f7167b105",
-    "data/public-audit.js": "78ec8821ad125a72d413bf08f8072d5a28e5d2d4948a0e74dc0b183db3f12a3f",
-    "data/public-audit.json": "19a2756517190aace4fcd65e658306fc78ace881512009fc76f99c40a91182a7",
+    "leaderboard.html": "cb7a5348cb091e4a1944a03dcf50121e55bb8dd301dcf201098a7e1441b42d7b",
+    "data/leaderboard-complete.csv": "68def903c24ca4fd3aac9a62ae7edb0c672b123af02e6555b9accf5aa4db06a2",
+    "data/public-audit.js": "d1084a00b92e59e66e8114efa9c23b81f2795b4e0aa5e70347c7c9a63e681ccd",
+    "data/public-audit.json": "1cb83cf3a0add7c3c3894ef1a05759ce5e1e6e012ce56e25ddb5fe267efc87e5",
     "data/highmotion-audit.json": "f2358a0ae2f61ae15d0e03436c640fed128b26cf591db3a9e97e668aa562683d",
     "data/leaderboard.js": "c88492ec535a3bc4f47fe9e91f66bc050a857f757cd2c478db598e889d9dc1b1",
 }
@@ -44,24 +45,71 @@ def test_complete_offline_golden_bytes_and_coverage(monkeypatch):
     assert {name: hashlib.sha256(text.encode()).hexdigest()
             for name, text in outputs.items()} == OUTPUT_HASHES
     rows = list(csv.DictReader(io.StringIO(outputs["data/leaderboard-complete.csv"])))
-    assert len(rows) == 59 and len(rows[0]) == 32
+    assert len(rows) == 41
     main = [r for r in rows if r["cohort"] != "educational_grt_controls"]
-    assert len({(r["cohort"], r["method"]) for r in main}) == 47
+    assert len({(r["cohort"], r["method"]) for r in main}) == 29
     assert {r["cohort"] for r in rows} == {
-        "educational_published", "highmotion_aligned_preview1000", "educational_grt_controls",
+        "educational_published", "educational_grt_controls",
     }
     audit = json.loads(outputs["data/public-audit.json"])
     evidence = json.loads(outputs["data/highmotion-audit.json"])
     assert len(evidence["rows"]) == 27
-    assert len(audit["highmotion_additional"]) == 18
-    assert {r["method"] for r in audit["highmotion_additional"]} == {
-        r["method"] for r in evidence["rows"] if r["rank_eligible"]
-    }
-    assert [r["rank"] for r in audit["highmotion_additional"]] == list(range(1, 19))
-    assert all(r["samples"] == 1000 for r in audit["highmotion_additional"])
+    assert audit["highmotion_additional"] == []
+    assert audit["highmotion_release_status"] == "held_target_reference_consistency_review"
+    assert audit["highmotion_hold_date"] == "2026-09-14"
+    assert audit["highmotion_hold_reason"] == complete.HIGHMOTION_HOLD_REASON
+    assert audit["highmotion_release_eligible_rows"] == 0
+    assert audit["highmotion_historical_protocol_screened_candidates"] == 18
+    assert sum(row["rank_eligible"] for row in evidence["rows"]) == 18
+    assert outputs["data/highmotion-audit.json"].encode() == (BUNDLE / "highmotion-audit.json").read_bytes()
+    assert hashlib.sha256((BUNDLE / "manifest.json").read_bytes()).hexdigest() == complete.MANIFEST_SHA256
     assert "grt_llava_ov_0_5b" not in outputs["leaderboard.html"]
     assert "highmotion_historical_unaligned" not in outputs["data/leaderboard-complete.csv"]
     assert outputs["data/leaderboard.js"].encode() == (HISTORICAL / "leaderboard.js").read_bytes()
+
+
+def test_current_hold_preserves_all_29_educational_rows_exactly():
+    frozen, audit, current_highmotion, _, _ = complete.load_data()
+    historical = json.loads((HISTORICAL / "leaderboard.js").read_text().split(
+        "window.DIVE_LEADERBOARD = ", 1)[1].strip().removesuffix(";"))
+    assert frozen == historical
+    assert current_highmotion == []
+    outputs = complete.build_outputs()
+    published = [row for row in csv.DictReader(io.StringIO(outputs["data/leaderboard-complete.csv"]))
+                 if row["cohort"] == "educational_published"]
+    assert len(published) == len(historical["tracks"]["lpm"]) == 29
+    for actual, expected in zip(published, historical["tracks"]["lpm"]):
+        for key, value in expected.items():
+            assert actual[key] == ("" if value is None else str(value))
+    assert len(audit["families"]) == 3
+    assert all(len(family["methods"]) == 4 for family in audit["families"])
+
+
+@pytest.mark.parametrize("target", ["rows", "payload", "status", "eligibility"])
+def test_renderer_rejects_stale_or_forged_highmotion_release_payload(target):
+    frozen, audit, aligned, _, _ = complete.load_data()
+    if target == "rows":
+        aligned.append({"method": "forged", "grid_acc": 1.0})
+    elif target == "payload":
+        audit["highmotion_additional"] = [{"method": "forged", "grid_acc": 1.0}]
+    elif target == "status":
+        audit["highmotion_release_status"] = "released"
+    else:
+        audit["highmotion_release_eligible_rows"] = 18
+    with pytest.raises(ValueError, match="release hold forbids"):
+        complete.render_outputs(frozen, audit, aligned)
+
+
+def test_historical_protocol_candidates_remain_verified_not_release_eligible():
+    objects = source_objects()
+    complete.validate_contract(*objects)
+    manifest, _, _, evidence = objects
+    assert manifest["counts"]["csv_rows"] == 59  # Immutable pre-hold historical contract.
+    assert len(manifest["eligible_highmotion_methods"]) == 18
+    assert [row["method"] for row in evidence["rows"] if row["rank_eligible"]] == manifest["eligible_highmotion_methods"]
+    current = json.loads(complete.build_outputs()["data/public-audit.json"])
+    assert current["highmotion_release_eligible_rows"] == 0
+    assert not current["highmotion_additional"]
 
 
 def test_all_12_quality_values_are_bound_to_7608_numeric_records():
@@ -119,14 +167,28 @@ def test_standalone_html_needs_no_missing_assets_or_javascript():
     page = outputs["leaderboard.html"]
     parser = ViewParser()
     parser.feed(page)
-    assert parser.rows_per_table == [29, 18, 12]
+    assert parser.rows_per_table == [29, 12]
     assert not parser.scripts and not parser.external_styles
     assert "<style>" in page
-    assert set(parser.local_links) <= set(outputs)
+    assert {urlsplit(link).path for link in parser.local_links} <= set(outputs)
+    for link in parser.local_links:
+        parsed = urlsplit(link)
+        if parsed.path in {"data/leaderboard-complete.csv", "data/public-audit.json"}:
+            assert parsed.query == "v=20260914-target-hold"
+        else:
+            assert not parsed.query  # Immutable historical artifact links are unchanged.
     assert "0.10125" not in page
     assert "not a fresh GPU rerun" in page
-    assert "not a new GPU replay" in page
-    assert "Model revisions were not fully pinned" in page
+    assert "target/reference consistency audit" in page
+    assert "41 CSV records" in page
+    assert "not a finding about all 3,243 items or GRT performance" in page
+    section = page.split('<h2 id="highmotion-aligned">', 1)[1].split('<h2 id="grt-controls">', 1)[0]
+    assert "<table" not in section and "<tbody" not in section
+    evidence = json.loads(outputs["data/highmotion-audit.json"])
+    assert all(row["method"] not in section for row in evidence["rows"])
+    for metric in ("grid_acc", "grid_ade", "grid_fde", "transition_acc", "protocol_status"):
+        assert metric not in outputs["data/leaderboard-complete.csv"].splitlines()[0]
+        assert metric not in outputs["data/public-audit.json"]
 
 
 @pytest.mark.parametrize("filename", [
@@ -209,7 +271,11 @@ def test_semantic_contract_rejects_known_failure_modes(case):
 def test_default_generation_is_offline_outside_cwd_and_refuses_overwrite(tmp_path, monkeypatch, capsys):
     monkeypatch.chdir(tmp_path)
     complete.main(["--verify-only"])
-    assert json.loads(capsys.readouterr().out)["leaderboard_rows"] == 47
+    checked = json.loads(capsys.readouterr().out)
+    assert checked["leaderboard_rows"] == 29
+    assert checked["highmotion_rows"] == 0
+    assert checked["highmotion_excluded_rows"] == 27
+    assert checked["csv_rows"] == 41
     assert not list(tmp_path.iterdir())
     output = tmp_path / "standalone"
     complete.main(["--output", str(output)])
