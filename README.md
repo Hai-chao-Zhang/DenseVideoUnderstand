@@ -13,19 +13,21 @@ Framework integrations are submitted Draft PRs:
 Historical README instructions below are retained as release-development history;
 use the minimal branch's current installation and reproduction instructions.
 
-`leaderboard.html` provides the complete protocol-screened leaderboard without
-JavaScript: 29 Educational + 18 High-Motion results, plus 12 educational GRT
-comparison rows (59 CSV records; the controls are not 12 additional methods).
-The interactive site uses the byte-identical 32-row `data/leaderboard.js` snapshot plus the separately
-audited `data/public-audit.json` overlay containing only 18 eligible High-Motion
-rows, without changing the original Educational scores. All nine non-aligned
-High-Motion runs (legacy GRT, midpoint InternVL and full-trajectory Gemini) are
-excluded from interactive tables, full HTML and CSV. Their scientific evidence
-remains in the complete 27-run `data/highmotion-audit.json`; the immutable original
-32-row snapshot is also retained as evidence, never a High-Motion fallback when
-the audit asset is unavailable. "Aligned" refers
-to the archived prompt, target, identity, metric and saved wrapper policy audit,
-not a fresh inference rerun or an immutable model revision for every baseline.
+`leaderboard.html` provides the current leaderboard without JavaScript:
+29 Educational results plus 12 educational GRT comparison rows (41 CSV records;
+the controls are not 12 additional methods). All High-Motion results are
+withheld pending target/reference consistency review. A bounded four-example
+reference-construction check found that archived trajectories correspond to a
+different source hand joint than the requested right-hand target; the full
+extent and original construction rules remain unresolved. This is not a GRT
+performance result or a claim that every benchmark item is affected.
+
+The byte-identical 32-row `data/leaderboard.js` snapshot and complete 27-run
+`data/highmotion-audit.json` remain historical evidence. The latter retains its
+earlier 18 protocol-screened candidates and nine protocol exclusions, but none
+is currently approved for ranking. The browser ignores even cached or injected
+previously screened High-Motion overlays; HTML and CSV contain no High-Motion
+result rows. Educational numbers are unchanged.
 
 The educational comparison exposes all 12 candidate/control rows, including
 archived baselines, quality baselines and all-patch controls. Qwen 3B GRT improves
@@ -35,8 +37,8 @@ control. The page does not claim every quality/efficiency metric improves.
 All six complete view/data assets come from the minimal branch's canonical
 `tools.densevideo.build_complete_leaderboard` generator. It verifies the pinned
 release manifests, independently recomputes all 12 educational quality means
-from 7,608 numeric records, and derives the 18 eligible rows from the single
-27-run High-Motion audit. Website JSON/CSV are outputs, not editable numeric
+from 7,608 numeric records, and verifies the unchanged 27-run High-Motion audit
+while withholding its rankings under the current release policy. Website JSON/CSV are outputs, not editable numeric
 sources. The JavaScript-free HTML includes its own CSS and can be viewed offline.
 
 With a current minimal checkout and Python/PyYAML, regenerate and check the site:

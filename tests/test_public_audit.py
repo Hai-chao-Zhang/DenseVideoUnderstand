@@ -2,6 +2,7 @@ import csv
 import hashlib
 import importlib.util
 import json
+import re
 import subprocess
 import unittest
 from copy import deepcopy
@@ -52,27 +53,29 @@ class PublicAuditTests(unittest.TestCase):
         rendered = _render_ui(self.frozen, self.browser)
         self.assertEqual(rendered["comparisonHtml"].count("<tr>"), 12)
 
-    def test_full_27_run_evidence_is_preserved_but_payload_contains_only_18_eligible(self):
+    def test_full_27_run_evidence_is_preserved_but_all_current_hm_rows_are_withheld(self):
         rows = self.browser["highmotion_additional"]
-        self.assertEqual(len(rows), 18)
-        self.assertEqual(len(self.audit["highmotion_additional"]), 18)
+        self.assertEqual(rows, [])
+        self.assertEqual(self.audit["highmotion_additional"], [])
+        for payload in (self.browser, self.audit):
+            self.assertEqual(payload["highmotion_release_status"], "held_target_reference_consistency_review")
+            self.assertEqual(payload["highmotion_historical_protocol_screened_candidates"], 18)
+            self.assertTrue(payload["highmotion_hold_reason"])
         self.assertEqual(len(self.evidence["rows"]), 27)
         aligned = [row for row in self.evidence["rows"] if row["rank_eligible"]]
         historical = [row for row in self.evidence["rows"] if not row["rank_eligible"]]
         self.assertEqual(len(historical), 9)
-        self.assertEqual({row["method"] for row in rows}, {row["method"] for row in aligned})
-        self.assertEqual([row["rank"] for row in rows], list(range(1, 19)))
-        self.assertTrue(all(row["samples"] == 1000 and row["rank_eligible"] is True and row["protocol_status"] == "aligned_preview" for row in rows))
+        self.assertEqual(len(aligned), 18)
         self.assertIn("grt_llava_ov_0_5b", {row["method"] for row in historical})
         self.assertEqual(hashlib.sha256((ROOT / "data/highmotion-audit.json").read_bytes()).hexdigest(), "f2358a0ae2f61ae15d0e03436c640fed128b26cf591db3a9e97e668aa562683d")
 
-    def test_browser_only_ranks_aligned_highmotion_rows(self):
+    def test_browser_withholds_all_highmotion_rows(self):
         aligned = _render_ui(self.frozen, self.browser, "highmotion")
-        self.assertEqual(aligned["tableHtml"].count("<tr>"), 18)
+        self.assertIn("Showing 0 of 0 methods", aligned["tableCount"])
+        self.assertIn("withheld pending target/reference", aligned["tableHtml"])
         self.assertNotIn("grt_llava_ov_0_5b", aligned["tableHtml"])
         for row in self.evidence["rows"]:
-            if not row["rank_eligible"]:
-                self.assertNotIn(row["method"], aligned["tableHtml"])
+            self.assertNotIn(row["method"], aligned["tableHtml"])
         unknown = _render_ui(self.frozen, self.browser, "highmotion_historical")
         self.assertEqual(unknown["tableHtml"].count("<tr>"), 29)
         self.assertNotIn("grt_llava_ov_0_5b", unknown["tableHtml"])
@@ -87,14 +90,15 @@ class PublicAuditTests(unittest.TestCase):
             self.assertIn("Showing 0 of 0 methods", rendered["tableCount"])
             self.assertNotIn("grt_llava_ov_0_5b", rendered["tableHtml"])
 
-    def test_browser_rejects_noneligible_or_wrong_split_overlay_rows(self):
+    def test_browser_rejects_stale_aligned_and_noneligible_overlay_rows(self):
         poisoned = deepcopy(self.browser)
-        poisoned["highmotion_additional"] += [row for row in self.evidence["rows"] if not row["rank_eligible"]]
+        poisoned["highmotion_additional"] = deepcopy(self.evidence["rows"])
         rendered = _render_ui(self.frozen, poisoned, "highmotion")
-        self.assertEqual(rendered["tableHtml"].count("<tr>"), 18)
-        for key, value in (("rank_eligible", False), ("protocol_status", "historical_unaligned"), ("samples", 3243)):
+        self.assertIn("Showing 0 of 0 methods", rendered["tableCount"])
+        for key, value in (("rank_eligible", True), ("protocol_status", "aligned_preview"), ("samples", 1000)):
             with self.subTest(key=key):
                 poisoned = deepcopy(self.browser)
+                poisoned["highmotion_additional"] = deepcopy(self.evidence["rows"])
                 for row in poisoned["highmotion_additional"]:
                     row[key] = value
                 rendered = _render_ui(self.frozen, poisoned, "highmotion")
@@ -107,19 +111,16 @@ class PublicAuditTests(unittest.TestCase):
         expected = builder.build_outputs()
         original_read = Path.read_text
         cases = []
-        for key, value in (("rank_eligible", False), ("protocol_status", "historical_unaligned"), ("samples", 3243), ("ordered_identity_sha256", "0" * 64)):
+        for key, value in (("highmotion_release_status", "approved"), ("highmotion_hold_reason", ""), ("highmotion_historical_protocol_screened_candidates", 27)):
             changed = deepcopy(self.audit)
-            changed["highmotion_additional"][0][key] = value
+            changed[key] = value
             cases.append((key, changed))
-        empty = deepcopy(self.audit)
-        empty["highmotion_additional"] = []
-        cases.append(("empty", empty))
+        injected = deepcopy(self.audit)
+        injected["highmotion_additional"] = deepcopy(self.evidence["rows"])
+        cases.append(("injected_historical_rows", injected))
         missing = deepcopy(self.audit)
         del missing["highmotion_additional"]
         cases.append(("missing", missing))
-        duplicate = deepcopy(self.audit)
-        duplicate["highmotion_additional"][0] = deepcopy(duplicate["highmotion_additional"][1])
-        cases.append(("duplicate", duplicate))
         for label, changed in cases:
             with self.subTest(case=label):
                 def substituted_read(path, *args, **kwargs):
@@ -133,38 +134,39 @@ class PublicAuditTests(unittest.TestCase):
                         builder.main(["--check"])
                     self.assertEqual(error.exception.code, 1)
 
-    def test_protocol_notes_and_comparison_labels_escape_markup(self):
+    def test_withheld_notes_cannot_inject_markup_and_comparison_labels_escape_it(self):
         injected = deepcopy(self.browser)
+        injected["highmotion_additional"] = deepcopy(self.evidence["rows"])
         injected["highmotion_additional"][0]["protocol_note"] = '<img src=x onerror="alert(1)">'
+        injected["highmotion_hold_reason"] = '<img src=x onerror="alert(1)">'
         injected["families"][0]["methods"][0]["label"] = "<script>alert(1)</script>"
         rendered = _render_ui(self.frozen, injected, "highmotion")
-        self.assertIn("&lt;img", rendered["tableHtml"])
         self.assertNotIn("<img", rendered["tableHtml"])
+        self.assertIn("withheld", rendered["tableHtml"])
         self.assertIn("&lt;script", rendered["comparisonHtml"])
         self.assertNotIn("<script", rendered["comparisonHtml"])
 
-    def test_complete_html_and_csv_include_only_47_eligible_results_and_12_controls(self):
+    def test_complete_html_and_csv_include_only_29_educational_results_and_12_controls(self):
         with (ROOT / "data/leaderboard-complete.csv").open() as stream:
             rows = list(csv.DictReader(stream))
         counts = {cohort: sum(row["cohort"] == cohort for row in rows) for cohort in {row["cohort"] for row in rows}}
-        self.assertEqual(counts, {"educational_published": 29, "highmotion_aligned_preview1000": 18, "educational_grt_controls": 12})
-        self.assertEqual(len(rows), 59)
-        self.assertEqual(len(rows[0]), 32)
+        self.assertEqual(counts, {"educational_published": 29, "educational_grt_controls": 12})
+        self.assertEqual(len(rows), 41)
+        self.assertNotIn("grid_acc", rows[0])
         main = [row for row in rows if row["cohort"] != "educational_grt_controls"]
-        self.assertEqual(len({(row["cohort"], row["method"]) for row in main}), 47)
+        self.assertEqual(len({(row["cohort"], row["method"]) for row in main}), 29)
         for row in rows:
             self.assertIn(row["method"], self.html)
         self.assertNotIn("<script", self.html)
-        self.assertEqual(self.html.count("<tbody>"), 3)
+        self.assertEqual(self.html.count("<tbody>"), 2)
         self.assertIn("Complete protocol-screened leaderboard", self.html)
         self.assertNotIn("grt_llava_ov_0_5b", self.html)
         self.assertNotIn("highmotion-historical", self.html)
         hm_html = self.html.split('<h2 id="highmotion-aligned">', 1)[1].split('<h2 id="grt-controls">', 1)[0]
         hm_ids = {row["method"] for row in rows if row["cohort"] == "highmotion_aligned_preview1000"}
         for row in self.evidence["rows"]:
-            if not row["rank_eligible"]:
-                self.assertNotIn(row["method"], hm_ids)
-                self.assertNotIn(row["method"], hm_html)
+            self.assertNotIn(row["method"], hm_ids)
+            self.assertNotIn(row["method"], hm_html)
         for page in (self.html, (ROOT / "index.html").read_text()):
             self.assertNotIn("0.10125", page)
             self.assertIn("data/highmotion-audit.json", page)
@@ -178,6 +180,17 @@ class PublicAuditTests(unittest.TestCase):
         self.assertIn("not a fresh GPU rerun", index)
         self.assertIn("leaderboard.html", index)
 
+    def test_changed_result_links_are_cache_versioned(self):
+        version = "?v=20260914-target-hold"
+        assets = ("leaderboard.html", "data/leaderboard-complete.csv", "data/public-audit.json")
+        for page in (self.html, (ROOT / "index.html").read_text()):
+            links = re.findall(r'href="([^"]+)"', page)
+            changed = [link for link in links if any(link.startswith(asset) for asset in assets)]
+            self.assertTrue(changed)
+            for link in changed:
+                self.assertIn(version, link)
+                self.assertLess(link.index(version), link.index("#") if "#" in link else len(link))
+
     def test_paper_scope_dataset_access_and_visual_inputs_are_explicit(self):
         index = (ROOT / "index.html").read_text()
         self.assertIn("arXiv version covers the earlier educational scope", index)
@@ -190,17 +203,17 @@ class PublicAuditTests(unittest.TestCase):
     def test_complete_reproduction_uses_new_code_pin_but_keeps_manuscript_pin(self):
         index = (ROOT / "index.html").read_text()
         app = (ROOT / "app.js").read_text()
-        code_pin = "e59a708043131271f42f7715cf11b322730554a1"
+        code_pin = "b720d636624166638a185202fd47d3eb56e17b38"
         paper_pin = "2a79fcce2707b1eb74648a5ed135c469b17eb4e1"
         for source in (index, app):
             self.assertIn("git checkout " + code_pin, source)
             self.assertIn("build_complete_leaderboard --verify-only", source)
             self.assertIn("build_complete_leaderboard --output outputs/leaderboard-complete", source)
-            self.assertIn("47 screened results + 12 comparison rows", source)
+            self.assertIn("29 Educational results + 12 comparison rows", source)
         self.assertIn("blob/" + paper_pin + "/paper/ECCV_Dense_Video_Understanding.pdf", index)
         self.assertEqual(index.count(paper_pin), 1)
         self.assertNotIn(paper_pin, app)
-        self.assertIn("47 results plus 12 educational GRT comparison rows", index)
+        self.assertIn("29 Educational results plus 12 educational GRT comparison rows", index)
 
     def test_external_archive_defaults_do_not_contain_private_machine_paths(self):
         for filename, variable in (

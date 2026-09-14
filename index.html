@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Newsreader:opsz,wght@6..72,500;6..72,600&amp;display=swap" rel="stylesheet">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect rx='20' width='100' height='100' fill='%2312212f'/%3E%3Cpath d='M20 64V29h25c20 0 33 12 33 35S65 91 45 91H20V64zm18 11h7c10 0 15-3 15-13 0-12-6-17-16-17h-6v30z' fill='%23f4f1e8'/%3E%3Ccircle cx='78' cy='23' r='9' fill='%23df5d3b'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=20260914-mos-status">
+  <link rel="stylesheet" href="styles.css?v=20260914-target-hold">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -124,7 +124,7 @@
           <div>
             <p class="track-label">High-Motion High-FPS Videos · preview</p>
             <h3>Track fine motion at frame-level precision.</h3>
-            <p>Models predict a hand trajectory over a semantic 3×3 image grid. Reported results cover a fixed 1,000-item preview of the 3,243-item test split, not the full split. Video access and underlying source licenses must be checked separately.</p>
+            <p>Models predict a hand trajectory over a semantic 3×3 image grid. Quality results are temporarily withheld while target/reference consistency is reviewed. The archived 1,000-item preview is distinct from the 3,243-item test split. Video access and underlying source licenses must be checked separately.</p>
             <ul class="tag-list">
               <li>Trajectory</li><li>3×3 grid</li><li>Transitions</li><li>High FPS</li>
             </ul>
@@ -200,7 +200,7 @@
 
       <div class="leader-summary" id="leader-summary" aria-live="polite"></div>
 
-      <p class="provenance-note"><strong>47 protocol-screened results: 29 Educational + 18 High-Motion, audited 14 September 2026.</strong> All 12 educational GRT comparison rows are also available. <a href="leaderboard.html">Full HTML tables (no JavaScript)</a> · <a href="data/leaderboard-complete.csv" download>Download CSV</a> · <a href="data/public-audit.json">Comparison evidence</a>. Historical scores are not a fresh GPU rerun. Missing Open MOS values are not zero; no score is imputed.</p>
+      <p class="provenance-note"><strong>29 Educational results plus 12 educational GRT comparison rows (41 CSV records), audited 14 September 2026.</strong> High-Motion results are withheld pending target/reference consistency review. <a href="leaderboard.html?v=20260914-target-hold">Full HTML tables (no JavaScript)</a> · <a href="data/leaderboard-complete.csv?v=20260914-target-hold" download>Download CSV</a> · <a href="data/public-audit.json?v=20260914-target-hold">Comparison evidence</a>. Historical scores are not a fresh GPU rerun. Missing Open MOS values are not zero; no score is imputed.</p>
 
       <section class="provenance-note" id="grt-family-qualification" aria-labelledby="grt-family-qualification-title" hidden>
         <h3 id="grt-family-qualification-title">Four-family GRT qualification</h3>
@@ -214,14 +214,14 @@
         <div class="table-scroll" role="region" tabindex="0" aria-label="GRT matched-control comparison">
           <table id="grt-comparison-table"><caption>634 educational items per method, eight sampled frames; all controls shown</caption><thead><tr><th scope="col">Family / control</th><th scope="col">Open MOS ↑</th><th scope="col">Token F1 ↑</th><th scope="col">Patch recompute ↓</th><th scope="col">Mean throughput (fps) ↑</th><th scope="col">Mean request time (s) ↓</th></tr></thead><tbody id="grt-comparison-body"></tbody></table>
         </div>
-        <p class="provenance-note">Qwen 3B GRT is slower than its matched all-patch control on the reported mean throughput (1.673 vs 1.750 fps), despite better quality and lower patch compute. Timing is historical per-request telemetry, not repeated end-to-end speed benchmarking. Eight sampled frames do not establish high-FPS coverage; patch reuse is not end-to-end FLOPs. <a href="leaderboard.html#grt-controls">Inspect exact values and all control rows</a>.</p>
+        <p class="provenance-note">Qwen 3B GRT is slower than its matched all-patch control on the reported mean throughput (1.673 vs 1.750 fps), despite better quality and lower patch compute. Timing is historical per-request telemetry, not repeated end-to-end speed benchmarking. Eight sampled frames do not establish high-FPS coverage; patch reuse is not end-to-end FLOPs. <a href="leaderboard.html?v=20260914-target-hold#grt-controls">Inspect exact values and all control rows</a>.</p>
       </section>
 
       <div class="leaderboard-panel reveal">
         <div class="leaderboard-toolbar">
           <div class="track-tabs" role="group" aria-label="Leaderboard track">
             <button id="tab-lpm" class="track-tab is-active" type="button" aria-pressed="true" data-track="lpm">Educational / LPM <span>634</span></button>
-            <button id="tab-highmotion" class="track-tab" type="button" aria-pressed="false" data-track="highmotion">High-Motion aligned preview <span>1,000</span></button>
+            <button id="tab-highmotion" class="track-tab" type="button" aria-pressed="false" data-track="highmotion">High-Motion <span>Under review</span></button>
           </div>
           <div class="leaderboard-filters">
             <label class="search-field">
@@ -252,8 +252,8 @@
           <p>Default rank: <strong id="ranking-rule">Open MOS (reported first; missing last), then Token F1</strong></p>
         </div>
       </div>
-      <noscript><p>The interactive table requires JavaScript. <a href="leaderboard.html">The complete leaderboard and all GRT controls are also available as plain HTML.</a></p></noscript>
-      <p class="provenance-note"><strong>High-Motion protocol screening.</strong> Nine runs with non-aligned input or target protocols, including the legacy High-Motion GRT run, are excluded from every leaderboard table and the CSV. Their original evidence is retained only in the <a href="data/highmotion-audit.json">protocol audit</a>. Screening checks archived records and wrapper policies; it does not establish a fresh GPU replay or fully pinned model revisions.</p>
+      <noscript><p>The interactive table requires JavaScript. <a href="leaderboard.html?v=20260914-target-hold">The current leaderboard and all Educational GRT controls are also available as plain HTML.</a></p></noscript>
+      <p class="provenance-note"><strong>High-Motion target/reference review.</strong> A bounded check of four reference examples found a mismatch between the requested hand target and the source joint underlying the archived trajectories. Its full extent and original construction rules remain under review. All High-Motion results, including the previously protocol-screened baselines, are withheld from current tables and CSV. The unchanged <a href="data/highmotion-audit.json">27-run historical protocol audit</a> is retained as evidence, not as approved rankings. No High-Motion GRT superiority claim is made.</p>
 
       <section class="metric-glossary" aria-labelledby="glossary-title">
         <div class="glossary-intro">
@@ -271,7 +271,7 @@
       <div class="section-kicker">04 / Reproduce</div>
       <div class="section-heading reveal">
         <h2 id="evaluate-title">Public code. Explicit reproduction limits.</h2>
-        <p>The minimal code and numerical evidence are public. Rebuild this complete protocol-screened view offline: 47 results plus 12 educational GRT comparison rows, with standalone HTML, CSV and source evidence. The original 32-row snapshot remains unchanged. Fresh inference of the pinned three-arm educational GRT profiles and Open MOS require appropriate GPU resources and authorized data access; neither is implied by the numerical audit.</p>
+        <p>The minimal code and numerical evidence are public. Rebuild the current view offline: 29 Educational results plus 12 educational GRT comparison rows, with standalone HTML, CSV and source evidence. High-Motion results are withheld pending reference review; the original 32-row snapshot remains unchanged as historical evidence. Fresh inference of the pinned three-arm educational GRT profiles and Open MOS require appropriate GPU resources and authorized data access; neither is implied by the numerical audit.</p>
       </div>
 
       <div class="code-layout reveal">
@@ -285,9 +285,9 @@
           <pre tabindex="0"><code id="active-code">git clone --branch release/dive-bench-minimal --single-branch \
   https://github.com/Hai-chao-Zhang/DenseVideoUnderstand.git DIVE-Bench
 cd DIVE-Bench
-git checkout e59a708043131271f42f7715cf11b322730554a1
+git checkout b720d636624166638a185202fd47d3eb56e17b38
 python -m pip install 'PyYAML&gt;=6'
-# 47 screened results + 12 comparison rows; no GPU or dataset needed.
+# 29 Educational results + 12 comparison rows; High-Motion results withheld.
 python -m tools.densevideo.build_complete_leaderboard --verify-only
 python -m tools.densevideo.build_complete_leaderboard --output outputs/leaderboard-complete
 # Open outputs/leaderboard-complete/leaderboard.html; output must be new.</code></pre>
@@ -329,13 +329,13 @@ python -m tools.densevideo.build_complete_leaderboard --output outputs/leaderboa
   <footer class="site-footer">
     <div class="section-shell footer-inner">
       <div><a class="brand footer-brand" href="#top"><span class="brand-mark" aria-hidden="true">D</span><span>DIVE–Bench</span></a><p>Dense evidence deserves dense understanding.</p></div>
-      <div class="footer-links"><a href="https://arxiv.org/abs/2509.14199">Earlier arXiv</a><a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/release/dive-bench-minimal">Code</a><a href="https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation">Educational dataset (gated)</a><a href="leaderboard.html">Full leaderboard</a></div>
+      <div class="footer-links"><a href="https://arxiv.org/abs/2509.14199">Earlier arXiv</a><a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/release/dive-bench-minimal">Code</a><a href="https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation">Educational dataset (gated)</a><a href="leaderboard.html?v=20260914-target-hold">Full leaderboard</a></div>
       <p class="footer-meta">© 2026 DIVE-Bench authors<br>Historical snapshot: <span id="footer-sync-date">20 Aug 2026</span><br>Public audit: 14 Sep 2026</p>
     </div>
   </footer>
 
   <script src="data/leaderboard.js?v=1f1b5a79c74ff763" defer></script>
-  <script src="data/public-audit.js?v=20260914-mos-status" defer></script>
-  <script src="app.js?v=20260914-mos-status" defer></script>
+  <script src="data/public-audit.js?v=20260914-target-hold" defer></script>
+  <script src="app.js?v=20260914-target-hold" defer></script>
 </body>
 </html>

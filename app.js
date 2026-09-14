@@ -5,14 +5,9 @@
   var publicAudit = window.DIVE_PUBLIC_AUDIT;
   if (dataset) {
     dataset = JSON.parse(JSON.stringify(dataset));
-    // Fail closed: the frozen three-row High-Motion archive is evidence only,
-    // never a fallback leaderboard when the screened audit asset is missing.
+    // 2026-09-14 target/reference-consistency hold. Neither the immutable
+    // archive nor a cached previously screened overlay may repopulate rankings.
     dataset.tracks.highmotion = [];
-    if (publicAudit && Array.isArray(publicAudit.highmotion_additional)) {
-      dataset.tracks.highmotion = publicAudit.highmotion_additional.filter(function (row) {
-        return row && row.protocol_status === "aligned_preview" && row.rank_eligible === true && row.samples === 1000;
-      });
-    }
     delete dataset.tracks.highmotion_historical;
   }
   var table = document.getElementById("leaderboard-table");
@@ -109,9 +104,9 @@
         "git clone --branch release/dive-bench-minimal --single-branch \\",
         "  https://github.com/Hai-chao-Zhang/DenseVideoUnderstand.git DIVE-Bench",
         "cd DIVE-Bench",
-        "git checkout e59a708043131271f42f7715cf11b322730554a1",
+        "git checkout b720d636624166638a185202fd47d3eb56e17b38",
         "python -m pip install 'PyYAML>=6'",
-        "# 47 screened results + 12 comparison rows; no GPU or dataset needed.",
+        "# 29 Educational results + 12 comparison rows; High-Motion results withheld.",
         "python -m tools.densevideo.build_complete_leaderboard --verify-only",
         "python -m tools.densevideo.build_complete_leaderboard --output outputs/leaderboard-complete",
         "# Open outputs/leaderboard-complete/leaderboard.html; output must be new."
@@ -142,6 +137,7 @@
         "  dive_bench_high_motion_high_fps_preview1000    # fixed first 1,000",
         "",
         "Legacy aliases: densevideo, densevideo_highmotion",
+        "High-Motion quality results are withheld pending target/reference review.",
         "Keep full-split, preview and historical misaligned protocols separate.",
         "See the released docs/REPRODUCTION.md for data and frame requirements."
       ].join("\n")
@@ -253,7 +249,8 @@
 
   function renderBody(rows) {
     if (!rows.length) {
-      tableBody.innerHTML = '<tr class="table-empty"><td colspan="' + columns[state.track].length + '">No models match this filter.</td></tr>';
+      var emptyMessage = state.track === "highmotion" ? "High-Motion results withheld pending target/reference consistency review." : "No models match this filter.";
+      tableBody.innerHTML = '<tr class="table-empty"><td colspan="' + columns[state.track].length + '">' + emptyMessage + '</td></tr>';
       return;
     }
     tableBody.innerHTML = rows.map(function (row) {
@@ -305,11 +302,7 @@
         '<div class="summary-card"><span>Reported GRT telemetry (' + grtRows.length + ' verified profile' + (grtRows.length === 1 ? '' : 's') + ')</span><strong>' + (telemetryGrt ? formatNumber(telemetryGrt.recompute_ratio, "ratio") : "—") + ' lowest patch recompute</strong><small>' + (telemetryGrt ? escapeHtml(telemetryGrt.model) + ' · ' : '') + (telemetryGrt ? formatNumber(telemetryGrt.reference_recompute_ratio, "ratio") : "—") + ' reference compute · ' + (telemetryGrt ? formatNumber(telemetryGrt.effective_fps, "score") : "—") + ' sampling density · ' + (telemetryGrt ? formatNumber(telemetryGrt.throughput_fps, "score") : "—") + " throughput (fps)</small></div>"
       ].join("");
     } else {
-      summary.innerHTML = [
-        summaryCard("Grid Accuracy leader", null, "grid_acc", "Grid Acc", false),
-        summaryCard("Lowest displacement", null, "grid_ade", "Grid ADE", true),
-        summaryCard("Best transition tracking", null, "transition_acc", "Transition Acc", false)
-      ].join("");
+      summary.innerHTML = '<div class="summary-card"><span>High-Motion release status</span><strong>Results withheld</strong><small>Target/reference consistency review is incomplete. No GRT superiority claim is supported.</small></div>';
     }
   }
 
@@ -385,8 +378,8 @@
       button.classList.toggle("is-active", selected);
       button.setAttribute("aria-pressed", String(selected));
     });
-    caption.textContent = track === "lpm" ? "DIVE-Bench Educational High-FPS Videos leaderboard" : "DIVE-Bench High-Motion High-FPS Videos: aligned 1,000-item preview";
-    rankingRule.textContent = track === "lpm" ? "Open MOS (reported first; missing last), then Token F1" : "Grid Accuracy, then Token F1";
+    caption.textContent = track === "lpm" ? "DIVE-Bench Educational High-FPS Videos leaderboard" : "DIVE-Bench High-Motion High-FPS Videos: results withheld pending reference review";
+    rankingRule.textContent = track === "lpm" ? "Open MOS (reported first; missing last), then Token F1" : "No ranking: target/reference review pending";
     renderSummary();
     renderGlossary();
     renderTable();
