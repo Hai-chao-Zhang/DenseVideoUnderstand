@@ -23,6 +23,12 @@ TASK_LABELS = {
     "dive_bench_high_motion_high_fps_preview1000": "DIVE-Bench High-Motion High-FPS Videos (1000-item preview)",
 }
 
+HELD_HIGHMOTION_TASKS = frozenset({
+    "densevideo_highmotion",
+    "dive_bench_high_motion_high_fps",
+    "dive_bench_high_motion_high_fps_preview1000",
+})
+
 TASK_COLUMNS = {
     "densevideo": [
         "rank",
@@ -120,7 +126,19 @@ def read_csv(path: Path) -> List[Dict[str, str]]:
         return list(csv.DictReader(f))
 
 
+def require_publishable_rows(rows: List[Dict[str, Any]]) -> None:
+    held_tasks = sorted({row.get("task", "") for row in rows} & HELD_HIGHMOTION_TASKS)
+    if held_tasks:
+        raise ValueError(
+            "High-Motion publication is withheld pending target/reference consistency "
+            f"review; refusing leaderboard output for: {', '.join(held_tasks)}. "
+            "See docs/HIGHMOTION_TARGET_HOLD.md. Raw evaluation and historical "
+            "evidence reconstruction remain available."
+        )
+
+
 def write_csv(path: Path, rows: List[Dict[str, Any]], columns: List[str]) -> None:
+    require_publishable_rows(rows)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=columns)
@@ -296,6 +314,7 @@ def write_markdown(
     include_closed_source: bool,
     open_mos_judges: Optional[List[str]] = None,
 ) -> None:
+    require_publishable_rows(rows)
     by_task: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for row in rows:
         by_task[row.get("task", "")].append(row)
@@ -357,6 +376,10 @@ def main() -> None:
         excluded_method_tasks.add(tuple(value.rsplit(":", 1)))
     rows = merge_lmms_rows(args.summary_csv, model_config, mos_by_method, excluded_method_tasks)
     rows.extend(merge_api_rows(args.api_summary_csv, args.include_closed_source, mos_by_method))
+    try:
+        require_publishable_rows(rows)
+    except ValueError as error:
+        parser.error(str(error))
     if not args.include_closed_source:
         rows = [row for row in rows if not is_closed_source(row)]
 

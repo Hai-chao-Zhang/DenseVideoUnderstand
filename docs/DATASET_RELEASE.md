@@ -142,7 +142,7 @@ The owner follow-up verified its annotation bytes, equivalent ordered task
 content, revision and source card; its archive contains all 3,243 referenced
 MP4 paths. This is not a fresh full-video decode or GPU evaluation claim.
 
-The existing public high-motion leaderboard uses the **first 1,000 rows** and
+The historical high-motion leaderboard uses the **first 1,000 rows** and
 the scorer's target policy is eight uniform endpoint-inclusive frames, not a
 full 3,243-row dense-frame evaluation. Actual legacy GRT inputs do not follow
 that policy: 787/1,000 contain fewer than eight frames and 148 clips are
@@ -215,7 +215,7 @@ or average their unrelated primary metrics.
 Existing repository ids and pinned revisions remain usable; the updated source
 cards include migration links. Preserve `densevideo` and `densevideo_highmotion`
 as evaluator aliases. Preserve the exact published row order and annotate the
-1,000-row public high-motion profile explicitly; a full-split profile should have
+1,000-row historical high-motion profile explicitly; a full-split profile should have
 a distinct configuration/result label. Include stable example ids, source ids,
 annotation checksums, video-path manifests, source revisions and the extraction
 commands. Validate both metadata loading and resolution of every required video

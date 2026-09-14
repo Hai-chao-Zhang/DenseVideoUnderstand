@@ -16,11 +16,24 @@ for a right-hand target (the palm/ring-base region). This raises a target/refere
 consistency issue: reproducing saved labels or metrics cannot by itself establish
 that the reference follows the body part requested in the question.
 
-This is a bounded four-reference finding, not an audit of all 3,243 items. The
-constructor and target mapping require review; the
-scope of any affected examples is not yet established. It is not evidence about
-GRT's quality, a matched GRT ablation, or a new performance result. A successful
-runtime smoke check cannot resolve this semantic question.
+The initial finding covered four references. A subsequent fixed-formula source
+audit covered all 3,243 references (826,253 frames), with every local HDF5 file
+SHA-256 matched to its canonical archive member. Of these, 2,871 complete
+trajectories match the fixed left-index projection within the predeclared
+0.001-pixel component tolerance; 3,121 references have all grid labels match
+that projection. These are different checks, and neither matches every item.
+Negative-depth and offscreen projections are present; both checked joints lack
+confidence data in 454 references. The audit completed with data issues, not a
+universal left-index-equivalence or universal incorrect-label conclusion.
+
+This follow-up used only two fixed joints and the prespecified projection; it
+did not fit a transform, search for a better mapping, or inspect model predictions.
+It does not recover the original constructor or establish intended anatomy,
+visibility, or confidence validity. Its private diagnostic report SHA-256 is
+`13d8ce987cca4b5d5c534743809a426f184db811bfb1f5b94d23982f99f81e08`.
+The constructor and target mapping still require review. Neither this source
+audit nor a successful runtime smoke check establishes GRT quality, a matched
+GRT advantage, or a new performance result.
 
 No reference answers, joint coordinates, videos or private source data are
 published by this note. No dataset, model, scoring rule, sampling protocol, GRT
@@ -40,6 +53,14 @@ The current generator emits an empty `highmotion_additional`, the hold status an
 reason, and zero release-eligible High-Motion rows. It retains the original
 historical evidence files separately and offers no flag to bypass the hold.
 Educational numbers, ranks and all three promoted GRT quality gates are unchanged.
+
+The generic `tools.densevideo.build_leaderboard` exporter also refuses all three
+High-Motion task aliases before writing Markdown or CSV. Mixed Educational and
+High-Motion inputs fail explicitly rather than silently dropping the held rows;
+there is no bypass flag. This is a publication guard, not a task removal: raw
+evaluation, metric collection, full/preview task registrations, and the separate
+immutable historical reconstruction remain available. The promoted
+`dive-reproduce` entry point continues to offer only the three Educational profiles.
 
 ## Conditions for revisiting the hold
 
