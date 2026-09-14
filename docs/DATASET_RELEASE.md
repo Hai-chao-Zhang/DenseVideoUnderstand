@@ -146,8 +146,8 @@ The existing public high-motion leaderboard uses the **first 1,000 rows** and
 the scorer's target policy is eight uniform endpoint-inclusive frames, not a
 full 3,243-row dense-frame evaluation. Actual legacy GRT inputs do not follow
 that policy: 787/1,000 contain fewer than eight frames and 148 clips are
-truncated at ten seconds. Keep that result unranked and separate from aligned
-input protocols. The legacy code selects the prefix by default. Its explicit
+truncated at ten seconds. That result is excluded from current leaderboard
+tables and CSV; it is retained only as archival evidence. The legacy code selects the prefix by default. Its explicit
 `DENSEVIDEO_HIGHMOTION_MAX_EXAMPLES=0` option selects all 3,243 examples; it does
 not change the default eight-frame budget. Report both example subset and frame
 policy with every result.

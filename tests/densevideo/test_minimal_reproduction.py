@@ -69,6 +69,17 @@ def test_plan_does_not_create_outputs_or_claim_smoke_as_full(tmp_path, capsys):
     assert json.loads(capsys.readouterr().out)["published_profile"] is False
 
 
+@pytest.mark.parametrize("profile", ["route31", "qwen3", "qwen7"])
+def test_all_profile_plans_resolve_the_shared_default_bundle(
+    profile, tmp_path, monkeypatch, capsys
+):
+    monkeypatch.chdir(tmp_path)
+    assert main(["--profile", profile, "--output", str(tmp_path / profile)]) == 0
+    plan = json.loads(capsys.readouterr().out)
+    assert Path(plan["bundle"]).name == "2026-08-20"
+    assert Path(plan["bundle"]).is_dir()
+
+
 @pytest.mark.parametrize("limit", [0, 635, 634.9, True])
 def test_invalid_limit_is_rejected(limit, tmp_path):
     with pytest.raises(ValueError):

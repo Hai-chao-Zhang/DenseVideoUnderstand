@@ -1,4 +1,6 @@
 include LICENSE LICENSE-APACHE README.md leaderboard.md
+include setup.py
+recursive-include build_support *.py
 recursive-include release *.json *.csv *.js *.md
 recursive-include configs/densevideo *.yaml
 recursive-include docs *.md

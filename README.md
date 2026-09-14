@@ -15,8 +15,9 @@ byte. This verifies historical results, **not a fresh GPU rerun**. The legacy
 High-Motion result covers 1,000 preview items, not the full 3,243-item split.
 Its legacy GRT input sampler was not aligned to the target protocol: 787 of
 1,000 inputs contained fewer than eight frames, and 148 clips were truncated.
-Retain that row as historical, out-of-protocol evidence, not a fair ranked GRT
-comparison; numeric reconstruction alone does not validate model inputs.
+That row is retained only in the historical evidence archive and is excluded
+from the current leaderboard and CSV; numeric reconstruction alone does not
+validate model inputs.
 
 | GRT profile | Open MOS (website) | Token F1 | Reference patch compute ratio |
 | --- | ---: | ---: | ---: |
@@ -38,27 +39,48 @@ both tested callers. Owner-authenticated follow-up confirmed that High-Motion
 is private, at revision `d44407f607fdf020c59b816884f06ed6d453cf26`.
 This repository does not grant those rights or promise a public download.
 
-## Rebuild the published leaderboard (CPU, no data or model downloads)
+## Rebuild the complete leaderboard (CPU, no data or model downloads)
 
 ```bash
 git clone --branch release/dive-bench-minimal --single-branch \
   https://github.com/Hai-chao-Zhang/DenseVideoUnderstand.git DIVE-Bench
 cd DIVE-Bench
 python -m pip install 'PyYAML>=6'
-python -m tools.densevideo.rebuild_published_leaderboard --verify-only
-python -m tools.densevideo.rebuild_published_leaderboard --output outputs/published
+python -m tools.densevideo.build_complete_leaderboard --verify-only
+python -m tools.densevideo.build_complete_leaderboard --output outputs/complete
 ```
 
-The verifier checks pinned SHA256 hashes, 634 identities per Educational method,
+Open `outputs/complete/leaderboard.html`. This rebuilds the current 47-result
+view (29 Educational and 18 protocol-screened High-Motion methods), plus all 12
+Educational GRT comparison rows. The CSV contains 59 records. Nine non-aligned
+High-Motion runs are excluded from every table and CSV, not displayed in an
+unranked section. The standalone HTML needs no JavaScript or external assets.
+The [complete generation contract](docs/COMPLETE_LEADERBOARD.md) explains its
+pinned evidence, checks and limits. This is archived-result verification, not
+new GPU inference.
+
+For the separate immutable 32-row **historical** snapshot:
+
+```bash
+python -m tools.densevideo.rebuild_published_leaderboard --verify-only
+python -m tools.densevideo.rebuild_published_leaderboard --output outputs/historical
+```
+
+The historical verifier checks pinned SHA256 hashes, 634 identities per Educational method,
 all three contracted quality floors, patch counts, the 1,000-item High-Motion
 metrics, frozen CSV/website agreement, and exact Markdown regeneration. Add
 `--website` to compare the website's retained historical `data/leaderboard.js`
 against the pinned 32-row snapshot. It does not audit the complete HTML page's
-new 56-result/12-control overlay, which has separate website tests and evidence.
+new 47-result/12-control overlay; the complete command above verifies that view.
 An existing output directory is refused. This
 bundle contains numeric scores and hashed identities, not reference answers,
 predictions, videos, or credentials. Non-GRT rows are preserved from the public
 snapshot; their inference is not reproduced by the minimal profiles.
+
+An installed wheel provides both dated evidence bundles as package data,
+generated from the canonical `release/` tree during the build. Both
+`dive-leaderboard-complete --verify-only` and `dive-leaderboard --verify-only`
+work outside a checkout; `--bundle` remains available for an explicit bundle.
 
 ## Install the evaluator
 

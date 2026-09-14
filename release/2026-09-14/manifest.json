@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-09-14",
+  "result_snapshot": "2026-08-20",
+  "code_commit": "2a79fcce2707b1eb74648a5ed135c469b17eb4e1",
+  "historical_leaderboard_sha256": "c88492ec535a3bc4f47fe9e91f66bc050a857f757cd2c478db598e889d9dc1b1",
+  "numeric_provenance_sha256": "ea2d25f47a10662dbc064931e7a9b6fd6bf782e2ec000c371314ac0c2651edcf",
+  "counts": {
+    "educational": 29,
+    "highmotion_evidence": 27,
+    "highmotion_eligible": 18,
+    "highmotion_excluded": 9,
+    "comparison_rows": 12,
+    "csv_rows": 59
+  },
+  "families": [
+    {
+      "family": "route31",
+      "label": "LLaVA-OneVision 0.5B Route31",
+      "methods": [
+        {
+          "method": "llava_onevision_0_5b",
+          "role": "archived_public",
+          "label": "Archived public baseline"
+        },
+        {
+          "method": "llava_onevision_0_5b_hf_route31_base",
+          "role": "matched_control",
+          "label": "Matched quality baseline"
+        },
+        {
+          "method": "llava_onevision_0_5b_hf_route31_exact",
+          "role": "matched_control",
+          "label": "Matched all-patch control"
+        },
+        {
+          "method": "grt_llava_onevision_0_5b_hf_route31_t0001",
+          "role": "candidate",
+          "label": "GRT candidate"
+        }
+      ]
+    },
+    {
+      "family": "qwen3",
+      "label": "Qwen2.5-VL 3B t03",
+      "methods": [
+        {
+          "method": "qwen2_5_vl_3b",
+          "role": "archived_public",
+          "label": "Archived public baseline"
+        },
+        {
+          "method": "qwen2_5_vl_3b_grt_all",
+          "role": "matched_control",
+          "label": "Matched all-patch control"
+        },
+        {
+          "method": "qwen2_5_vl_3b_quality_base",
+          "role": "matched_control",
+          "label": "Matched quality baseline"
+        },
+        {
+          "method": "grt_qwen2_5_vl_3b_t03",
+          "role": "candidate",
+          "label": "GRT candidate"
+        }
+      ]
+    },
+    {
+      "family": "qwen7",
+      "label": "Qwen2.5-VL 7B route floor",
+      "methods": [
+        {
+          "method": "qwen2_5_vl_7b",
+          "role": "archived_public",
+          "label": "Archived public baseline"
+        },
+        {
+          "method": "qwen2_5_vl_7b_floor_grt_all",
+          "role": "matched_control",
+          "label": "Matched all-patch control"
+        },
+        {
+          "method": "qwen2_5_vl_7b_floor_quality_base",
+          "role": "matched_control",
+          "label": "Matched quality baseline"
+        },
+        {
+          "method": "grt_qwen2_5_vl_7b_dual_floor_s080_o055_cap48",
+          "role": "candidate",
+          "label": "GRT candidate"
+        }
+      ]
+    }
+  ],
+  "highmotion_methods": [
+    "grt_llava_ov_0_5b",
+    "qwen3_vl_2b",
+    "qwen3_vl_4b",
+    "qwen3_vl_8b",
+    "qwen3_vl_32b",
+    "qwen2_vl_2b",
+    "qwen2_5_vl_3b",
+    "qwen2_5_vl_7b",
+    "qwen2_5_vl_32b",
+    "qwen2_5_vl_72b",
+    "llava_onevision_0_5b",
+    "llava_onevision_original",
+    "qwen2_vl_7b",
+    "llava_onevision_1_5_8b",
+    "llava_onevision_2_8b",
+    "internvl2_5_1b",
+    "internvl2_5_4b",
+    "internvl2_5_8b",
+    "internvl3_1b",
+    "internvl3_2b",
+    "internvl3_8b",
+    "videollama3_2b",
+    "videollama3_7b",
+    "longva_7b",
+    "phi4_multimodal",
+    "gemini-3.1-pro-preview",
+    "gemini-3.6-flash"
+  ],
+  "eligible_highmotion_methods": [
+    "qwen3_vl_2b",
+    "qwen3_vl_4b",
+    "qwen3_vl_8b",
+    "qwen3_vl_32b",
+    "qwen2_vl_2b",
+    "qwen2_5_vl_3b",
+    "qwen2_5_vl_7b",
+    "qwen2_5_vl_32b",
+    "qwen2_5_vl_72b",
+    "llava_onevision_0_5b",
+    "llava_onevision_original",
+    "qwen2_vl_7b",
+    "llava_onevision_1_5_8b",
+    "llava_onevision_2_8b",
+    "videollama3_2b",
+    "videollama3_7b",
+    "longva_7b",
+    "phi4_multimodal"
+  ],
+  "files": {
+    "highmotion-audit.json": "f2358a0ae2f61ae15d0e03436c640fed128b26cf591db3a9e97e668aa562683d",
+    "comparison_telemetry.json": "d538f8dc4b3b6fadc9c74d07436d532e5de4444fb85717d08f7908a77f89e471"
+  }
+}

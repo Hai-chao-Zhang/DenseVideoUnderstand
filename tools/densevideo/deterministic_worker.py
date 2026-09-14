@@ -7,6 +7,27 @@ import socket
 import sys
 from importlib.metadata import version
 
+_PROCESS_SIZE_ENV = ("WORLD_SIZE", "LOCAL_WORLD_SIZE", "PMI_SIZE", "OMPI_COMM_WORLD_SIZE", "MV2_COMM_WORLD_SIZE", "SLURM_NTASKS", "SLURM_NPROCS")
+_PROCESS_RANK_ENV = ("RANK", "LOCAL_RANK", "PMI_RANK", "OMPI_COMM_WORLD_RANK", "MV2_COMM_WORLD_RANK", "SLURM_PROCID")
+
+
+def require_single_process(torch_module):
+    """One visible GPU per rank is not proof of a single-process launch."""
+    for name in (*_PROCESS_SIZE_ENV, *_PROCESS_RANK_ENV):
+        raw = os.environ.get(name)
+        if raw is None:
+            continue
+        try:
+            value = int(raw)
+        except ValueError as error:
+            raise RuntimeError(f"Invalid {name}; use a single process") from error
+        allowed = (1,) if name in _PROCESS_SIZE_ENV else ((-1, 0) if name == "LOCAL_RANK" else (0,))
+        if value not in allowed:
+            raise RuntimeError(f"{name}={value}; use a single process for serial reproduction")
+    distributed = torch_module.distributed
+    if distributed.is_available() and distributed.is_initialized() and distributed.get_world_size() != 1:
+        raise RuntimeError("Initialized distributed group is not a single process")
+
 
 def trace_floor_requests(model_class):
     """Bind floor-decision log order to document IDs without changing inference."""
@@ -28,6 +49,7 @@ def main():
     import numpy as np
     import torch
 
+    require_single_process(torch)
     if not torch.cuda.is_available() or torch.cuda.device_count() != 1:
         raise RuntimeError("Expose exactly one CUDA GPU for same-device serial reproduction")
     random.seed(0)
@@ -85,11 +107,17 @@ def main():
         )
 
         trace_floor_requests(Qwen2_5_VL_DualRouteFloor)
-    from lmms_eval.__main__ import cli_evaluate
+    from lmms_eval.__main__ import cli_evaluate, parse_eval_args
 
     if len(sys.argv) > 1 and sys.argv[1] == "--":
         sys.argv.pop(1)
-    cli_evaluate()
+    args = parse_eval_args()
+    if args.config:
+        raise RuntimeError("Strict reproduction uses explicit profile flags, not --config overrides")
+    # The retained harness otherwise logs evaluation errors and returns normally.
+    # The parent runner also validates artifacts; the worker itself must fail too.
+    args.verbosity = "DEBUG"
+    cli_evaluate(args=args)
 
 
 if __name__ == "__main__":

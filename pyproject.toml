@@ -30,13 +30,14 @@ legacy-decord = ["decord==0.6.0"]
 lmms-eval = "lmms_eval.__main__:cli_evaluate"
 dive-reproduce = "tools.densevideo.reproduce_grt:main"
 dive-leaderboard = "tools.densevideo.rebuild_published_leaderboard:main"
+dive-leaderboard-complete = "tools.densevideo.build_complete_leaderboard:main"
 
 [tool.setuptools.packages.find]
 include = ["lmms_eval*", "densevideo_qwen_dual_plugin*", "tools.densevideo*"]
 
 [tool.setuptools.package-data]
 lmms_eval = ["tasks/densevideo/*.yaml", "tasks/densevideo/*_yaml"]
-"tools.densevideo" = ["profiles.json"]
+"tools.densevideo" = ["profiles.json", "_release_data/**/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/densevideo"]

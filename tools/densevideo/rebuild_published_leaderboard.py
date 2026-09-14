@@ -16,10 +16,13 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 from tools.densevideo.build_leaderboard import TASK_COLUMNS, TASK_LABELS, markdown_table, rank_rows
+from tools.densevideo.release_resources import resolve_release_bundle
 
+VERIFICATION_CONTRACT_VERSION = 1
 SNAPSHOT_SHA256 = "c88492ec535a3bc4f47fe9e91f66bc050a857f757cd2c478db598e889d9dc1b1"
 PROVENANCE_SHA256 = "ea2d25f47a10662dbc064931e7a9b6fd6bf782e2ec000c371314ac0c2651edcf"
 CSV_SHA256 = "dc269f911d346672f097cbfd69497a7875f895a868afa3977494a7fbbf07597e"
+SOURCE_INVENTORY_SHA256 = "47d9794697fbf434853ba0c7071e47c553049e9b68d88332e05edfbf574b7cf0"
 TRACKS = {"lpm": "densevideo", "highmotion": "densevideo_highmotion"}
 SITE_FIELDS = {
     "model": "display_name", "recompute_ratio": "mean_recompute_ratio",
@@ -69,6 +72,7 @@ def rebuild_markdown(rows):
 def verify_bundle(bundle, *, website=False):
     bundle = Path(bundle)
     provenance = json.loads(checked_bytes(bundle, "provenance.json", PROVENANCE_SHA256))
+    checked_bytes(bundle, "source_inventory.json", SOURCE_INVENTORY_SHA256)
     site_bytes = checked_bytes(bundle, "leaderboard.js", SNAPSHOT_SHA256)
     matched = re.fullmatch(r"\s*(?:/\*.*?\*/\s*)?window\.DIVE_LEADERBOARD\s*=\s*(\{.*\});\s*",
                            site_bytes.decode("utf-8"), re.DOTALL)
@@ -166,15 +170,16 @@ def verify_bundle(bundle, *, website=False):
             current = response.read()
         require(hashlib.sha256(current).hexdigest() == SNAPSHOT_SHA256,
                 "Live website differs from the pinned 2026-08-20 release")
-    return {"status": "verified", "verification": "historical artifacts; no fresh inference",
+    return {"status": "verified", "verification_contract": VERIFICATION_CONTRACT_VERSION,
+            "verification": "historical artifacts; no fresh inference",
             "website_checked": website, "leaderboard_rows": 32, "lpm_samples_per_method": 634,
             "highmotion_preview_samples": 1000, "families": result_families}, rebuilt
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--bundle", type=Path, default=Path("release/2026-08-20"),
-                        help="Release bundle directory (relative to current directory by default)")
+    parser.add_argument("--bundle", type=Path,
+                        help="Override the packaged release bundle directory")
     parser.add_argument("--output", type=Path, help="New output directory; existing directories are refused")
     parser.add_argument("--verify-only", action="store_true")
     parser.add_argument("--website", action="store_true", help="Also compare live website bytes (network)")
@@ -182,12 +187,13 @@ def main(argv=None):
     if args.verify_only and args.output:
         parser.error("--verify-only and --output are mutually exclusive")
     try:
-        report, markdown = verify_bundle(args.bundle, website=args.website)
+        bundle = resolve_release_bundle(args.bundle)
+        report, markdown = verify_bundle(bundle, website=args.website)
         if args.output:
             args.output.mkdir(parents=True, exist_ok=False)
             (args.output / "leaderboard.md").write_bytes(markdown)
             for filename in ("leaderboard.csv", "leaderboard.js"):
-                (args.output / filename).write_bytes((args.bundle / filename).read_bytes())
+                (args.output / filename).write_bytes((bundle / filename).read_bytes())
             (args.output / "verification.json").write_text(json.dumps(report, indent=2) + "\n")
     except (OSError, ValueError, KeyError) as error:
         parser.exit(1, f"Verification failed: {error}\n")

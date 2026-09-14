@@ -17,6 +17,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from tools.densevideo.release_resources import resolve_release_bundle
+
 EVALUATION_SEEDS = "0,1234,1234,1234"
 IDENTITY_SHA256 = "27ea477ec792f645fabffec4b813ae2946c4e4cc48049ae15961cbb3de7b7ec7"
 
@@ -366,25 +368,25 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--profile", choices=tuple(profiles()["profiles"]), required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument(
-        "--bundle",
-        type=Path,
-        default=Path("release/2026-08-20"),
-        help="Published identity/numeric bundle; required for execution",
-    )
+    parser.add_argument("--bundle", type=Path, help="Override the packaged release bundle")
     parser.add_argument("--limit", type=int, help="Smoke only; omitted means all 634 examples")
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--with-mos", action="store_true")
     args = parser.parse_args(argv)
     output = args.output.resolve()
+    try:
+        bundle = resolve_release_bundle(args.bundle)
+    except (OSError, RuntimeError) as error:
+        parser.exit(1, f"Release bundle unavailable: {error}\n")
     plan = build_plan(args.profile, output, args.limit)
+    plan["bundle"] = str(bundle)
     print(json.dumps(plan, indent=2))
     if not args.execute:
         return 0
     from tools.densevideo.rebuild_published_leaderboard import verify_bundle
 
-    verify_bundle(args.bundle)
-    identity_bytes = (args.bundle / "sample_identities.csv").read_bytes()
+    verify_bundle(bundle)
+    identity_bytes = (bundle / "sample_identities.csv").read_bytes()
     require(
         hashlib.sha256(identity_bytes).hexdigest() == IDENTITY_SHA256,
         "Published identity bundle checksum changed",
@@ -393,7 +395,7 @@ def main(argv=None):
         int(row["doc_id"]): row["identity_sha256"]
         for row in csv.DictReader(identity_bytes.decode().splitlines())
     }
-    provenance = json.loads((args.bundle / "provenance.json").read_text(encoding="utf-8"))
+    provenance = json.loads((bundle / "provenance.json").read_text(encoding="utf-8"))
     # Refuse reuse of an output directory from another allocation/partial run.
     output.mkdir(parents=True, exist_ok=False)
     (output / "reproduction_plan.json").write_text(

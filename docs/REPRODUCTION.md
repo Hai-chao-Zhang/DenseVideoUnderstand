@@ -34,17 +34,31 @@ Torchvision 0.24.0, Transformers 4.57.6, Accelerate 1.12.0, Datasets 4.5.0,
 NumPy 2.2.6 and PyAV 15.1.0. Wider dependency ranges are packaging compatibility
 ranges, not a claim of bitwise-identical inference on every version or GPU.
 
-`dive-reproduce` and `dive-leaderboard` also work from an installed wheel. The
-numeric `release/2026-08-20` bundle is kept in the source checkout, not duplicated
-inside the wheel. Pass its absolute location using `--bundle` when running from
-another directory. No credentials, videos, model weights, reference answers or
-historical generated answers are distributed in the numeric bundle.
+`dive-reproduce`, `dive-leaderboard` and `dive-leaderboard-complete` also work from an installed wheel. At
+build time, every dated directory under the canonical source `release/` tree is
+copied into package resources; there is no second checked-in bundle. The commands
+resolve the packaged dated bundles independently of the working directory.
+Use `--bundle` only to audit an explicit alternate bundle. No credentials,
+videos, model weights, reference answers or historical generated answers are
+distributed in the numeric bundle.
 
 ## Offline published scores
 
+Generate the current 47-result view and its 12 comparison rows:
+
 ```bash
-dive-leaderboard --bundle release/2026-08-20 --verify-only
-dive-leaderboard --bundle release/2026-08-20 --output /tmp/dive-published-table
+dive-leaderboard-complete --verify-only
+dive-leaderboard-complete --output /tmp/dive-complete-table
+```
+
+Open the generated `leaderboard.html` without needing JavaScript or external
+assets. The [complete generation contract](COMPLETE_LEADERBOARD.md) describes
+which archived inputs are verified and which nine High-Motion runs are excluded.
+For the separate immutable 32-row historical snapshot:
+
+```bash
+dive-leaderboard --verify-only
+dive-leaderboard --output /tmp/dive-published-table
 ```
 
 The output directory must be new. Optional `--website` additionally checks the
@@ -108,6 +122,12 @@ These settings cannot guarantee identical outputs across different hardware,
 drivers or library builds. They apply to inference workers; the separate MOS
 command retains the recorded judge protocol and is not advertised as an
 independently proven cross-hardware deterministic judge.
+
+Workers also reject multi-process MPI, Slurm and distributed-launch metadata,
+even when each process sees just one GPU. Evaluation errors propagate as nonzero
+exit codes: the retained evaluator uses strict `DEBUG` exception handling, and
+configuration-file overrides are rejected. Debug logs can contain dataset text
+or predictions; keep raw run directories private and review them before sharing.
 
 Every fresh arm must contain exactly document IDs `0..633` (or `0..limit-1` for
 smoke), matching published hashed qid/video/type identities, with no duplicate,

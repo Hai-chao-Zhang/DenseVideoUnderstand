@@ -44,11 +44,15 @@ is wall-clock processing throughput.
   It contains 29 LPM rows, three High-Motion rows, and three promoted GRT
   families.
   The 2026-09-14 complete HTML update retains that historical file unchanged
-  and adds separate audited assets for 29 Educational plus 27 High-Motion
-  results and all 12 educational candidate/control rows. Nine incompatible
-  High-Motion rows are visible but deliberately unranked. The minimal
+  and adds separate audited assets for 29 Educational plus 18 protocol-screened
+  High-Motion results and all 12 educational candidate/control rows. Nine
+  incompatible High-Motion runs are excluded from the current leaderboard,
+  HTML tables and CSV; their evidence remains only in the audit archive. The minimal
   verifier's `--website` option checks the retained historical file, not the
-  additional complete-page assets.
+  additional complete-page assets. The new `dive-leaderboard-complete` command
+  verifies both dated evidence bundles and generates all six complete-page
+  assets offline, including the 59-record CSV. See its
+  [source contract](COMPLETE_LEADERBOARD.md).
 - The audited commit's `leaderboard.md` equals the frozen Markdown byte for
   byte. The original workspace's uncommitted 2026-08-23 `leaderboard.md`
   differs: it omits all Open MOS values and all three verified GRT LPM rows,
@@ -107,10 +111,10 @@ and Token-F1 are also worse. Their wrappers and input policies differ, so this
 is not a matched GRT ablation and does not establish a causal loss or gain.
 An aligned new run is required before claiming a high-motion GRT improvement.
 The old numeric archive remains unchanged for provenance, but this row must
-not participate in a protocol-aligned ranking. Six newer InternVL rows use
+not appear in the current protocol-screened leaderboard. Six newer InternVL rows use
 midpoint rather than endpoint sampling, and two historical Gemini rows score
 full trajectories despite sparse input frames; they also require separate,
-explicitly unranked historical presentation.
+archival documentation and are excluded from current leaderboard tables and CSV.
 
 ## Publication and reproduction limitations
 
@@ -151,8 +155,8 @@ Submission is not upstream acceptance or a completed GPU reproduction.
 Before describing the combined paper/code/data release as complete, align
 the paper version and two task names, make the chosen benchmark data
 revision accessible, and finish the new full GPU/judge reproduction.
-The website update links the published code and separates incompatible
-historical rows; the owner has configured both named Hub subtasks in a private
+The website update links the published code and excludes incompatible
+historical rows from leaderboard tables and CSV; the owner has configured both named Hub subtasks in a private
 combined entry while preserving source access controls. Neither update proves
 public data access. The current arXiv version and local ECCV
 paper differ in scope according to the separate paper audit. Framework

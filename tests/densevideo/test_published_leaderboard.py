@@ -18,6 +18,7 @@ def test_numerical_audit_and_exact_markdown():
 
 
 @pytest.mark.parametrize("filename", ["leaderboard.js", "leaderboard.csv", "provenance.json",
+                                     "source_inventory.json",
                                      "route31_numeric.csv", "qwen3_numeric.csv", "qwen7_numeric.csv",
                                      "sample_identities.csv", "highmotion_numeric.csv", "leaderboard.md"])
 def test_tampered_artifact_rejected(tmp_path, filename):
@@ -43,6 +44,14 @@ def test_export_no_overwrite(tmp_path, capsys):
 def test_verify_only_does_not_write(tmp_path):
     main(["--bundle", str(BUNDLE), "--verify-only"])
     assert not list(tmp_path.iterdir())
+
+
+def test_default_bundle_is_independent_of_working_directory(tmp_path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    main(["--verify-only"])
+    report = json.loads(capsys.readouterr().out)
+    assert report["status"] == "verified"
+    assert report["verification_contract"] == 1
 
 
 def test_conflicting_options_rejected(tmp_path):
