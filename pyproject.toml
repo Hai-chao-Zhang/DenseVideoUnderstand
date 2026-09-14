@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dive-bench"
+version = "0.1.0"
+description = "DIVE-Bench evaluation, Gated Residual Tokenization, and reproducible leaderboards"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT AND Apache-2.0"
+license-files = ["LICENSE", "LICENSE-APACHE"]
+authors = [{name = "DIVE-Bench authors"}]
+dependencies = [
+  "accelerate>=1.2,<2", "av>=15,<16", "datasets>=4.5,<5",
+  "dill>=0.3.8,<0.5", "evaluate>=0.4,<0.5", "huggingface-hub>=0.34,<1", "hf-transfer>=0.1",
+  "jinja2>=3", "loguru>=0.7", "numpy>=2,<3", "openai>=1,<2",
+  "packaging>=23", "pandas>=2", "pillow>=10", "pytablewriter>=1",
+  "pytz", "pyyaml>=6", "qwen-vl-utils==0.0.14", "requests>=2.31",
+  "sacrebleu>=2", "sqlitedict>=2", "tenacity>=8", "torch>=2.9,<2.10",
+  "torchvision>=0.24,<0.25", "tqdm>=4.66", "transformers==4.57.6"
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<9", "pytest-subtests", "ruff>=0.12", "build"]
+logging = ["wandb>=0.16"]
+legacy-decord = ["decord==0.6.0"]
+
+[project.scripts]
+lmms-eval = "lmms_eval.__main__:cli_evaluate"
+dive-reproduce = "tools.densevideo.reproduce_grt:main"
+dive-leaderboard = "tools.densevideo.rebuild_published_leaderboard:main"
+
+[tool.setuptools.packages.find]
+include = ["lmms_eval*", "densevideo_qwen_dual_plugin*", "tools.densevideo*"]
+
+[tool.setuptools.package-data]
+lmms_eval = ["tasks/densevideo/*.yaml", "tasks/densevideo/*_yaml"]
+"tools.densevideo" = ["profiles.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/densevideo"]
+
+[tool.ruff]
+line-length = 100
+
+[project.urls]
+Homepage = "https://www.zhanghaichao.xyz/DenseVideoUnderstand/"
+Repository = "https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/release/dive-bench-minimal"

@@ -1,0 +1,349 @@
+{
+  "schema_version": 1,
+  "release_date": "2026-08-20",
+  "audit_date": "2026-09-13",
+  "code_commit": "78284318c9c8664df5fc6785410a0a9c4e494436",
+  "website": "https://www.zhanghaichao.xyz/DenseVideoUnderstand/",
+  "website_data": "https://www.zhanghaichao.xyz/DenseVideoUnderstand/data/leaderboard.js?v=1f1b5a79c74ff763",
+  "website_data_sha256": "c88492ec535a3bc4f47fe9e91f66bc050a857f757cd2c478db598e889d9dc1b1",
+  "frozen_manifest_sha256": "f2b1a4e063d08bea3b2c494878b67cbc8bb1ec09b4faafb333b4f0a5c38369b7",
+  "original_leaderboard_csv_sha256": "bff15f3cc365cdbab6f373144a3332c8b7ad59b489836e64669bfeca89e76525",
+  "original_csv_columns_omitted": [
+    "alias",
+    "cer_stderr",
+    "effective_max_new_tokens_counts",
+    "exact_match_stderr",
+    "forced_refresh_frame_indices",
+    "frame_type_source",
+    "frozen_cache_hit",
+    "frozen_cache_hit_counts",
+    "frozen_cache_manifest_sha256",
+    "gate_metric",
+    "gate_policy",
+    "gate_policy_counts",
+    "gate_projection_mode",
+    "gate_projection_mode_counts",
+    "gpt_eval_accuracy",
+    "gpt_eval_accuracy_stderr",
+    "gpt_eval_score",
+    "gpt_eval_score_stderr",
+    "grid_acc_stderr",
+    "grid_ade_stderr",
+    "grid_fde_stderr",
+    "grid_transition_acc_stderr",
+    "input_fps",
+    "main_score",
+    "mean_capped_video_frames",
+    "mean_codec_b_frames",
+    "mean_codec_k_frames",
+    "mean_codec_p_frames",
+    "mean_codec_unknown_frames",
+    "mean_effective_max_new_tokens",
+    "mean_forced_refresh_frames",
+    "mean_forced_refresh_patches",
+    "mean_gate_keep_ratio",
+    "mean_gate_refresh_interval_frames",
+    "mean_merge_ratio",
+    "mean_orig_patches",
+    "mean_patch_projection_compute_ratio_vs_reference",
+    "mean_patch_projection_recompute_ratio",
+    "mean_post_tokens",
+    "mean_post_tokens_after_prune",
+    "mean_post_tokens_before_prune",
+    "mean_pre_tokens",
+    "mean_prune_keep_ratio_actual",
+    "mean_recomputed_patches",
+    "mean_reference_frames",
+    "mean_reference_orig_patches",
+    "mean_requested_frames",
+    "mean_retention_ratio",
+    "mean_scene_merge_after_tokens",
+    "mean_scene_merge_before_tokens",
+    "mean_scene_merge_keep_ratio_actual",
+    "mean_tokenization_time_s",
+    "mean_total_video_frames",
+    "mean_wall_time_s",
+    "prompt_router",
+    "prune_apply_mode",
+    "prune_mode",
+    "pruning_enabled",
+    "question_route",
+    "question_route_counts",
+    "result_json",
+    "return_code",
+    "run_log",
+    "run_name",
+    "run_status",
+    "run_wall_time_s",
+    "scene_merge_applied",
+    "token_f1_stderr",
+    "total_forced_refresh_frames",
+    "total_forced_refresh_patches",
+    "total_orig_patches",
+    "total_recomputed_patches",
+    "total_reference_orig_patches",
+    "video_decode_backend",
+    "video_decode_backend_counts",
+    "wer_stderr"
+  ],
+  "snapshot_rows": {
+    "lpm": 29,
+    "highmotion": 3
+  },
+  "judge": {
+    "fingerprint": "64c644b2bd2696677afd3507a6bd6efa03e902d712c0e55e26ab9ab144c0a76d",
+    "model": "Qwen/Qwen3-VL-32B-Instruct",
+    "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb"
+  },
+  "identity": {
+    "file": "sample_identities.csv",
+    "sha256": "27ea477ec792f645fabffec4b813ae2946c4e4cc48049ae15961cbb3de7b7ec7",
+    "definition": "SHA256 of UTF-8 JSON [doc_id, question_id, video_name, type], ensure_ascii=False, separators=(comma,colon)"
+  },
+  "families": [
+    {
+      "family": "route31",
+      "selected_method": "grt_llava_onevision_0_5b_hf_route31_t0001",
+      "base_method": "llava_onevision_0_5b",
+      "campaign_fingerprint": "c86cc6e874f85e9c20bfc164be9b9ff34054c7b156e0332b2efef323ded1810f",
+      "revisions": {
+        "dataset": "5cc61a045c8e5e95d1d9c87e22ccd0f699575aea",
+        "judge": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+        "model": "74dd0bf867a4cda7950c17663794267c60cf4b40"
+      },
+      "numeric_file": "route31_numeric.csv",
+      "numeric_sha256": "66bd29bed121b2086ec72d4899d90d7dd1374dd564cae0abfbdd2f058615317e",
+      "source_sha256": {
+        "open_mos_matrix": "2723132b021f0aac575341d16e1b76183f964ac50199be962a469c51854df973",
+        "selection": "c4b951d36b023eb9f69d058b12dbe523429dabea00894a357006877359370c84",
+        "summary_csv": "5dc44d85018cd8728e820d2376a568719588e6f149b2c519a9ae244a60b840fd"
+      },
+      "methods": [
+        {
+          "method_index": 0,
+          "method": "llava_onevision_0_5b",
+          "role": "archived_public",
+          "samples": 634,
+          "open_mos": 0.1167192429022082,
+          "token_f1": 0.014087875254888587,
+          "raw_sample_sha256": "675cce78ab46c01aa739d07cf4403dfa028e9a0d190af7b914bbc3d67f27f293"
+        },
+        {
+          "method_index": 1,
+          "method": "llava_onevision_0_5b_hf_route31_base",
+          "role": "matched_control",
+          "samples": 634,
+          "open_mos": 0.1167192429022082,
+          "token_f1": 0.01398149132599728,
+          "raw_sample_sha256": "971dc00f301dee8eef0f95e3d20cb5a93b1baf78a1eb4d2b6da3fb3af506f854"
+        },
+        {
+          "method_index": 2,
+          "method": "llava_onevision_0_5b_hf_route31_exact",
+          "role": "matched_control",
+          "samples": 634,
+          "open_mos": 0.1167192429022082,
+          "token_f1": 0.01398149132599728,
+          "raw_sample_sha256": "971dc00f301dee8eef0f95e3d20cb5a93b1baf78a1eb4d2b6da3fb3af506f854"
+        },
+        {
+          "method_index": 3,
+          "method": "grt_llava_onevision_0_5b_hf_route31_t0001",
+          "role": "candidate",
+          "samples": 634,
+          "open_mos": 0.11987381703470032,
+          "token_f1": 0.014196368250678385,
+          "raw_sample_sha256": "32f620409b2735ec67ae73562117e9c2d0bdf875974b510771a3389962b90b01"
+        }
+      ],
+      "candidate_telemetry": {
+        "mean_recompute_ratio": 0.8671541327517492,
+        "reference_patch_compute_ratio": 0.8671541327517492,
+        "mean_effective_fps": 0.007479167192429018,
+        "mean_throughput_fps": 4.865135906940061,
+        "total_recomputed_patches": 3206292,
+        "total_orig_patches": 3697488,
+        "total_reference_orig_patches": 3697488
+      }
+    },
+    {
+      "family": "qwen3",
+      "selected_method": "grt_qwen2_5_vl_3b_t03",
+      "base_method": "qwen2_5_vl_3b",
+      "campaign_fingerprint": "df5cd135fde84311ed1e16262f1f9721b78c7b751290327f42bdd16e1d1d4ee2",
+      "revisions": {
+        "dataset": "5cc61a045c8e5e95d1d9c87e22ccd0f699575aea",
+        "judge": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+        "model": "66285546d2b821cf421d4f5eb2576359d3770cd3"
+      },
+      "numeric_file": "qwen3_numeric.csv",
+      "numeric_sha256": "bc6ad49b51e02cbc5640998cea11587e60cc571d181388fc5fa822031a5c6be8",
+      "source_sha256": {
+        "completion": "b83b02857d8dd4fd0deb2b203022c1d8493006c94a467be9857790c25c777df4",
+        "open_mos_matrix": "3ab01cab27053eacbf03a1779c750683084174f486acfb3815df328c8f034ba2",
+        "selection": "b36b12e8010ef366dfcc901b237d0a016f8141c4803a9de1aed98f319b2f7aa6",
+        "summary_csv": "baaa9acac9eaa4257995ccfc02ddef95512248473086e5b84c1dd165c0caf20f"
+      },
+      "methods": [
+        {
+          "method_index": 0,
+          "method": "qwen2_5_vl_3b",
+          "role": "archived_public",
+          "samples": 634,
+          "open_mos": 1.135646687697161,
+          "token_f1": 0.03433883131964181,
+          "raw_sample_sha256": "2d79feadfe854a6fb78f27f1e53cba73eb10f5d5494332a2df634f6ba9939a2a"
+        },
+        {
+          "method_index": 1,
+          "method": "qwen2_5_vl_3b_grt_all",
+          "role": "matched_control",
+          "samples": 634,
+          "open_mos": 1.5583596214511042,
+          "token_f1": 0.09913584373152082,
+          "raw_sample_sha256": "e20a88913dc6490bef5b94b59dcb7e33ab201abab76f9c6435d1c07afba7ece2"
+        },
+        {
+          "method_index": 2,
+          "method": "qwen2_5_vl_3b_quality_base",
+          "role": "matched_control",
+          "samples": 634,
+          "open_mos": 1.553627760252366,
+          "token_f1": 0.09889159179657736,
+          "raw_sample_sha256": "55847d30679c2a34fea654edd259b25c5d54ba2682817be7970e0e7246e279a2"
+        },
+        {
+          "method_index": 3,
+          "method": "grt_qwen2_5_vl_3b_t03",
+          "role": "candidate",
+          "samples": 634,
+          "open_mos": 1.5899053627760253,
+          "token_f1": 0.09958369460437803,
+          "raw_sample_sha256": "fe8b77d5d0cb8b2e1eeded166c3bd847b85fa911a91b54d75b789e4d99282c67"
+        }
+      ],
+      "candidate_telemetry": {
+        "mean_recompute_ratio": 0.8856587587716475,
+        "reference_patch_compute_ratio": 0.8856587587716475,
+        "mean_effective_fps": 0.007479167192429018,
+        "mean_throughput_fps": 1.6726384037854896,
+        "total_recomputed_patches": 1760888,
+        "total_orig_patches": 1988224,
+        "total_reference_orig_patches": 1988224
+      }
+    },
+    {
+      "family": "qwen7",
+      "selected_method": "grt_qwen2_5_vl_7b_dual_floor_s080_o055_cap48",
+      "base_method": "qwen2_5_vl_7b",
+      "campaign_fingerprint": "5c391e7b789070c0000ecca43ab4fd626fb4984d28d2a35753009bf1aef0f04f",
+      "revisions": {
+        "dataset": "5cc61a045c8e5e95d1d9c87e22ccd0f699575aea",
+        "judge": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+        "model": "cc594898137f460bfe9f0759e9844b3ce807cfb5"
+      },
+      "numeric_file": "qwen7_numeric.csv",
+      "numeric_sha256": "6f30130ec348f706d1384e7e6f4aff517eae0cbf61a934023064f729fd4d3a9b",
+      "source_sha256": {
+        "completion": "8aa6cfde24e40400843774cb14fda75d3e59fd38e18cf243ce97a6c137c09ba0",
+        "open_mos_matrix": "ad684c33c18541e2939a6991e1ee7bb7b3b89ede2a6985295cd92b003f6eb27b",
+        "selection": "0f7b66aed8318c784128f93fddc721da05f3b2cbab5a4df15a1ec6eb57c4ab16",
+        "summary_csv": "270ff289c1c1eecf37d9b7132cf258c8a9677197a08f1e137c0d24c75de66cec"
+      },
+      "methods": [
+        {
+          "method_index": 0,
+          "method": "qwen2_5_vl_7b",
+          "role": "archived_public",
+          "samples": 634,
+          "open_mos": 1.2839116719242902,
+          "token_f1": 0.03478459844603571,
+          "raw_sample_sha256": "ff30e4b5ad1f2bfbb30a30c868ce0b02da1620f25894e8775c9942aae1fd5ccc"
+        },
+        {
+          "method_index": 1,
+          "method": "qwen2_5_vl_7b_floor_grt_all",
+          "role": "matched_control",
+          "samples": 634,
+          "open_mos": 1.5757097791798107,
+          "token_f1": 0.04877739573780698,
+          "raw_sample_sha256": "82ecadc100d8f93ae220f78e5300b081bd2a5dbd53908c0b68b08a3c97cf02e4"
+        },
+        {
+          "method_index": 2,
+          "method": "qwen2_5_vl_7b_floor_quality_base",
+          "role": "matched_control",
+          "samples": 634,
+          "open_mos": 1.5757097791798107,
+          "token_f1": 0.04877739573780698,
+          "raw_sample_sha256": "82ecadc100d8f93ae220f78e5300b081bd2a5dbd53908c0b68b08a3c97cf02e4"
+        },
+        {
+          "method_index": 3,
+          "method": "grt_qwen2_5_vl_7b_dual_floor_s080_o055_cap48",
+          "role": "candidate",
+          "samples": 634,
+          "open_mos": 1.5914826498422714,
+          "token_f1": 0.048908690353566486,
+          "raw_sample_sha256": "f97e9a6d96d4518831004b1917b1b21ad281f3379130524945e25b9d1b2943f4"
+        }
+      ],
+      "candidate_telemetry": {
+        "mean_recompute_ratio": 0.8477193716603361,
+        "reference_patch_compute_ratio": 0.8477193716603361,
+        "mean_effective_fps": 0.007479167192429035,
+        "mean_throughput_fps": 2.4804290173501595,
+        "total_recomputed_patches": 1685456,
+        "total_orig_patches": 1988224,
+        "total_reference_orig_patches": 1988224
+      }
+    }
+  ],
+  "not_promoted": [
+    "llava7"
+  ],
+  "highmotion": {
+    "method": "grt_llava_ov_0_5b",
+    "source_result_sha256": "1b980db0fc97dd1ebd4791319d52af3e2f89775567db8edaba920b53cd040808",
+    "source_git_hash": "62b10af",
+    "model": "llava_ov_dense_video",
+    "model_args": "pretrained=lmms-lab/llava-onevision-qwen2-0.5b-ov,conv_template=qwen_1_5,model_name=llava_qwen,video_decode_backend=decord,max_frames_num=8,dense_frame_fps=1,clip_duration_sec=10,profiling=True,use_gated_tok=True,use_vision_merge=True,frame_sampling_strategy=uniform,gate_policy=motion,gate_metric=ssim,gate_diff_threshold=0.05,enable_visual_token_pruning=False,prune_mode=off,scene_merge_apply=True,scene_merge_keep_ratio=0.5,scene_merge_require_semantic_match=True,merge_jsd_threshold=0.02,scene_merge_min_tokens_per_frame=16",
+    "generation_kwargs": {
+      "max_new_tokens": 64,
+      "temperature": 0
+    },
+    "samples": 1000,
+    "results": {
+      "alias": "densevideo_highmotion",
+      "grid_acc,none": 0.10125,
+      "grid_acc_stderr,none": "N/A",
+      "grid_ade,none": 0.712142440040729,
+      "grid_ade_stderr,none": "N/A",
+      "grid_fde,none": 0.6864884792587348,
+      "grid_fde_stderr,none": "N/A",
+      "grid_transition_acc,none": 0.014857142857142855,
+      "grid_transition_acc_stderr,none": "N/A",
+      "token_f1,none": 0.18128055327025913,
+      "token_f1_stderr,none": "N/A"
+    },
+    "reproduction_status": "The current task prompt, target, and five metrics reproduce every saved sample (1,000/1,000). No fresh model inference was run; the general leaderboard model configuration differs from the saved run.",
+    "numeric_file": "highmotion_numeric.csv",
+    "numeric_sha256": "d9365e5893cc59906b009718d85678d25c51f3eca7f16d8ffe03c72902f07d43",
+    "raw_sample_sha256": "fa525bb49ef70e42a8cfdf08a5edf5e8d5418634c81d4532b6a7064a0199f462",
+    "current_task_function_checks": {
+      "samples": 1000,
+      "prompt_matches": 1000,
+      "target_matches": 1000,
+      "all_five_metric_matches": 1000,
+      "metric_absolute_tolerance": 1e-15
+    }
+  },
+  "limitations": [
+    "No GPU inference or judge rerun was performed in this audit.",
+    "Numeric artifacts recompute historical MOS and Token-F1 aggregates; they cannot re-judge answers because answers and predictions are deliberately omitted.",
+    "Original full-manifest validation currently fails: a legacy LLaVA7 archived result is absent; Qwen3 and Qwen7 shared public summary.csv no longer matches its frozen checksum.",
+    "These missing or changed upstream provenance files do not alter the independently verified frozen per-sample MOS matrices and sample logs exported here.",
+    "Website MOS is rounded to six significant digits; other candidate numeric fields equal their frozen summary values exactly.",
+    "The minimal release can rebuild this website snapshot offline; new model runs require dataset access, model weights, and the documented environment."
+  ]
+}

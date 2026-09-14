@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "code_commit": "78284318c9c8664df5fc6785410a0a9c4e494436",
+  "audit_date": "2026-09-13",
+  "scope": "Reference hashes for inference and task implementations. Registration and packaging edits are intentionally outside this inventory. HighMotion wrapper hash records current source only; no historical run source snapshot is available.",
+  "files": [
+    {
+      "path": "lmms_eval/models/llava_hf.py",
+      "sha256": "9af5254de2ac9cc0bb7562712457534a3c4f1f7f4b78f6c459d6544996c46be4"
+    },
+    {
+      "path": "lmms_eval/models/qwen2_5_vl.py",
+      "sha256": "e3aa4556e79b6201c1cedcfc96dfc3fba95658758fdda4010d9bb23e8fc097ee"
+    },
+    {
+      "path": "lmms_eval/models/llava_ov_dense_video.py",
+      "sha256": "6fd60cad1d3f74b2c569c065046c48ed72a816c4141f8092d2c602478884eee5"
+    },
+    {
+      "path": "lmms_eval/models/model_utils/load_video.py",
+      "sha256": "8061fd31dad2392f632c6b95e0b50e01de2aac80f3d2ffa1d51c7444d0ec3099"
+    },
+    {
+      "path": "lmms_eval/models/model_utils/frozen_video_cache.py",
+      "sha256": "9df0f030a28d9bfbf907c7a8ccd80d5c7c1a7f4667927796787c63b2a7b66e34"
+    },
+    {
+      "path": "densevideo_qwen_dual_plugin/__init__.py",
+      "sha256": "5889f7163a80312bb7fea883beef34075af20b00badf7cdfa7435e396875c2fe"
+    },
+    {
+      "path": "densevideo_qwen_dual_plugin/models/__init__.py",
+      "sha256": "e17921e6a4d0ae9924f03fd6b8b44946415de6155ef942c889d893057867455d"
+    },
+    {
+      "path": "densevideo_qwen_dual_plugin/models/qwen2_5_vl_dual_route.py",
+      "sha256": "33a5d3e7294e2851458130080b8c2d03e8dcc5087b96dec28f5fb5de49de75bb"
+    },
+    {
+      "path": "densevideo_qwen_dual_plugin/models/qwen2_5_vl_dual_route_floor.py",
+      "sha256": "6d20f75178f989192b5f0725af2ad730c4b0565b9f5046983c49fb8a3c09cfa1"
+    },
+    {
+      "path": "densevideo_qwen_dual_plugin/tasks/__init__.py",
+      "sha256": "77a54219d17fdcb4f99a4ea0f2f10d946994ae2f6b7d02a5190d0765fb124ad8"
+    },
+    {
+      "path": "lmms_eval/tasks/densevideo/utils.py",
+      "sha256": "7cac6ded309aee1278ac06945d5f0105c37258898960a8cad8dee8cfc50c5b92"
+    },
+    {
+      "path": "lmms_eval/tasks/densevideo/_default_template_yaml",
+      "sha256": "3f03dcfe537be3bf30d16a00344880dbe2a297ce309946b099300589bc27a54c"
+    },
+    {
+      "path": "lmms_eval/tasks/densevideo/_highmotion_template_yaml",
+      "sha256": "8795bc2f3e1fce2477b1e4f73e5169fff9d7e91f14e172bdddbab093067157fc"
+    },
+    {
+      "path": "lmms_eval/tasks/densevideo/lpm_generation.yaml",
+      "sha256": "788d14b009db258e86c266d98b025166390e4da2ca014bf7cb75ff27c53313e0"
+    },
+    {
+      "path": "lmms_eval/tasks/densevideo/highmotion_generation.yaml",
+      "sha256": "20453d2f4ce0bc06d868113d70bd769fb5c8c2c6f74ca316dbf1d46157c934c0"
+    }
+  ]
+}
