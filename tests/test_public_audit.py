@@ -100,10 +100,11 @@ class PublicAuditTests(unittest.TestCase):
                 rendered = _render_ui(self.frozen, poisoned, "highmotion")
                 self.assertIn("Showing 0 of 0 methods", rendered["tableCount"])
 
-    def test_builder_fails_closed_on_missing_incomplete_or_noneligible_audit(self):
+    def test_builder_has_no_second_numeric_truth_and_checks_generated_audit(self):
         spec = importlib.util.spec_from_file_location("audit_builder", ROOT / "scripts/build_audit_page.py")
         builder = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(builder)
+        expected = builder.build_outputs()
         original_read = Path.read_text
         cases = []
         for key, value in (("rank_eligible", False), ("protocol_status", "historical_unaligned"), ("samples", 3243), ("ordered_identity_sha256", "0" * 64)):
@@ -125,8 +126,12 @@ class PublicAuditTests(unittest.TestCase):
                     if path == ROOT / "data/public-audit.json":
                         return json.dumps(changed)
                     return original_read(path, *args, **kwargs)
-                with patch.object(Path, "read_text", substituted_read), self.assertRaises((ValueError, KeyError)):
-                    builder.build_outputs()
+                with patch.object(Path, "read_text", substituted_read):
+                    # Browser JSON is generated output, never a numeric input.
+                    self.assertEqual(builder.build_outputs(), expected)
+                    with self.assertRaises(SystemExit) as error:
+                        builder.main(["--check"])
+                    self.assertEqual(error.exception.code, 1)
 
     def test_protocol_notes_and_comparison_labels_escape_markup(self):
         injected = deepcopy(self.browser)
@@ -181,6 +186,21 @@ class PublicAuditTests(unittest.TestCase):
         self.assertIn("educational source videos", index)
         self.assertIn("not an audio-input protocol", index)
         self.assertNotIn("Read, listen", index)
+
+    def test_complete_reproduction_uses_new_code_pin_but_keeps_manuscript_pin(self):
+        index = (ROOT / "index.html").read_text()
+        app = (ROOT / "app.js").read_text()
+        code_pin = "a52c0360de0df175a476e815f4aaa27886131b23"
+        paper_pin = "2a79fcce2707b1eb74648a5ed135c469b17eb4e1"
+        for source in (index, app):
+            self.assertIn("git checkout " + code_pin, source)
+            self.assertIn("build_complete_leaderboard --verify-only", source)
+            self.assertIn("build_complete_leaderboard --output outputs/leaderboard-complete", source)
+            self.assertIn("47 screened results + 12 comparison rows", source)
+        self.assertIn("blob/" + paper_pin + "/paper/ECCV_Dense_Video_Understanding.pdf", index)
+        self.assertEqual(index.count(paper_pin), 1)
+        self.assertNotIn(paper_pin, app)
+        self.assertIn("47 results plus 12 educational GRT comparison rows", index)
 
     def test_external_archive_defaults_do_not_contain_private_machine_paths(self):
         for filename, variable in (

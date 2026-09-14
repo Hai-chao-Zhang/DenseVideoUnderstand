@@ -32,14 +32,28 @@ archived baselines, quality baselines and all-patch controls. Qwen 3B GRT improv
 Open MOS/Token F1 and patch reuse but has lower mean throughput than its all-patch
 control. The page does not claim every quality/efficiency metric improves.
 
-Rebuild and check the generated assets after editing audited numeric metadata:
+All six complete view/data assets come from the minimal branch's canonical
+`tools.densevideo.build_complete_leaderboard` generator. It verifies the pinned
+release manifests, independently recomputes all 12 educational quality means
+from 7,608 numeric records, and derives the 18 eligible rows from the single
+27-run High-Motion audit. Website JSON/CSV are outputs, not editable numeric
+sources. The JavaScript-free HTML includes its own CSS and can be viewed offline.
+
+With a current minimal checkout and Python/PyYAML, regenerate and check the site:
 
 ```bash
+export DIVE_MINIMAL_ROOT=/path/to/DIVE-Bench
 python scripts/build_audit_page.py
 python scripts/build_audit_page.py --check
 python -m unittest discover -s tests -v
 python -m pytest tests -q
 ```
+
+Alternatively pass `--minimal-root /path/to/DIVE-Bench` to the wrapper, or install
+the minimal package. No GPU, model download, dataset access or token is used.
+The canonical command `python -m tools.densevideo.build_complete_leaderboard
+--output /path/to/new-directory` creates a standalone offline view; an existing
+output directory is refused. Original release evidence remains unchanged.
 
 Four tests that inspect external, mutable Qwen3/LLaVA7 historical campaign trees are
 opt-in via `DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS=1`; all synthetic validator, UI and

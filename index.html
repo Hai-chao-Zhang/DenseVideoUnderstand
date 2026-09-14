@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Newsreader:opsz,wght@6..72,500;6..72,600&amp;display=swap" rel="stylesheet">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect rx='20' width='100' height='100' fill='%2312212f'/%3E%3Cpath d='M20 64V29h25c20 0 33 12 33 35S65 91 45 91H20V64zm18 11h7c10 0 15-3 15-13 0-12-6-17-16-17h-6v30z' fill='%23f4f1e8'/%3E%3Ccircle cx='78' cy='23' r='9' fill='%23df5d3b'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=20260914-screened">
+  <link rel="stylesheet" href="styles.css?v=20260914-complete">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -271,7 +271,7 @@
       <div class="section-kicker">04 / Reproduce</div>
       <div class="section-heading reveal">
         <h2 id="evaluate-title">Public code. Explicit reproduction limits.</h2>
-        <p>The minimal code and numerical evidence are public. Rebuild the historical leaderboard offline, or run the pinned three-arm educational GRT profiles with eight frames. Fresh inference and Open MOS require appropriate GPU resources and authorized data access; neither is implied by the numerical audit.</p>
+        <p>The minimal code and numerical evidence are public. Rebuild this complete protocol-screened view offline: 47 results plus 12 educational GRT comparison rows, with standalone HTML, CSV and source evidence. The original 32-row snapshot remains unchanged. Fresh inference of the pinned three-arm educational GRT profiles and Open MOS require appropriate GPU resources and authorized data access; neither is implied by the numerical audit.</p>
       </div>
 
       <div class="code-layout reveal">
@@ -285,9 +285,12 @@
           <pre tabindex="0"><code id="active-code">git clone --branch release/dive-bench-minimal --single-branch \
   https://github.com/Hai-chao-Zhang/DenseVideoUnderstand.git DIVE-Bench
 cd DIVE-Bench
-git checkout 2a79fcce2707b1eb74648a5ed135c469b17eb4e1
+git checkout a52c0360de0df175a476e815f4aaa27886131b23
 python -m pip install 'PyYAML&gt;=6'
-python -m tools.densevideo.rebuild_published_leaderboard --verify-only</code></pre>
+# 47 screened results + 12 comparison rows; no GPU or dataset needed.
+python -m tools.densevideo.build_complete_leaderboard --verify-only
+python -m tools.densevideo.build_complete_leaderboard --output outputs/leaderboard-complete
+# Open outputs/leaderboard-complete/leaderboard.html; output must be new.</code></pre>
         </div>
         <div class="reproduce-aside">
           <p class="mini-label">Protocol notes</p>
@@ -332,7 +335,7 @@ python -m tools.densevideo.rebuild_published_leaderboard --verify-only</code></p
   </footer>
 
   <script src="data/leaderboard.js?v=1f1b5a79c74ff763" defer></script>
-  <script src="data/public-audit.js?v=20260914-screened" defer></script>
-  <script src="app.js?v=20260914-screened" defer></script>
+  <script src="data/public-audit.js?v=20260914-complete" defer></script>
+  <script src="app.js?v=20260914-complete" defer></script>
 </body>
 </html>
