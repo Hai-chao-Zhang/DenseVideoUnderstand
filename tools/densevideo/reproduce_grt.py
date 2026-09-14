@@ -364,6 +364,78 @@ def evaluate_fresh_quality(plan, samples, telemetry, matrix, provenance):
     return report
 
 
+def initial_quality_status(with_mos):
+    if with_mos:
+        return {"status": "pending"}
+    return {"status": "not_evaluated", "reason": "Open MOS not requested"}
+
+
+def _write_validation_report(path, report):
+    path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+
+
+def _record_mos_exception(report, report_path, phase, error):
+    # Exception messages may contain private paths, prompts, or subprocess arguments.
+    report["quality"] = {
+        "status": "failed",
+        "phase": phase,
+        "error_class": type(error).__name__,
+    }
+    _write_validation_report(report_path, report)
+
+
+def run_requested_mos(plan, samples, telemetry, output, provenance, env, report, report_path):
+    try:
+        judge = profiles()["judge"]
+        command = [
+            sys.executable,
+            "-m",
+            "tools.densevideo.score_open_mos_matrix",
+            "--input-root",
+            str(output),
+            "--output-dir",
+            str(output / "mos"),
+            "--expected-samples",
+            str(plan["samples"]),
+            "--judge-model",
+            judge["model"],
+            "--judge-revision",
+            judge["revision"],
+            "--batch-size",
+            str(judge["batch_size"]),
+            "--dtype",
+            judge["dtype"],
+            "--max-new-tokens",
+            str(judge["max_new_tokens"]),
+            "--trim-char-limit",
+            str(judge["trim_char_limit"]),
+        ]
+        for entry in plan["commands"]:
+            command.extend(["--method", entry["method"]])
+        subprocess.run(command, check=True, env=env)
+    except Exception as error:
+        _record_mos_exception(report, report_path, "judge_execution", error)
+        raise
+    try:
+        quality = evaluate_fresh_quality(
+            plan, samples, telemetry, output / "mos/matrix.jsonl", provenance
+        )
+        require(
+            isinstance(quality, dict)
+            and quality.get("status") in {"smoke_only", "passed", "failed"}
+            and type(quality.get("historical_score_equality")) is bool,
+            "Fresh quality validation returned an invalid status",
+        )
+        historical_score_equality = quality["historical_score_equality"]
+    except Exception as error:
+        _record_mos_exception(report, report_path, "quality_validation", error)
+        raise
+    report["quality"] = quality
+    report["historical_score_equality"] = historical_score_equality
+    _write_validation_report(report_path, report)
+    return quality
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--profile", choices=tuple(profiles()["profiles"]), required=True)
@@ -459,44 +531,15 @@ def main(argv=None):
         "historical_score_equality": "not_checked",
         "integrity": validate_controls(plan, samples, logs),
         "telemetry": telemetry,
-        "quality": {"status": "not_evaluated", "reason": "Open MOS not requested"},
+        "quality": initial_quality_status(args.with_mos),
     }
     report_path = output / "reproduction_validation.json"
-    report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    _write_validation_report(report_path, report)
     if args.with_mos:
-        judge = profiles()["judge"]
-        command = [
-            sys.executable,
-            "-m",
-            "tools.densevideo.score_open_mos_matrix",
-            "--input-root",
-            str(output),
-            "--output-dir",
-            str(output / "mos"),
-            "--expected-samples",
-            str(plan["samples"]),
-            "--judge-model",
-            judge["model"],
-            "--judge-revision",
-            judge["revision"],
-            "--batch-size",
-            str(judge["batch_size"]),
-            "--dtype",
-            judge["dtype"],
-            "--max-new-tokens",
-            str(judge["max_new_tokens"]),
-            "--trim-char-limit",
-            str(judge["trim_char_limit"]),
-        ]
-        for entry in plan["commands"]:
-            command.extend(["--method", entry["method"]])
-        subprocess.run(command, check=True, env=env)
-        report["quality"] = evaluate_fresh_quality(
-            plan, samples, telemetry, output / "mos/matrix.jsonl", provenance
+        quality = run_requested_mos(
+            plan, samples, telemetry, output, provenance, env, report, report_path
         )
-        report["historical_score_equality"] = report["quality"]["historical_score_equality"]
-        report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-        if report["quality"]["status"] == "failed":
+        if quality["status"] == "failed":
             print(f"Fresh quality gate FAILED; inspect {report_path}", file=sys.stderr)
             return 1
     print(

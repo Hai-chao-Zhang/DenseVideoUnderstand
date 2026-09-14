@@ -19,6 +19,11 @@ That row is retained only in the historical evidence archive and is excluded
 from the current leaderboard and CSV; numeric reconstruction alone does not
 validate model inputs.
 
+On 2026-09-14, all three supported Educational profiles completed a
+[two-item, nine-arm GPU smoke check](docs/GPU_SMOKE_VALIDATION.md), including
+fresh Open MOS and matching consumed input tensors. Full 634-example inference
+and score equality remain unverified; smoke results are not leaderboard entries.
+
 | GRT profile | Open MOS (website) | Token F1 | Reference patch compute ratio |
 | --- | ---: | ---: | ---: |
 | LLaVA-OneVision 0.5B Route31 | 0.119874 | 0.0141963683 | 0.867154133 |
@@ -173,7 +178,8 @@ CUDA_VISIBLE_DEVICES=0 python -m tools.densevideo.reproduce_grt \
 ```
 
 Repeat with `--profile qwen3` or `--profile qwen7` and a fresh output directory.
-Use `--limit 1` for a smoke test; it is not published-score reproduction.
+Use `--limit 2` for a smoke test covering subtitle and OCR; it is not
+published-score reproduction.
 Model revisions, eight-frame sampling, thresholds, generation caps (128/128/48),
 and the judge revision are recorded in
 [`profiles.json`](tools/densevideo/profiles.json). Published MOS uses batch 8,
