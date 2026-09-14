@@ -190,7 +190,7 @@ class PublicAuditTests(unittest.TestCase):
     def test_complete_reproduction_uses_new_code_pin_but_keeps_manuscript_pin(self):
         index = (ROOT / "index.html").read_text()
         app = (ROOT / "app.js").read_text()
-        code_pin = "a52c0360de0df175a476e815f4aaa27886131b23"
+        code_pin = "e59a708043131271f42f7715cf11b322730554a1"
         paper_pin = "2a79fcce2707b1eb74648a5ed135c469b17eb4e1"
         for source in (index, app):
             self.assertIn("git checkout " + code_pin, source)

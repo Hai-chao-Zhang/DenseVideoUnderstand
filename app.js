@@ -109,7 +109,7 @@
         "git clone --branch release/dive-bench-minimal --single-branch \\",
         "  https://github.com/Hai-chao-Zhang/DenseVideoUnderstand.git DIVE-Bench",
         "cd DIVE-Bench",
-        "git checkout a52c0360de0df175a476e815f4aaa27886131b23",
+        "git checkout e59a708043131271f42f7715cf11b322730554a1",
         "python -m pip install 'PyYAML>=6'",
         "# 47 screened results + 12 comparison rows; no GPU or dataset needed.",
         "python -m tools.densevideo.build_complete_leaderboard --verify-only",
