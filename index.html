@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Newsreader:opsz,wght@6..72,500;6..72,600&amp;display=swap" rel="stylesheet">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect rx='20' width='100' height='100' fill='%2312212f'/%3E%3Cpath d='M20 64V29h25c20 0 33 12 33 35S65 91 45 91H20V64zm18 11h7c10 0 15-3 15-13 0-12-6-17-16-17h-6v30z' fill='%23f4f1e8'/%3E%3Ccircle cx='78' cy='23' r='9' fill='%23df5d3b'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=20260914-audit">
+  <link rel="stylesheet" href="styles.css?v=20260914-screened">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -189,7 +189,7 @@
       <div class="section-kicker">03 / Leaderboard</div>
       <div class="section-heading leaderboard-heading reveal">
         <div>
-          <h2 id="leaderboard-title">Public results, inspectable by metric.</h2>
+          <h2 id="leaderboard-title">Complete protocol-screened leaderboard.</h2>
           <p>Switch tracks, search models, filter sources, and sort any metric. A dash means that the current public artifact did not report that field. For the LPM default rank, methods without Open MOS are placed after all scored methods, then ordered by Token F1.</p>
         </div>
         <div class="snapshot">
@@ -200,7 +200,7 @@
 
       <div class="leader-summary" id="leader-summary" aria-live="polite"></div>
 
-      <p class="provenance-note"><strong>Complete results, audited 14 September 2026.</strong> <a href="leaderboard.html">Full HTML tables (no JavaScript)</a> · <a href="data/leaderboard-complete.csv" download>Download CSV</a> · <a href="data/public-audit.json">Comparison evidence</a>. Historical scores are not a fresh GPU rerun. Missing Open MOS values are not zero; no score is imputed.</p>
+      <p class="provenance-note"><strong>47 protocol-screened results: 29 Educational + 18 High-Motion, audited 14 September 2026.</strong> All 12 educational GRT comparison rows are also available. <a href="leaderboard.html">Full HTML tables (no JavaScript)</a> · <a href="data/leaderboard-complete.csv" download>Download CSV</a> · <a href="data/public-audit.json">Comparison evidence</a>. Historical scores are not a fresh GPU rerun. Missing Open MOS values are not zero; no score is imputed.</p>
 
       <section class="provenance-note" id="grt-family-qualification" aria-labelledby="grt-family-qualification-title" hidden>
         <h3 id="grt-family-qualification-title">Four-family GRT qualification</h3>
@@ -222,7 +222,6 @@
           <div class="track-tabs" role="group" aria-label="Leaderboard track">
             <button id="tab-lpm" class="track-tab is-active" type="button" aria-pressed="true" data-track="lpm">Educational / LPM <span>634</span></button>
             <button id="tab-highmotion" class="track-tab" type="button" aria-pressed="false" data-track="highmotion">High-Motion aligned preview <span>1,000</span></button>
-            <button id="tab-highmotion-historical" class="track-tab" type="button" aria-pressed="false" data-track="highmotion_historical">Historical / non-aligned</button>
           </div>
           <div class="leaderboard-filters">
             <label class="search-field">
@@ -254,7 +253,7 @@
         </div>
       </div>
       <noscript><p>The interactive table requires JavaScript. <a href="leaderboard.html">The complete leaderboard and all GRT controls are also available as plain HTML.</a></p></noscript>
-      <p class="provenance-note"><strong>High-Motion protocol audit.</strong> The legacy GRT run used only 2–8 input frames (213 of 1,000 requests used eight) and truncated 148 clips to ten seconds while the scorer targeted eight frames from the full clip. Its Grid Accuracy of 0.10125 is historical, not a comparable GRT improvement over the aligned LLaVA baseline (0.142875). InternVL midpoint sampling and Gemini full-trajectory targets are also listed separately, without a shared rank. <a href="leaderboard.html#highmotion-historical">Inspect all excluded protocols</a>.</p>
+      <p class="provenance-note"><strong>High-Motion protocol screening.</strong> Nine runs with non-aligned input or target protocols, including the legacy High-Motion GRT run, are excluded from every leaderboard table and the CSV. Their original evidence is retained only in the <a href="data/highmotion-audit.json">protocol audit</a>. Screening checks archived records and wrapper policies; it does not establish a fresh GPU replay or fully pinned model revisions.</p>
 
       <section class="metric-glossary" aria-labelledby="glossary-title">
         <div class="glossary-intro">
@@ -333,7 +332,7 @@ python -m tools.densevideo.rebuild_published_leaderboard --verify-only</code></p
   </footer>
 
   <script src="data/leaderboard.js?v=1f1b5a79c74ff763" defer></script>
-  <script src="data/public-audit.js?v=20260914-audit" defer></script>
-  <script src="app.js?v=20260914-audit" defer></script>
+  <script src="data/public-audit.js?v=20260914-screened" defer></script>
+  <script src="app.js?v=20260914-screened" defer></script>
 </body>
 </html>

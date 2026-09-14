@@ -13,12 +13,17 @@ Framework integrations are submitted Draft PRs:
 Historical README instructions below are retained as release-development history;
 use the minimal branch's current installation and reproduction instructions.
 
-`leaderboard.html` provides complete JavaScript-free tables. The interactive site
-uses the byte-identical 32-row `data/leaderboard.js` snapshot plus the separately
-audited `data/public-audit.json` overlay. This adds the later High-Motion archive
-without changing the original Educational scores or hiding incompatible protocols.
-High-Motion ranks include only the aligned-preview cohort; legacy GRT, midpoint
-InternVL and full-trajectory Gemini runs are explicitly unranked. "Aligned" refers
+`leaderboard.html` provides the complete protocol-screened leaderboard without
+JavaScript: 29 Educational + 18 High-Motion results, plus 12 educational GRT
+comparison rows (59 CSV records; the controls are not 12 additional methods).
+The interactive site uses the byte-identical 32-row `data/leaderboard.js` snapshot plus the separately
+audited `data/public-audit.json` overlay containing only 18 eligible High-Motion
+rows, without changing the original Educational scores. All nine non-aligned
+High-Motion runs (legacy GRT, midpoint InternVL and full-trajectory Gemini) are
+excluded from interactive tables, full HTML and CSV. Their scientific evidence
+remains in the complete 27-run `data/highmotion-audit.json`; the immutable original
+32-row snapshot is also retained as evidence, never a High-Motion fallback when
+the audit asset is unavailable. "Aligned" refers
 to the archived prompt, target, identity, metric and saved wrapper policy audit,
 not a fresh inference rerun or an immutable model revision for every baseline.
 

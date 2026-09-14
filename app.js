@@ -5,19 +5,15 @@
   var publicAudit = window.DIVE_PUBLIC_AUDIT;
   if (dataset) {
     dataset = JSON.parse(JSON.stringify(dataset));
-    if (publicAudit && Array.isArray(publicAudit.highmotion_additional) && publicAudit.highmotion_additional.length) {
-      dataset.tracks.highmotion = publicAudit.highmotion_additional.filter(function (row) { return row.protocol_status === "aligned_preview"; });
-      dataset.tracks.highmotion_historical = publicAudit.highmotion_additional.filter(function (row) { return row.protocol_status !== "aligned_preview"; });
-    } else {
-      // Fail closed if the protocol audit asset does not load: never promote
-      // the historical three-row snapshot into the aligned preview ranking.
-      dataset.tracks.highmotion_historical = dataset.tracks.highmotion.map(function (row) {
-        row.rank = null;
-        row.protocol_note = "Historical protocol; aligned-preview audit unavailable";
-        return row;
+    // Fail closed: the frozen three-row High-Motion archive is evidence only,
+    // never a fallback leaderboard when the screened audit asset is missing.
+    dataset.tracks.highmotion = [];
+    if (publicAudit && Array.isArray(publicAudit.highmotion_additional)) {
+      dataset.tracks.highmotion = publicAudit.highmotion_additional.filter(function (row) {
+        return row && row.protocol_status === "aligned_preview" && row.rank_eligible === true && row.samples === 1000;
       });
-      dataset.tracks.highmotion = [];
     }
+    delete dataset.tracks.highmotion_historical;
   }
   var table = document.getElementById("leaderboard-table");
   var tableHead = table ? table.querySelector("thead") : null;
@@ -84,7 +80,6 @@
       { key: "source", label: "Source", format: "source" }
     ]
   };
-  columns.highmotion_historical = columns.highmotion.filter(function (column) { return column.key !== "rank"; });
 
   var metricDefinitions = {
     lpm: [
@@ -106,11 +101,6 @@
       ["Sampling density (fps)", "Sampled frames divided by full source-video duration when profiling telemetry is available; not processing throughput."]
     ]
   };
-  metricDefinitions.highmotion_historical = [
-    ["Unranked historical values", "These metrics retain their original per-row input and target protocols and are not comparable to the aligned eight-position ranking."],
-    ["Grid metrics", "InternVL/GRT use an eight-position reference with mismatched input sampling; Gemini API rows use the full reference trajectory. Missing and malformed predictions retain their original scoring penalties."],
-    ["Token F1 ↑", "Open-model rows use canonical grid-label overlap. Gemini API rows use the historical literal-text overlap scorer instead; their zeros must not be interpreted as the same canonical grid-label metric."]
-  ];
 
   var codeSamples = {
     setup: {
@@ -311,8 +301,6 @@
         summaryCard("Top open model", null, "open_mos", "Open MOS", false, "open"),
         '<div class="summary-card"><span>Reported GRT telemetry (' + grtRows.length + ' verified profile' + (grtRows.length === 1 ? '' : 's') + ')</span><strong>' + (telemetryGrt ? formatNumber(telemetryGrt.recompute_ratio, "ratio") : "—") + ' lowest patch recompute</strong><small>' + (telemetryGrt ? escapeHtml(telemetryGrt.model) + ' · ' : '') + (telemetryGrt ? formatNumber(telemetryGrt.reference_recompute_ratio, "ratio") : "—") + ' reference compute · ' + (telemetryGrt ? formatNumber(telemetryGrt.effective_fps, "score") : "—") + ' sampling density · ' + (telemetryGrt ? formatNumber(telemetryGrt.throughput_fps, "score") : "—") + " throughput (fps)</small></div>"
       ].join("");
-    } else if (state.track === "highmotion_historical") {
-      summary.innerHTML = '<div class="summary-card"><span>Historical / non-aligned protocols</span><strong>Not ranked against the aligned preview</strong><small>These saved values are retained for transparency, not treated as matched comparisons. See the per-row protocol notes.</small></div>';
     } else {
       summary.innerHTML = [
         summaryCard("Grid Accuracy leader", null, "grid_acc", "Grid Acc", false),
@@ -373,7 +361,7 @@
 
   function renderGrtComparison() {
     var body = document.getElementById("grt-comparison-body");
-    if (!body || !publicAudit) return;
+    if (!body || !publicAudit || !Array.isArray(publicAudit.families)) return;
     body.innerHTML = publicAudit.families.map(function (family) {
       return family.methods.map(function (row) {
         var values = [row.open_mos, row.token_f1, row.patch_ratio, row.throughput_fps, row.mean_wall_time_s];
@@ -385,16 +373,17 @@
   }
 
   function selectTrack(track) {
+    if (track !== "lpm" && track !== "highmotion") return;
     state.track = track;
-    state.sortKey = track === "highmotion_historical" ? "model" : "rank";
+    state.sortKey = "rank";
     state.sortDirection = "asc";
     document.querySelectorAll(".track-tab").forEach(function (button) {
       var selected = button.getAttribute("data-track") === track;
       button.classList.toggle("is-active", selected);
       button.setAttribute("aria-pressed", String(selected));
     });
-    caption.textContent = track === "lpm" ? "DIVE-Bench Educational High-FPS Videos leaderboard" : track === "highmotion_historical" ? "High-Motion historical non-aligned results (unranked)" : "DIVE-Bench High-Motion High-FPS Videos: aligned 1,000-item preview";
-    rankingRule.textContent = track === "lpm" ? "Open MOS (reported first; missing last), then Token F1" : track === "highmotion_historical" ? "Unranked: incompatible frame or target protocol" : "Grid Accuracy, then Token F1";
+    caption.textContent = track === "lpm" ? "DIVE-Bench Educational High-FPS Videos leaderboard" : "DIVE-Bench High-Motion High-FPS Videos: aligned 1,000-item preview";
+    rankingRule.textContent = track === "lpm" ? "Open MOS (reported first; missing last), then Token F1" : "Grid Accuracy, then Token F1";
     renderSummary();
     renderGlossary();
     renderTable();
