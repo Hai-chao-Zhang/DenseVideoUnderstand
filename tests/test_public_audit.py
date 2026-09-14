@@ -181,15 +181,23 @@ class PublicAuditTests(unittest.TestCase):
         self.assertIn("leaderboard.html", index)
 
     def test_changed_result_links_are_cache_versioned(self):
-        version = "?v=20260914-target-hold"
+        index = (ROOT / "index.html").read_text()
         assets = ("leaderboard.html", "data/leaderboard-complete.csv", "data/public-audit.json")
-        for page in (self.html, (ROOT / "index.html").read_text()):
+        # The unchanged canonical bundle retains its source-bound cache key;
+        # the updated landing page and app use the new installation-pin key.
+        for page, version in (
+            (self.html, "?v=20260914-target-hold"),
+            (index, "?v=20260914-export-guard"),
+        ):
             links = re.findall(r'href="([^"]+)"', page)
             changed = [link for link in links if any(link.startswith(asset) for asset in assets)]
             self.assertTrue(changed)
             for link in changed:
                 self.assertIn(version, link)
                 self.assertLess(link.index(version), link.index("#") if "#" in link else len(link))
+        for asset in ("app.js", "styles.css", "data/public-audit.js"):
+            self.assertIn(asset + "?v=20260914-export-guard", index)
+        self.assertNotIn("20260914-target-hold", index)
 
     def test_paper_scope_dataset_access_and_visual_inputs_are_explicit(self):
         index = (ROOT / "index.html").read_text()
@@ -203,10 +211,11 @@ class PublicAuditTests(unittest.TestCase):
     def test_complete_reproduction_uses_new_code_pin_but_keeps_manuscript_pin(self):
         index = (ROOT / "index.html").read_text()
         app = (ROOT / "app.js").read_text()
-        code_pin = "b720d636624166638a185202fd47d3eb56e17b38"
+        code_pin = "9ee16af0d03d7f31e726b71f00e4586972afb062"
         paper_pin = "2a79fcce2707b1eb74648a5ed135c469b17eb4e1"
         for source in (index, app):
             self.assertIn("git checkout " + code_pin, source)
+            self.assertNotIn("b720d636624166638a185202fd47d3eb56e17b38", source)
             self.assertIn("build_complete_leaderboard --verify-only", source)
             self.assertIn("build_complete_leaderboard --output outputs/leaderboard-complete", source)
             self.assertIn("29 Educational results + 12 comparison rows", source)
@@ -214,6 +223,24 @@ class PublicAuditTests(unittest.TestCase):
         self.assertEqual(index.count(paper_pin), 1)
         self.assertNotIn(paper_pin, app)
         self.assertIn("29 Educational results plus 12 educational GRT comparison rows", index)
+
+    def test_qualification_and_comparison_headings_are_educational_on_both_tabs(self):
+        index = (ROOT / "index.html").read_text()
+        self.assertIn(
+            'id="grt-family-qualification-title">Four-family Educational GRT qualification',
+            index,
+        )
+        self.assertIn(
+            'id="grt-comparison-title">Educational GRT: does it beat the baselines?',
+            index,
+        )
+        for track in ("lpm", "highmotion"):
+            rendered = _render_ui(self.frozen, self.browser, track)
+            self.assertEqual(
+                rendered["qualification"]["count"], "3 of 4 Educational GRT families promoted"
+            )
+            self.assertEqual(rendered["comparisonHtml"].count("<tr>"), 12)
+            self.assertEqual(rendered["tableHtml"].count("<tr>"), 29 if track == "lpm" else 0)
 
     def test_external_archive_defaults_do_not_contain_private_machine_paths(self):
         for filename, variable in (

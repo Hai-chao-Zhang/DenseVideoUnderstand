@@ -251,7 +251,7 @@ class SiteContractTests(unittest.TestCase):
         )
         self.assertIn(
             'id="grt-family-qualification-list" '
-            'aria-label="GRT family qualification results"',
+            'aria-label="Educational GRT family qualification results"',
             self.html,
         )
         start = self.app.index("function renderGrtQualification()")
@@ -354,7 +354,7 @@ class SiteContractTests(unittest.TestCase):
         self.assertEqual(rendered["methodCount"], "2")
         self.assertEqual(rendered["tableCount"], "Showing 2 of 2 methods")
         self.assertFalse(rendered["qualification"]["hidden"])
-        self.assertEqual(rendered["qualification"]["count"], "2 of 4 GRT families promoted")
+        self.assertEqual(rendered["qualification"]["count"], "2 of 4 Educational GRT families promoted")
         self.assertEqual(
             [item["status"] for item in rendered["qualification"]["items"]],
             ["promoted", "not_promoted", "promoted", "not_promoted"],

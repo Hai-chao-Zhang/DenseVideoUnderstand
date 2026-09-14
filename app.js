@@ -104,7 +104,7 @@
         "git clone --branch release/dive-bench-minimal --single-branch \\",
         "  https://github.com/Hai-chao-Zhang/DenseVideoUnderstand.git DIVE-Bench",
         "cd DIVE-Bench",
-        "git checkout b720d636624166638a185202fd47d3eb56e17b38",
+        "git checkout 9ee16af0d03d7f31e726b71f00e4586972afb062",
         "python -m pip install 'PyYAML>=6'",
         "# 29 Educational results + 12 comparison rows; High-Motion results withheld.",
         "python -m tools.densevideo.build_complete_leaderboard --verify-only",
@@ -320,7 +320,7 @@
     }
 
     var promoted = families.filter(function (entry) { return entry.status === "promoted"; });
-    grtQualificationCount.textContent = promoted.length + " of " + families.length + " GRT families promoted";
+    grtQualificationCount.textContent = promoted.length + " of " + families.length + " Educational GRT families promoted";
 
     families.forEach(function (entry) {
       var item = document.createElement("li");
