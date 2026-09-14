@@ -248,6 +248,7 @@
   }
 
   function renderBody(rows) {
+    table.setAttribute("data-empty", rows.length ? "false" : "true");
     if (!rows.length) {
       var emptyMessage = state.track === "highmotion" ? "High-Motion results withheld pending target/reference consistency review." : "No models match this filter.";
       tableBody.innerHTML = '<tr class="table-empty"><td colspan="' + columns[state.track].length + '">' + emptyMessage + '</td></tr>';
@@ -432,6 +433,7 @@
 
   function installLeaderboard() {
     if (!dataset) {
+      if (table) table.setAttribute("data-empty", "true");
       if (tableBody) tableBody.innerHTML = '<tr class="table-empty"><td>Leaderboard data could not be loaded.</td></tr>';
       return;
     }

@@ -1299,6 +1299,22 @@ td {
   text-align: center !important;
 }
 
+/* Empty-state messages must fit the viewport, not the wide numeric columns. */
+#leaderboard-table[data-empty="true"] {
+  min-width: 0;
+  table-layout: fixed;
+}
+
+#leaderboard-table[data-empty="true"] thead {
+  display: none;
+}
+
+#leaderboard-table[data-empty="true"] .table-empty td {
+  width: auto;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .table-footer {
   display: flex;
   align-items: center;

@@ -196,7 +196,7 @@ class PublicAuditTests(unittest.TestCase):
                 self.assertIn(version, link)
                 self.assertLess(link.index(version), link.index("#") if "#" in link else len(link))
         for asset in ("app.js", "styles.css", "data/public-audit.js"):
-            self.assertIn(asset + "?v=20260914-export-guard", index)
+            self.assertIn(asset + "?v=20260914-empty-state", index)
         self.assertNotIn("20260914-target-hold", index)
 
     def test_paper_scope_dataset_access_and_visual_inputs_are_explicit(self):

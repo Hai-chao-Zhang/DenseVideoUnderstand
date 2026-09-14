@@ -39,7 +39,7 @@ process.stdout.write(JSON.stringify(context.window.DIVE_LEADERBOARD));
     return json.loads(result.stdout)
 
 
-def _render_ui(dataset, audit=None, track=None):
+def _render_ui(dataset, audit=None, track=None, return_to_educational=False):
     loader = r"""
 const fs = require("fs");
 const vm = require("vm");
@@ -108,6 +108,7 @@ const context = { window, document, navigator: {}, clearTimeout, setTimeout };
 const source = fs.readFileSync("app.js", "utf8").replace("  installLeaderboard();", "  window.selectTrackForTest = selectTrack;\n  installLeaderboard();");
 vm.runInNewContext(source, context);
 if (input.track) window.selectTrackForTest(input.track);
+if (input.returnToEducational) window.selectTrackForTest("lpm");
 
 function tagsBelow(node) {
   return node.children.reduce(
@@ -130,6 +131,7 @@ process.stdout.write(JSON.stringify({
     tags: tagsBelow(qualificationList)
   },
   tableCount: elements["table-count"].textContent,
+  tableEmpty: table.getAttribute("data-empty"),
   tableHtml: tableBody.innerHTML,
   tableHead: tableHead.innerHTML,
   comparisonHtml: elements["grt-comparison-body"].innerHTML,
@@ -141,7 +143,8 @@ process.stdout.write(JSON.stringify({
         cwd=ROOT,
         check=True,
         capture_output=True,
-        input=json.dumps({"dataset": dataset, "audit": audit, "track": track}),
+        input=json.dumps({"dataset": dataset, "audit": audit, "track": track,
+                          "returnToEducational": return_to_educational}),
         text=True,
     )
     return json.loads(result.stdout)
@@ -169,6 +172,33 @@ class SiteContractTests(unittest.TestCase):
         parser.feed(self.html)
         duplicates = sorted({value for value in parser.ids if parser.ids.count(value) > 1})
         self.assertEqual(duplicates, [])
+
+    def test_highmotion_empty_state_uses_responsive_table_layout(self):
+        rendered = _render_ui(self.data, track="highmotion")
+        self.assertEqual(rendered["tableEmpty"], "true")
+        self.assertIn("High-Motion results withheld", rendered["tableHtml"])
+        self.assertNotIn('<td class="rank-cell">', rendered["tableHtml"])
+        css = (ROOT / "styles.css").read_text(encoding="utf-8")
+        self.assertRegex(css, r'#leaderboard-table\[data-empty="true"\]\s*\{[^}]*min-width:\s*0;')
+        self.assertRegex(css, r'#leaderboard-table\[data-empty="true"\] thead\s*\{[^}]*display:\s*none;')
+
+    def test_returning_to_educational_restores_numeric_table_layout(self):
+        rendered = _render_ui(self.data, track="highmotion", return_to_educational=True)
+        self.assertEqual(rendered["tableEmpty"], "false")
+        self.assertIn('<td class="rank-cell">', rendered["tableHtml"])
+        self.assertEqual(rendered["tableCount"], "Showing 29 of 29 methods")
+
+    def test_empty_educational_state_also_fits_viewport(self):
+        empty = deepcopy(self.data)
+        empty["tracks"]["lpm"] = []
+        rendered = _render_ui(empty)
+        self.assertEqual(rendered["tableEmpty"], "true")
+        self.assertIn("No models match this filter.", rendered["tableHtml"])
+
+    def test_unavailable_data_uses_responsive_error_message(self):
+        rendered = _render_ui(None)
+        self.assertEqual(rendered["tableEmpty"], "true")
+        self.assertIn("Leaderboard data could not be loaded.", rendered["tableHtml"])
 
     def test_primary_grt_method_is_data_driven_and_present(self):
         method = self.data["primaryGrtMethod"]
