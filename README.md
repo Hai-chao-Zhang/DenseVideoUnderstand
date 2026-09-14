@@ -1,6 +1,24 @@
 # 🤿 **DENSE VIDEO UNDERSTANDING WITH GATED RESIDUAL TOKENIZATION**
 ### **Dense Information Video Evaluation (DIVE) Benchmark**
 
+## Audited minimal code release — September 2026
+
+The [minimal DIVE-Bench/GRT release](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/release/dive-bench-minimal)
+contains the two paper-named tasks, three pinned Educational GRT profiles,
+matched-control reproduction commands, and a numerically verified leaderboard bundle.
+Use that branch's installation instructions; the older instructions below are historical.
+
+The official snapshot rebuilds without datasets or GPUs. Fresh inference still
+requires authorized data access; High-Motion public download and full GPU/judge
+reproduction remain unverified. See the
+[publication audit](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/release/dive-bench-minimal/docs/PUBLICATION_AUDIT.md)
+and [dataset/manuscript limitations](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/release/dive-bench-minimal/docs/DATASET_RELEASE.md).
+
+```bash
+git clone --branch release/dive-bench-minimal --single-branch \
+  https://github.com/Hai-chao-Zhang/DenseVideoUnderstand.git DIVE-Bench
+```
+
 
 
 <p align="center">
