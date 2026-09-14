@@ -35,7 +35,7 @@
       <a href="#method">Method</a>
       <a href="#leaderboard">Leaderboard</a>
       <a href="#evaluate">Evaluate</a>
-      <a class="nav-paper" href="https://arxiv.org/abs/2509.14199">Paper <span aria-hidden="true">↗</span></a>
+      <a class="nav-paper" href="https://arxiv.org/abs/2509.14199" title="Earlier educational-scope arXiv version">Earlier arXiv <span aria-hidden="true">↗</span></a>
     </nav>
   </header>
 
@@ -46,10 +46,11 @@
         <h1 id="hero-title">Understand the frames<br><em>others skip.</em></h1>
         <p class="hero-lead">DIVE-Bench tests video-language models when evidence is not confined to a few keyframes—from long-form educational content to precise high-motion trajectories.</p>
         <div class="hero-actions" role="group" aria-label="Project resources">
-          <a class="button button-primary" href="https://arxiv.org/pdf/2509.14199">Read the paper <span aria-hidden="true">↗</span></a>
+          <a class="button button-primary" href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/2a79fcce2707b1eb74648a5ed135c469b17eb4e1/paper/ECCV_Dense_Video_Understanding.pdf">Revised manuscript <span aria-hidden="true">↗</span></a>
           <a class="button button-secondary" href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/release/dive-bench-minimal">Code &amp; evidence <span aria-hidden="true">↗</span></a>
-          <a class="button button-text" href="https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation">Get dataset <span aria-hidden="true">↗</span></a>
+          <a class="button button-text" href="https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation">Educational dataset (gated) <span aria-hidden="true">↗</span></a>
         </div>
+        <p class="hero-meta">The <a href="https://arxiv.org/abs/2509.14199">arXiv version covers the earlier educational scope</a>. The bundled revised manuscript includes both tasks; remaining manuscript/protocol differences are listed in the <a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/release/dive-bench-minimal/docs/PUBLICATION_AUDIT.md">publication audit</a>.</p>
         <p class="hero-meta">Haichao Zhang<sup>1</sup>, Wenhao Chai<sup>2</sup>, Shwai He<sup>3</sup>, Ang Li<sup>3</sup>, Yun Fu<sup>1</sup></p>
         <p class="affiliations"><sup>1</sup>Northeastern University &nbsp; <sup>2</sup>Princeton University &nbsp; <sup>3</sup>University of Maryland</p>
       </div>
@@ -90,7 +91,7 @@
 
     <section class="stat-band" aria-label="Benchmark at a glance">
       <div class="stat-band-inner">
-        <div class="stat"><strong>317</strong><span>long-form source videos</span></div>
+        <div class="stat"><strong>317</strong><span>educational source videos</span></div>
         <div class="stat"><strong>634</strong><span>educational QA items</span></div>
         <div class="stat"><strong>1,000</strong><span>high-motion preview items</span></div>
         <div class="stat"><strong id="lpm-method-count">—</strong><span>evaluated LPM methods</span></div>
@@ -109,8 +110,8 @@
           <div class="track-index">A</div>
           <div>
             <p class="track-label">Educational High-FPS Videos · LPM</p>
-            <h3>Read, listen, and reason across long-form video.</h3>
-            <p>Questions target visible text and spoken subtitles distributed across educational videos. The public split contains 634 evaluation items, with two prompts per source video.</p>
+            <h3>Read and reason across educational video.</h3>
+            <p>Questions target visible text and subtitles distributed across educational videos. The released, gated split contains 634 evaluation items, with two prompts per source video. This evaluation uses video frames, not an audio-input protocol.</p>
             <ul class="tag-list">
               <li>OCR</li><li>Subtitles</li><li>Long-form</li><li>Open-ended QA</li>
             </ul>
@@ -306,7 +307,7 @@ python -m tools.densevideo.rebuild_published_leaderboard --verify-only</code></p
         <div>
           <div class="section-kicker section-kicker-light">05 / Cite</div>
           <h2 id="citation-title">Build on DIVE-Bench.</h2>
-          <p>If the benchmark or GRT is useful in your research, please cite the project paper.</p>
+          <p>If the benchmark or GRT is useful in your research, please cite the project paper. The citation below identifies the earlier educational-scope arXiv version; the bundled revised manuscript covers both tasks.</p>
         </div>
         <div class="bibtex-card">
           <button class="copy-button copy-bibtex" type="button" data-copy-target="bibtex-code">Copy BibTeX</button>
@@ -326,7 +327,7 @@ python -m tools.densevideo.rebuild_published_leaderboard --verify-only</code></p
   <footer class="site-footer">
     <div class="section-shell footer-inner">
       <div><a class="brand footer-brand" href="#top"><span class="brand-mark" aria-hidden="true">D</span><span>DIVE–Bench</span></a><p>Dense evidence deserves dense understanding.</p></div>
-      <div class="footer-links"><a href="https://arxiv.org/abs/2509.14199">Paper</a><a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/release/dive-bench-minimal">Code</a><a href="https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation">Educational dataset</a><a href="leaderboard.html">Full leaderboard</a></div>
+      <div class="footer-links"><a href="https://arxiv.org/abs/2509.14199">Earlier arXiv</a><a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/release/dive-bench-minimal">Code</a><a href="https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation">Educational dataset (gated)</a><a href="leaderboard.html">Full leaderboard</a></div>
       <p class="footer-meta">© 2026 DIVE-Bench authors<br>Historical snapshot: <span id="footer-sync-date">20 Aug 2026</span><br>Public audit: 14 Sep 2026</p>
     </div>
   </footer>

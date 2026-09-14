@@ -17,12 +17,9 @@ sys.path.insert(0, str(ROOT))
 from scripts import sync_leaderboard as sync  # noqa: E402
 
 
-REAL_CONTRACT = Path(
-    "/work/nvme/bdqf/william/charles/dive_grt_quality_outputs/"
-    "quality_20260819_062149/followups_v2/qwen3_full_recovery_v2/"
-    "provenance/contract.json"
-)
-REAL_COMPLETION = REAL_CONTRACT.parent / "completed.json"
+_CONTRACT_LOCATION = os.environ.get("DIVE_QWEN3_ARCHIVED_CONTRACT", "").strip()
+REAL_CONTRACT = Path(_CONTRACT_LOCATION).expanduser() if _CONTRACT_LOCATION else None
+REAL_COMPLETION = REAL_CONTRACT.parent / "completed.json" if REAL_CONTRACT else None
 
 
 def telemetry_row(
@@ -43,10 +40,12 @@ def telemetry_row(
 
 class Qwen3RecoveryReleaseTests(unittest.TestCase):
     @unittest.skipUnless(
-        os.environ.get("DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS") == "1" and REAL_CONTRACT.is_file(),
+        os.environ.get("DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS") == "1",
         "external historical campaign check is opt-in (DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS=1)",
     )
     def test_real_prepared_contract_deeply_verifies_without_writes(self) -> None:
+        self.assertIsNotNone(REAL_CONTRACT, "DIVE_QWEN3_ARCHIVED_CONTRACT is required when archival checks are enabled")
+        self.assertTrue(REAL_CONTRACT.is_file(), "Configured Qwen3 contract is not a readable file")
         before = sync.sha256_file(REAL_CONTRACT)
         contract = json.loads(REAL_CONTRACT.read_text(encoding="utf-8"))
         verified = sync._validate_qwen3_recovery_contract(
@@ -163,10 +162,12 @@ class Qwen3RecoveryReleaseTests(unittest.TestCase):
                     sync._normalized_recovery_doc_id(value, "invalid")
 
     @unittest.skipUnless(
-        os.environ.get("DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS") == "1" and REAL_COMPLETION.is_file(),
+        os.environ.get("DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS") == "1",
         "external historical campaign check is opt-in (DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS=1)",
     )
     def test_real_completion_passes_site_independent_consumer(self) -> None:
+        self.assertIsNotNone(REAL_COMPLETION, "DIVE_QWEN3_ARCHIVED_CONTRACT is required when archival checks are enabled")
+        self.assertTrue(REAL_COMPLETION.is_file(), "Configured Qwen3 completion is not a readable file")
         completed = sync._load_hashed_json(REAL_COMPLETION, "qwen3 completion")
         artifacts = completed["artifacts"]
 

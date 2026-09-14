@@ -45,10 +45,8 @@ from scripts.sync_leaderboard import (  # noqa: E402
 from scripts import qwen_dual_release as dual_release  # noqa: E402
 
 
-REAL_LLAVA7_FAILURE = Path(
-    "/work/nvme/bdqf/william/charles/dive_grt_quality_outputs/"
-    "quality_20260819_062149/llava7_dual_route"
-)
+_FAILURE_LOCATION = os.environ.get("DIVE_LLAVA7_ARCHIVED_FAILURE_ROOT", "").strip()
+REAL_LLAVA7_FAILURE = Path(_FAILURE_LOCATION).expanduser() if _FAILURE_LOCATION else None
 
 
 def descriptor(path: Path) -> dict[str, str]:
@@ -58,6 +56,8 @@ def descriptor(path: Path) -> dict[str, str]:
 
 def real_llava_entry() -> dict:
     root = REAL_LLAVA7_FAILURE
+    assert root is not None, "DIVE_LLAVA7_ARCHIVED_FAILURE_ROOT is required when archival checks are enabled"
+    assert (root / "full_validation.json").is_file(), "Configured LLaVA7 archive is not readable"
     contract = json.loads(
         (root / "provenance/campaign_contract.json").read_text(encoding="utf-8")
     )
@@ -283,7 +283,7 @@ def test_v2_payload_publishes_only_promoted_and_preserves_highmotion(
 
 
 @pytest.mark.skipif(
-    os.environ.get("DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS") != "1" or not (REAL_LLAVA7_FAILURE / "full_validation.json").is_file(),
+    os.environ.get("DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS") != "1",
     reason="external historical campaign check is opt-in (DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS=1)",
 )
 def test_v2_full_binding_e2e_with_real_failure_and_synthetic_promotions(
@@ -888,7 +888,7 @@ def test_site_payload_loader_rejects_duplicates_and_preserves_decimal(
 
 
 @pytest.mark.skipif(
-    os.environ.get("DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS") != "1" or not (REAL_LLAVA7_FAILURE / "full_validation.json").is_file(),
+    os.environ.get("DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS") != "1",
     reason="external historical campaign check is opt-in (DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS=1)",
 )
 def test_real_llava7_failure_preflight_and_descriptor_tamper(

@@ -38,7 +38,12 @@ python -m pytest tests -q
 
 Four tests that inspect external, mutable Qwen3/LLaVA7 historical campaign trees are
 opt-in via `DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS=1`; all synthetic validator, UI and
-new protocol-cohort checks run by default. Those four archival checks currently
+new protocol-cohort checks run by default. When opting in, explicitly set
+`DIVE_QWEN3_ARCHIVED_CONTRACT` to the Qwen3 contract JSON and
+`DIVE_LLAVA7_ARCHIVED_FAILURE_ROOT` to the LLaVA7 failure-evidence directory.
+There are no machine-specific default paths: missing configuration fails clearly
+instead of silently skipping an explicitly requested check. The Qwen3 completion
+must be `completed.json` alongside its configured contract. Those four archival checks currently
 fail against legacy manifest paths/checksums and are **not claimed to pass**.
 The portable release's frozen numeric evidence is independently checked by its
 own verifier. Fresh full GPU/judge reproduction is not yet completed.

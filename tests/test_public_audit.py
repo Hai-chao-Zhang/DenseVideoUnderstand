@@ -110,6 +110,26 @@ class PublicAuditTests(unittest.TestCase):
         self.assertIn("not a fresh GPU rerun", index)
         self.assertIn("leaderboard.html", index)
 
+    def test_paper_scope_dataset_access_and_visual_inputs_are_explicit(self):
+        index = (ROOT / "index.html").read_text()
+        self.assertIn("arXiv version covers the earlier educational scope", index)
+        self.assertIn("paper/ECCV_Dense_Video_Understanding.pdf", index)
+        self.assertIn("Educational dataset (gated)", index)
+        self.assertIn("educational source videos", index)
+        self.assertIn("not an audio-input protocol", index)
+        self.assertNotIn("Read, listen", index)
+
+    def test_external_archive_defaults_do_not_contain_private_machine_paths(self):
+        for filename, variable in (
+            ("test_qwen3_recovery_release.py", "DIVE_QWEN3_ARCHIVED_CONTRACT"),
+            ("test_release_v2.py", "DIVE_LLAVA7_ARCHIVED_FAILURE_ROOT"),
+        ):
+            source = (ROOT / "tests" / filename).read_text()
+            self.assertNotIn("/work/nvme/", source)
+            self.assertNotIn("/u/yli8/", source)
+            self.assertIn(variable, source)
+            self.assertIn("is required when archival checks are enabled", source)
+
 
 if __name__ == "__main__":
     unittest.main()
