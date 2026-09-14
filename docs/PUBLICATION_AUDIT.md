@@ -71,6 +71,8 @@ The minimal branch is not byte-identical to that original checkout: it prunes
 unrelated registrations, makes Decord imports optional for PyAV use, adds the
 paper-named task aliases and a fixed preview selector, and makes video-path
 resolution fail on missing files without flattening EgoDex action directories.
+Archive downloads now preflight paths and allow only ordinary files/directories;
+the inherited YouTube helper invokes argument vectors without a shell.
 These release changes do not alter GRT kernel calculations or scoring formulas;
 the original source hashes remain historical provenance, not hashes of every
 current file. The published snapshot has a clean root commit so that the private

@@ -39,6 +39,11 @@ from tqdm import tqdm
 from lmms_eval import utils
 from lmms_eval.api import samplers
 from lmms_eval.api.instance import Instance
+from lmms_eval.api.media_download import (
+    safe_extract_tar,
+    safe_extract_zip,
+    youtube_download_command,
+)
 from lmms_eval.api.registry import (
     AGGREGATION_REGISTRY,
     DEFAULT_METRIC_REGISTRY,
@@ -880,8 +885,8 @@ class ConfigurableTask(Task):
                             video_id = video["videoID"]
                             target_path = os.path.join(path, f"{video_id}.mp4")
                             assert shutil.which("yt-dlp") is not None, "yt-dlp must be installed and available in the system's PATH"
-                            command = f"yt-dlp -o {target_path} -f mp4 https://www.youtube.com/watch?v={video_id}"
-                            subprocess.run(command, shell=True)
+                            command = youtube_download_command(video_id, target_path)
+                            subprocess.run(command, check=True)
                         with open(os.path.join(cache_path, f"{task}_download_status.json"), "w") as f:
                             f.write(json.dumps({task: "downloaded"}))
                     except Exception as e:
@@ -999,25 +1004,12 @@ class ConfigurableTask(Task):
                             tar_files = glob(os.path.join(cache_path, "**/*.tar*"), recursive=True)
 
                     def unzip_video_data(zip_file):
-                        import os
-                        import zipfile
-
-                        with zipfile.ZipFile(zip_file, "r") as zip_ref:
-                            for file_info in zip_ref.infolist():
-                                target_path = os.path.join(cache_dir, file_info.filename)
-                                if not os.path.exists(target_path):
-                                    zip_ref.extract(file_info, cache_dir)
-                                else:
-                                    eval_logger.info(f"Skipping existing file: {target_path}")
-
+                        safe_extract_zip(zip_file, cache_dir)
                         eval_logger.info(f"Extracted all files from {zip_file} to {cache_dir}")
 
                     def untar_video_data(tar_file):
-                        import tarfile
-
-                        with tarfile.open(tar_file, "r") as tar_ref:
-                            tar_ref.extractall(cache_dir)
-                            eval_logger.info(f"Extracted all files from {tar_file} to {cache_dir}")
+                        safe_extract_tar(tar_file, cache_dir)
+                        eval_logger.info(f"Extracted all files from {tar_file} to {cache_dir}")
 
                     def concat_tar_parts(tar_parts, output_tar):
                         with open(output_tar, "wb") as out_tar:

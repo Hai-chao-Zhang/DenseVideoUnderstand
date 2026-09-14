@@ -94,6 +94,8 @@ High-Motion is referenced at
 Obtain access from its owner; inaccessible data must not be replaced silently.
 
 The loader downloads/extracts the authorized video archive into the HF cache.
+Archive extraction accepts only regular files and directories, rejecting path
+traversal, links, and special files before extraction begins.
 For existing videos, set `DENSEVIDEO_DATA_ROOT` to a directory containing
 `DenseVideo-LPM/videos/<video>.mp4` and/or `egodex/<action>/<clip>.mp4`.
 Never flatten High-Motion filenames: its numeric clip ids repeat across actions.
