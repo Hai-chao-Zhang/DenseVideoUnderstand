@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import json
 import math
+import os
 import sys
 import tempfile
 import unittest
@@ -42,7 +43,8 @@ def telemetry_row(
 
 class Qwen3RecoveryReleaseTests(unittest.TestCase):
     @unittest.skipUnless(
-        REAL_CONTRACT.is_file(), "task-specific prepared recovery evidence unavailable"
+        os.environ.get("DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS") == "1" and REAL_CONTRACT.is_file(),
+        "external historical campaign check is opt-in (DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS=1)",
     )
     def test_real_prepared_contract_deeply_verifies_without_writes(self) -> None:
         before = sync.sha256_file(REAL_CONTRACT)
@@ -161,7 +163,8 @@ class Qwen3RecoveryReleaseTests(unittest.TestCase):
                     sync._normalized_recovery_doc_id(value, "invalid")
 
     @unittest.skipUnless(
-        REAL_COMPLETION.is_file(), "qwen3 recovery full run has not completed"
+        os.environ.get("DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS") == "1" and REAL_COMPLETION.is_file(),
+        "external historical campaign check is opt-in (DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS=1)",
     )
     def test_real_completion_passes_site_independent_consumer(self) -> None:
         completed = sync._load_hashed_json(REAL_COMPLETION, "qwen3 completion")

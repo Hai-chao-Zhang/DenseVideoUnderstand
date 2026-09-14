@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Newsreader:opsz,wght@6..72,500;6..72,600&amp;display=swap" rel="stylesheet">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect rx='20' width='100' height='100' fill='%2312212f'/%3E%3Cpath d='M20 64V29h25c20 0 33 12 33 35S65 91 45 91H20V64zm18 11h7c10 0 15-3 15-13 0-12-6-17-16-17h-6v30z' fill='%23f4f1e8'/%3E%3Ccircle cx='78' cy='23' r='9' fill='%23df5d3b'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=1f1b5a79c74ff763">
+  <link rel="stylesheet" href="styles.css?v=20260914-audit">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -47,7 +47,7 @@
         <p class="hero-lead">DIVE-Bench tests video-language models when evidence is not confined to a few keyframes—from long-form educational content to precise high-motion trajectories.</p>
         <div class="hero-actions" role="group" aria-label="Project resources">
           <a class="button button-primary" href="https://arxiv.org/pdf/2509.14199">Read the paper <span aria-hidden="true">↗</span></a>
-          <span class="button button-secondary button-disabled" aria-disabled="true">Code forthcoming</span>
+          <a class="button button-secondary" href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/release/dive-bench-minimal">Code &amp; evidence <span aria-hidden="true">↗</span></a>
           <a class="button button-text" href="https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation">Get dataset <span aria-hidden="true">↗</span></a>
         </div>
         <p class="hero-meta">Haichao Zhang<sup>1</sup>, Wenhao Chai<sup>2</sup>, Shwai He<sup>3</sup>, Ang Li<sup>3</sup>, Yun Fu<sup>1</sup></p>
@@ -108,7 +108,7 @@
         <article class="track-card track-lpm reveal">
           <div class="track-index">A</div>
           <div>
-            <p class="track-label">Educational dense video · LPM</p>
+            <p class="track-label">Educational High-FPS Videos · LPM</p>
             <h3>Read, listen, and reason across long-form video.</h3>
             <p>Questions target visible text and spoken subtitles distributed across educational videos. The public split contains 634 evaluation items, with two prompts per source video.</p>
             <ul class="tag-list">
@@ -121,9 +121,9 @@
         <article class="track-card track-motion reveal">
           <div class="track-index">B</div>
           <div>
-            <p class="track-label">High-motion dense video · preview</p>
+            <p class="track-label">High-Motion High-FPS Videos · preview</p>
             <h3>Track fine motion at frame-level precision.</h3>
-            <p>Models predict a hand trajectory over a semantic 3×3 image grid. The current result snapshot evaluates 1,000 examples from the 3,243-example test split; public mirror access will accompany the evaluation-code release.</p>
+            <p>Models predict a hand trajectory over a semantic 3×3 image grid. Reported results cover a fixed 1,000-item preview of the 3,243-item test split, not the full split. Video access and underlying source licenses must be checked separately.</p>
             <ul class="tag-list">
               <li>Trajectory</li><li>3×3 grid</li><li>Transitions</li><li>High FPS</li>
             </ul>
@@ -193,11 +193,13 @@
         </div>
         <div class="snapshot">
           <span class="snapshot-dot" aria-hidden="true"></span>
-          <div><strong>Result snapshot</strong><span id="snapshot-date">17 Aug 2026</span></div>
+          <div><strong>Historical result snapshot</strong><span id="snapshot-date">20 Aug 2026</span></div>
         </div>
       </div>
 
       <div class="leader-summary" id="leader-summary" aria-live="polite"></div>
+
+      <p class="provenance-note"><strong>Complete results, audited 14 September 2026.</strong> <a href="leaderboard.html">Full HTML tables (no JavaScript)</a> · <a href="data/leaderboard-complete.csv" download>Download CSV</a> · <a href="data/public-audit.json">Comparison evidence</a>. Historical scores are not a fresh GPU rerun. Missing Open MOS values are not zero; no score is imputed.</p>
 
       <section class="provenance-note" id="grt-family-qualification" aria-labelledby="grt-family-qualification-title" hidden>
         <h3 id="grt-family-qualification-title">Four-family GRT qualification</h3>
@@ -205,11 +207,21 @@
         <ul class="leader-summary" id="grt-family-qualification-list" aria-label="GRT family qualification results"></ul>
       </section>
 
+      <section class="grt-comparison" aria-labelledby="grt-comparison-title">
+        <h3 id="grt-comparison-title">Does GRT beat its baseline?</h3>
+        <p>All three promoted educational profiles exceed their archived and matched controls on Open MOS and Token F1 while recomputing fewer patch projections. This is a point-estimate result, not a significance claim or a win on every metric. The larger gap to archived Qwen baselines includes protocol differences and must not be attributed entirely to gating.</p>
+        <div class="table-scroll" role="region" tabindex="0" aria-label="GRT matched-control comparison">
+          <table id="grt-comparison-table"><caption>634 educational items per method, eight sampled frames; all controls shown</caption><thead><tr><th scope="col">Family / control</th><th scope="col">Open MOS ↑</th><th scope="col">Token F1 ↑</th><th scope="col">Patch recompute ↓</th><th scope="col">Mean throughput (fps) ↑</th><th scope="col">Mean request time (s) ↓</th></tr></thead><tbody id="grt-comparison-body"></tbody></table>
+        </div>
+        <p class="provenance-note">Qwen 3B GRT is slower than its matched all-patch control on the reported mean throughput (1.673 vs 1.750 fps), despite better quality and lower patch compute. Timing is historical per-request telemetry, not repeated end-to-end speed benchmarking. Eight sampled frames do not establish high-FPS coverage; patch reuse is not end-to-end FLOPs. <a href="leaderboard.html#grt-controls">Inspect exact values and all control rows</a>.</p>
+      </section>
+
       <div class="leaderboard-panel reveal">
         <div class="leaderboard-toolbar">
           <div class="track-tabs" role="group" aria-label="Leaderboard track">
             <button id="tab-lpm" class="track-tab is-active" type="button" aria-pressed="true" data-track="lpm">Educational / LPM <span>634</span></button>
-            <button id="tab-highmotion" class="track-tab" type="button" aria-pressed="false" data-track="highmotion">High-Motion Preview <span>1,000</span></button>
+            <button id="tab-highmotion" class="track-tab" type="button" aria-pressed="false" data-track="highmotion">High-Motion aligned preview <span>1,000</span></button>
+            <button id="tab-highmotion-historical" class="track-tab" type="button" aria-pressed="false" data-track="highmotion_historical">Historical / non-aligned</button>
           </div>
           <div class="leaderboard-filters">
             <label class="search-field">
@@ -230,7 +242,7 @@
 
         <div class="table-scroll" role="region" tabindex="0" aria-label="Scrollable leaderboard table">
           <table id="leaderboard-table">
-            <caption id="leaderboard-caption">DIVE-Bench Educational Dense Video leaderboard</caption>
+            <caption id="leaderboard-caption">DIVE-Bench Educational High-FPS Videos leaderboard</caption>
             <thead></thead>
             <tbody></tbody>
           </table>
@@ -240,6 +252,8 @@
           <p>Default rank: <strong id="ranking-rule">Open MOS (reported first; missing last), then Token F1</strong></p>
         </div>
       </div>
+      <noscript><p>The interactive table requires JavaScript. <a href="leaderboard.html">The complete leaderboard and all GRT controls are also available as plain HTML.</a></p></noscript>
+      <p class="provenance-note"><strong>High-Motion protocol audit.</strong> The legacy GRT run used only 2–8 input frames (213 of 1,000 requests used eight) and truncated 148 clips to ten seconds while the scorer targeted eight frames from the full clip. Its Grid Accuracy of 0.10125 is historical, not a comparable GRT improvement over the aligned LLaVA baseline (0.142875). InternVL midpoint sampling and Gemini full-trajectory targets are also listed separately, without a shared rank. <a href="leaderboard.html#highmotion-historical">Inspect all excluded protocols</a>.</p>
 
       <section class="metric-glossary" aria-labelledby="glossary-title">
         <div class="glossary-intro">
@@ -250,39 +264,39 @@
         <dl id="metric-definitions"></dl>
       </section>
 
-      <p class="provenance-note"><strong>Result provenance.</strong> This static snapshot was generated from <span id="source-artifact-count">20</span> evaluation artifacts on <span id="snapshot-date-long">17 August 2026</span>. LPM Open MOS uses <code id="open-mos-judge">Qwen/Qwen3-VL-32B-Instruct</code> as the open text judge. Re-run details and exact model arguments will ship with the forthcoming evaluation-code release.</p>
+      <p class="provenance-note"><strong>Result provenance.</strong> The immutable historical snapshot was generated from <span id="source-artifact-count">21</span> evaluation artifacts on <span id="snapshot-date-long">20 August 2026</span>. Educational Open MOS uses <code id="open-mos-judge">Qwen/Qwen3-VL-32B-Instruct</code> as the open text judge. <a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/release/dive-bench-minimal/docs/PUBLICATION_AUDIT.md">Public score audit</a> · <a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/release/dive-bench-minimal/docs/REPRODUCTION.md">Pinned reproduction protocol</a>. Frozen score bytes remain available in <a href="data/leaderboard.js">the original snapshot</a>.</p>
     </section>
 
     <section class="section-shell evaluate-section" id="evaluate" aria-labelledby="evaluate-title">
-      <div class="section-kicker">04 / Protocol preview</div>
+      <div class="section-kicker">04 / Reproduce</div>
       <div class="section-heading reveal">
-        <h2 id="evaluate-title">Evaluation recipe, pending code release.</h2>
-        <p>The integration follows LMMS-Eval conventions and uses an explicit eight-frame budget with deterministic generation. Commands are shown for protocol inspection; the evaluation repository and High-Motion mirror are not public yet.</p>
+        <h2 id="evaluate-title">Public code. Explicit reproduction limits.</h2>
+        <p>The minimal code and numerical evidence are public. Rebuild the historical leaderboard offline, or run the pinned three-arm educational GRT profiles with eight frames. Fresh inference and Open MOS require appropriate GPU resources and authorized data access; neither is implied by the numerical audit.</p>
       </div>
 
       <div class="code-layout reveal">
         <div class="code-tabs" role="tablist" aria-label="Reproduction commands">
           <button id="code-tab-setup" class="code-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="code-panel" tabindex="0" data-code="setup">Setup</button>
-          <button id="code-tab-lpm" class="code-tab" type="button" role="tab" aria-selected="false" aria-controls="code-panel" tabindex="-1" data-code="lpm">Run LPM</button>
-          <button id="code-tab-motion" class="code-tab" type="button" role="tab" aria-selected="false" aria-controls="code-panel" tabindex="-1" data-code="motion">Run High-Motion</button>
+          <button id="code-tab-lpm" class="code-tab" type="button" role="tab" aria-selected="false" aria-controls="code-panel" tabindex="-1" data-code="lpm">Reproduce GRT</button>
+          <button id="code-tab-motion" class="code-tab" type="button" role="tab" aria-selected="false" aria-controls="code-panel" tabindex="-1" data-code="motion">Task names</button>
         </div>
         <div class="code-window" id="code-panel" role="tabpanel" aria-labelledby="code-tab-setup" tabindex="0">
           <div class="code-window-bar"><span></span><span></span><span></span><p id="code-filename">setup.sh</p><button class="copy-button" type="button" data-copy-target="active-code">Copy</button></div>
-          <pre tabindex="0"><code id="active-code"># Evaluation code release in progress.
-# The pinned installation recipe will include:
-conda create -n dive python=3.10 -y
-conda activate dive
-python -m pip install qwen-vl-utils
-hf auth login</code></pre>
+          <pre tabindex="0"><code id="active-code">git clone --branch release/dive-bench-minimal --single-branch \
+  https://github.com/Hai-chao-Zhang/DenseVideoUnderstand.git DIVE-Bench
+cd DIVE-Bench
+git checkout 2a79fcce2707b1eb74648a5ed135c469b17eb4e1
+python -m pip install 'PyYAML&gt;=6'
+python -m tools.densevideo.rebuild_published_leaderboard --verify-only</code></pre>
         </div>
         <div class="reproduce-aside">
           <p class="mini-label">Protocol notes</p>
           <ol>
-            <li><span>01</span> Code repository and High-Motion mirror: release forthcoming.</li>
-            <li><span>02</span> Keep model-specific frame budgets explicit in <code>--model_args</code>.</li>
-            <li><span>03</span> Save sample logs and aggregate summaries for auditable submissions.</li>
+            <li><span>01</span> Use a dedicated environment; minimal DIVE-Bench and upstream lmms-eval share a Python namespace.</li>
+            <li><span>02</span> Keep the 1,000-item preview separate from the full 3,243-item task and from different API protocols.</li>
+            <li><span>03</span> Record model/data revisions, frame budgets, predictions, quality gates and request telemetry.</li>
           </ol>
-          <p class="release-notice"><strong>Release status</strong><br>Paper and LPM data are available; pinned code and the High-Motion mirror are being prepared.</p>
+          <p class="release-notice"><strong>Framework submissions</strong><br><a href="https://github.com/open-compass/VLMEvalKit/pull/1686">VLMEvalKit #1686</a> and <a href="https://github.com/EvolvingLMMs-Lab/lmms-eval/pull/1521">lmms-eval #1521</a> are submitted Draft PRs, not upstream acceptance. Data permissions and manuscript/protocol differences remain documented in the public audit.</p>
         </div>
       </div>
     </section>
@@ -312,12 +326,13 @@ hf auth login</code></pre>
   <footer class="site-footer">
     <div class="section-shell footer-inner">
       <div><a class="brand footer-brand" href="#top"><span class="brand-mark" aria-hidden="true">D</span><span>DIVE–Bench</span></a><p>Dense evidence deserves dense understanding.</p></div>
-      <div class="footer-links"><a href="https://arxiv.org/abs/2509.14199">Paper</a><span>Code · forthcoming</span><a href="https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation">LPM dataset</a><a href="#leaderboard">Leaderboard</a></div>
-      <p class="footer-meta">© 2026 DIVE-Bench authors<br>Last result sync: <span id="footer-sync-date">17 Aug 2026</span></p>
+      <div class="footer-links"><a href="https://arxiv.org/abs/2509.14199">Paper</a><a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/release/dive-bench-minimal">Code</a><a href="https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation">Educational dataset</a><a href="leaderboard.html">Full leaderboard</a></div>
+      <p class="footer-meta">© 2026 DIVE-Bench authors<br>Historical snapshot: <span id="footer-sync-date">20 Aug 2026</span><br>Public audit: 14 Sep 2026</p>
     </div>
   </footer>
 
   <script src="data/leaderboard.js?v=1f1b5a79c74ff763" defer></script>
-  <script src="app.js?v=1f1b5a79c74ff763" defer></script>
+  <script src="data/public-audit.js?v=20260914-audit" defer></script>
+  <script src="app.js?v=20260914-audit" defer></script>
 </body>
 </html>

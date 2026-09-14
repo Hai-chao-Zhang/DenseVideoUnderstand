@@ -3,6 +3,52 @@
 
 ## Project website
 
+### Public audit update — 14 September 2026
+
+The minimal evaluation/GRT code is public on
+[`release/dive-bench-minimal`](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/release/dive-bench-minimal).
+Framework integrations are submitted Draft PRs:
+[VLMEvalKit #1686](https://github.com/open-compass/VLMEvalKit/pull/1686) and
+[lmms-eval #1521](https://github.com/EvolvingLMMs-Lab/lmms-eval/pull/1521), not merged/accepted.
+Historical README instructions below are retained as release-development history;
+use the minimal branch's current installation and reproduction instructions.
+
+`leaderboard.html` provides complete JavaScript-free tables. The interactive site
+uses the byte-identical 32-row `data/leaderboard.js` snapshot plus the separately
+audited `data/public-audit.json` overlay. This adds the later High-Motion archive
+without changing the original Educational scores or hiding incompatible protocols.
+High-Motion ranks include only the aligned-preview cohort; legacy GRT, midpoint
+InternVL and full-trajectory Gemini runs are explicitly unranked. "Aligned" refers
+to the archived prompt, target, identity, metric and saved wrapper policy audit,
+not a fresh inference rerun or an immutable model revision for every baseline.
+
+The educational comparison exposes all 12 candidate/control rows, including
+archived baselines, quality baselines and all-patch controls. Qwen 3B GRT improves
+Open MOS/Token F1 and patch reuse but has lower mean throughput than its all-patch
+control. The page does not claim every quality/efficiency metric improves.
+
+Rebuild and check the generated assets after editing audited numeric metadata:
+
+```bash
+python scripts/build_audit_page.py
+python scripts/build_audit_page.py --check
+python -m unittest discover -s tests -v
+python -m pytest tests -q
+```
+
+Four tests that inspect external, mutable Qwen3/LLaVA7 historical campaign trees are
+opt-in via `DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS=1`; all synthetic validator, UI and
+new protocol-cohort checks run by default. Those four archival checks currently
+fail against legacy manifest paths/checksums and are **not claimed to pass**.
+The portable release's frozen numeric evidence is independently checked by its
+own verifier. Fresh full GPU/judge reproduction is not yet completed.
+
+Deployment source is this repository's `webpage` branch (GitHub Pages), not
+`main` or the minimal evaluation branch. The original live deployment was
+`98f8bb8d3ee7b67e389acc7aa108a250957e5a34`; update only reviewed website files.
+
+### Historical release builder
+
 The webpage branch is a dependency-free static research site. It separates content, presentation, interaction, and the published result snapshot into index.html, styles.css, app.js, and data/leaderboard.js.
 
 Preview it locally from the repository root:

@@ -39,7 +39,7 @@ process.stdout.write(JSON.stringify(context.window.DIVE_LEADERBOARD));
     return json.loads(result.stdout)
 
 
-def _render_ui(dataset):
+def _render_ui(dataset, audit=None, track=None):
     loader = r"""
 const fs = require("fs");
 const vm = require("vm");
@@ -83,7 +83,7 @@ const ids = [
   "grt-family-qualification-list", "lpm-method-count",
   "source-artifact-count", "open-mos-judge", "snapshot-date",
   "snapshot-date-long", "footer-sync-date", "active-code", "code-filename",
-  "code-panel"
+  "code-panel", "grt-comparison-body"
 ];
 const elements = {};
 ids.forEach((id) => { elements[id] = new Element("div", id); });
@@ -103,9 +103,11 @@ const document = {
   querySelectorAll: () => []
 };
 const input = JSON.parse(fs.readFileSync(0, "utf8"));
-const window = { DIVE_LEADERBOARD: input, isSecureContext: false };
+const window = { DIVE_LEADERBOARD: input.dataset, DIVE_PUBLIC_AUDIT: input.audit, isSecureContext: false };
 const context = { window, document, navigator: {}, clearTimeout, setTimeout };
-vm.runInNewContext(fs.readFileSync("app.js", "utf8"), context);
+const source = fs.readFileSync("app.js", "utf8").replace("  installLeaderboard();", "  window.selectTrackForTest = selectTrack;\n  installLeaderboard();");
+vm.runInNewContext(source, context);
+if (input.track) window.selectTrackForTest(input.track);
 
 function tagsBelow(node) {
   return node.children.reduce(
@@ -128,7 +130,10 @@ process.stdout.write(JSON.stringify({
     tags: tagsBelow(qualificationList)
   },
   tableCount: elements["table-count"].textContent,
-  tableHtml: tableBody.innerHTML
+  tableHtml: tableBody.innerHTML,
+  tableHead: tableHead.innerHTML,
+  comparisonHtml: elements["grt-comparison-body"].innerHTML,
+  rankingRule: elements["ranking-rule"].textContent
 }));
 """
     result = subprocess.run(
@@ -136,7 +141,7 @@ process.stdout.write(JSON.stringify({
         cwd=ROOT,
         check=True,
         capture_output=True,
-        input=json.dumps(dataset),
+        input=json.dumps({"dataset": dataset, "audit": audit, "track": track}),
         text=True,
     )
     return json.loads(result.stdout)
@@ -388,17 +393,18 @@ class SiteContractTests(unittest.TestCase):
         self.assertEqual(rendered["methodCount"], str(len(legacy["tracks"]["lpm"])))
         self.assertEqual(rendered["badgeCount"], 1)
 
-    def test_final_assets_share_a_versioned_cache_key(self):
+    def test_final_assets_are_versioned_and_frozen_data_retains_its_key(self):
         assets = re.findall(
-            r'(?:href|src)="(styles\.css|data/leaderboard\.js|app\.js)'
-            r'\?v=([0-9a-f]{16})"',
+            r'(?:href|src)="(styles\.css|data/leaderboard\.js|data/public-audit\.js|app\.js)'
+            r'\?v=([0-9a-z-]+)"',
             self.html,
         )
         self.assertEqual(
             [path for path, _version in assets],
-            ["styles.css", "data/leaderboard.js", "app.js"],
+            ["styles.css", "data/leaderboard.js", "data/public-audit.js", "app.js"],
         )
-        self.assertEqual(len({version for _path, version in assets}), 1)
+        self.assertEqual(dict(assets)["data/leaderboard.js"], "1f1b5a79c74ff763")
+        self.assertEqual(len({version for path, version in assets if path != "data/leaderboard.js"}), 1)
 
     def test_sampling_density_is_not_presented_as_throughput(self):
         visible_sources = self.html + self.app

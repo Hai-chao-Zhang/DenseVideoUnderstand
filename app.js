@@ -2,6 +2,23 @@
   "use strict";
 
   var dataset = window.DIVE_LEADERBOARD;
+  var publicAudit = window.DIVE_PUBLIC_AUDIT;
+  if (dataset) {
+    dataset = JSON.parse(JSON.stringify(dataset));
+    if (publicAudit && Array.isArray(publicAudit.highmotion_additional) && publicAudit.highmotion_additional.length) {
+      dataset.tracks.highmotion = publicAudit.highmotion_additional.filter(function (row) { return row.protocol_status === "aligned_preview"; });
+      dataset.tracks.highmotion_historical = publicAudit.highmotion_additional.filter(function (row) { return row.protocol_status !== "aligned_preview"; });
+    } else {
+      // Fail closed if the protocol audit asset does not load: never promote
+      // the historical three-row snapshot into the aligned preview ranking.
+      dataset.tracks.highmotion_historical = dataset.tracks.highmotion.map(function (row) {
+        row.rank = null;
+        row.protocol_note = "Historical protocol; aligned-preview audit unavailable";
+        return row;
+      });
+      dataset.tracks.highmotion = [];
+    }
+  }
   var table = document.getElementById("leaderboard-table");
   var tableHead = table ? table.querySelector("thead") : null;
   var tableBody = table ? table.querySelector("tbody") : null;
@@ -63,9 +80,11 @@
       { key: "transition_acc", label: "Transition Acc ↑", format: "score" },
       { key: "token_f1", label: "Token F1 ↑", format: "score" },
       { key: "effective_fps", label: "Sampling density (fps)", format: "score" },
+      { key: "protocol_note", label: "Protocol / status", format: "text" },
       { key: "source", label: "Source", format: "source" }
     ]
   };
+  columns.highmotion_historical = columns.highmotion.filter(function (column) { return column.key !== "rank"; });
 
   var metricDefinitions = {
     lpm: [
@@ -79,7 +98,7 @@
       ["Throughput (fps) ↑", "Sampled frames divided by end-to-end request wall time; unlike sampling density, this is a processing-rate measurement."]
     ],
     highmotion: [
-      ["Grid Acc ↑", "Per-frame accuracy over the nine semantic regions of the 3×3 image grid."],
+      ["Grid Acc ↑", "Accuracy at the eight aligned target positions over the nine semantic regions of the 3×3 image grid."],
       ["Grid ADE ↓", "Mean Euclidean distance between aligned predicted and reference grid-cell centers in normalized image coordinates (range 0 to √2); a missing position receives √2."],
       ["Grid FDE ↓", "Euclidean distance at the reference trajectory's final position in normalized image coordinates (range 0 to √2); a missing final position receives √2."],
       ["Transition Acc ↑", "Fraction of consecutive steps whose predicted 2D grid displacement exactly matches the reference displacement."],
@@ -87,39 +106,51 @@
       ["Sampling density (fps)", "Sampled frames divided by full source-video duration when profiling telemetry is available; not processing throughput."]
     ]
   };
+  metricDefinitions.highmotion_historical = [
+    ["Unranked historical values", "These metrics retain their original per-row input and target protocols and are not comparable to the aligned eight-position ranking."],
+    ["Grid metrics", "InternVL/GRT use an eight-position reference with mismatched input sampling; Gemini API rows use the full reference trajectory. Missing and malformed predictions retain their original scoring penalties."],
+    ["Token F1 ↑", "Open-model rows use canonical grid-label overlap. Gemini API rows use the historical literal-text overlap scorer instead; their zeros must not be interpreted as the same canonical grid-label metric."]
+  ];
 
   var codeSamples = {
     setup: {
       filename: "setup.sh",
       value: [
-        "# Evaluation code release in progress.",
-        "# The pinned installation recipe will include:",
-        "conda create -n dive python=3.10 -y",
-        "conda activate dive",
-        "python -m pip install qwen-vl-utils",
-        "hf auth login"
+        "git clone --branch release/dive-bench-minimal --single-branch \\",
+        "  https://github.com/Hai-chao-Zhang/DenseVideoUnderstand.git DIVE-Bench",
+        "cd DIVE-Bench",
+        "git checkout 2a79fcce2707b1eb74648a5ed135c469b17eb4e1",
+        "python -m pip install 'PyYAML>=6'",
+        "python -m tools.densevideo.rebuild_published_leaderboard --verify-only"
       ].join("\n")
     },
     lpm: {
-      filename: "run_lpm.sh",
+      filename: "reproduce_grt.sh",
       value: [
-        "accelerate launch --num_processes 1 -m lmms_eval \\",
-        "  --model llava_hf \\",
-        "  --model_args pretrained=llava-hf/llava-onevision-qwen2-7b-ov-hf,trust_remote_code=True,device_map=auto,dtype=bfloat16,max_frames_num=8,max_image_size=384,attn_implementation=eager \\",
-        "  --tasks densevideo \\",
-        "  --batch_size 1 --log_samples \\",
-        "  --output_path outputs/dive_lpm_llava_ov"
+        "# Use a dedicated environment with a compatible CUDA build.",
+        "python -m venv .venv",
+        ". .venv/bin/activate",
+        "python -m pip install -e '.[test]'",
+        "# First prints the pinned three-arm plan without running a GPU.",
+        "dive-reproduce --profile qwen7 --output outputs/qwen7-full",
+        "# Requires authorized videos and one visible GPU; also runs the judge.",
+        "CUDA_VISIBLE_DEVICES=0 dive-reproduce --profile qwen7 \\",
+        "  --output outputs/qwen7-full --execute --with-mos",
+        "# Other profiles: route31, qwen3. Output must not already exist."
       ].join("\n")
     },
     motion: {
-      filename: "run_highmotion.sh",
+      filename: "task_names.txt",
       value: [
-        "accelerate launch --num_processes 1 -m lmms_eval \\",
-        "  --model qwen3_vl \\",
-        "  --model_args pretrained=Qwen/Qwen3-VL-32B-Instruct,trust_remote_code=True,device_map=auto,max_num_frames=8,use_custom_video_loader=True \\",
-        "  --tasks densevideo_highmotion \\",
-        "  --batch_size 1 --log_samples \\",
-        "  --output_path outputs/dive_highmotion_qwen3vl"
+        "Educational High-FPS Videos:",
+        "  dive_bench_educational_high_fps                 # 634 QA / 317 videos",
+        "High-Motion High-FPS Videos:",
+        "  dive_bench_high_motion_high_fps                # full 3,243 items",
+        "  dive_bench_high_motion_high_fps_preview1000    # fixed first 1,000",
+        "",
+        "Legacy aliases: densevideo, densevideo_highmotion",
+        "Keep full-split, preview and historical misaligned protocols separate.",
+        "See the released docs/REPRODUCTION.md for data and frame requirements."
       ].join("\n")
     }
   };
@@ -166,6 +197,7 @@
 
   function cellContent(row, column) {
     var value = row[column.key];
+    if (column.format === "text") return '<span class="protocol-cell">' + escapeHtml(value || "Historical protocol; see audit") + "</span>";
     if (column.format === "model") return modelCell(row);
     if (column.format === "method") return '<span class="method-id" title="' + escapeHtml(value) + '">' + escapeHtml(value) + "</span>";
     if (column.format === "source") return '<span class="source-chip source-' + escapeHtml(value) + '">' + escapeHtml(value) + "</span>";
@@ -279,6 +311,8 @@
         summaryCard("Top open model", null, "open_mos", "Open MOS", false, "open"),
         '<div class="summary-card"><span>Reported GRT telemetry (' + grtRows.length + ' verified profile' + (grtRows.length === 1 ? '' : 's') + ')</span><strong>' + (telemetryGrt ? formatNumber(telemetryGrt.recompute_ratio, "ratio") : "—") + ' lowest patch recompute</strong><small>' + (telemetryGrt ? escapeHtml(telemetryGrt.model) + ' · ' : '') + (telemetryGrt ? formatNumber(telemetryGrt.reference_recompute_ratio, "ratio") : "—") + ' reference compute · ' + (telemetryGrt ? formatNumber(telemetryGrt.effective_fps, "score") : "—") + ' sampling density · ' + (telemetryGrt ? formatNumber(telemetryGrt.throughput_fps, "score") : "—") + " throughput (fps)</small></div>"
       ].join("");
+    } else if (state.track === "highmotion_historical") {
+      summary.innerHTML = '<div class="summary-card"><span>Historical / non-aligned protocols</span><strong>Not ranked against the aligned preview</strong><small>These saved values are retained for transparency, not treated as matched comparisons. See the per-row protocol notes.</small></div>';
     } else {
       summary.innerHTML = [
         summaryCard("Grid Accuracy leader", null, "grid_acc", "Grid Acc", false),
@@ -337,17 +371,30 @@
     }).join("");
   }
 
+  function renderGrtComparison() {
+    var body = document.getElementById("grt-comparison-body");
+    if (!body || !publicAudit) return;
+    body.innerHTML = publicAudit.families.map(function (family) {
+      return family.methods.map(function (row) {
+        var values = [row.open_mos, row.token_f1, row.patch_ratio, row.throughput_fps, row.mean_wall_time_s];
+        return '<tr><th scope="row">' + escapeHtml(family.label) + '<br><small>' + escapeHtml(row.label) + '</small></th>' + values.map(function (value, index) {
+          return '<td title="' + escapeHtml(value === null || value === undefined || value === "" ? "Not reported" : value) + '">' + formatNumber(value, index === 2 ? "ratio" : "score") + '</td>';
+        }).join("") + '</tr>';
+      }).join("");
+    }).join("");
+  }
+
   function selectTrack(track) {
     state.track = track;
-    state.sortKey = "rank";
+    state.sortKey = track === "highmotion_historical" ? "model" : "rank";
     state.sortDirection = "asc";
     document.querySelectorAll(".track-tab").forEach(function (button) {
       var selected = button.getAttribute("data-track") === track;
       button.classList.toggle("is-active", selected);
       button.setAttribute("aria-pressed", String(selected));
     });
-    caption.textContent = track === "lpm" ? "DIVE-Bench Educational Dense Video leaderboard" : "DIVE-Bench High-Motion Dense Video preview leaderboard";
-    rankingRule.textContent = track === "lpm" ? "Open MOS (reported first; missing last), then Token F1" : "Grid Accuracy, then Token F1";
+    caption.textContent = track === "lpm" ? "DIVE-Bench Educational High-FPS Videos leaderboard" : track === "highmotion_historical" ? "High-Motion historical non-aligned results (unranked)" : "DIVE-Bench High-Motion High-FPS Videos: aligned 1,000-item preview";
+    rankingRule.textContent = track === "lpm" ? "Open MOS (reported first; missing last), then Token F1" : track === "highmotion_historical" ? "Unranked: incompatible frame or target protocol" : "Grid Accuracy, then Token F1";
     renderSummary();
     renderGlossary();
     renderTable();
@@ -405,6 +452,7 @@
     }
     renderDatasetMetadata();
     renderGrtQualification();
+    renderGrtComparison();
     document.querySelectorAll(".track-tab").forEach(function (button) {
       button.addEventListener("click", function () { selectTrack(button.getAttribute("data-track")); });
       button.addEventListener("keydown", function (event) {

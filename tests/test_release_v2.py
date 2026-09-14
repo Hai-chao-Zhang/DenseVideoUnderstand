@@ -1,6 +1,7 @@
 import csv
 import hashlib
 import json
+import os
 import sys
 from copy import deepcopy
 from decimal import Decimal
@@ -282,8 +283,8 @@ def test_v2_payload_publishes_only_promoted_and_preserves_highmotion(
 
 
 @pytest.mark.skipif(
-    not (REAL_LLAVA7_FAILURE / "full_validation.json").is_file(),
-    reason="real prepared LLaVA7 full failure evidence is unavailable",
+    os.environ.get("DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS") != "1" or not (REAL_LLAVA7_FAILURE / "full_validation.json").is_file(),
+    reason="external historical campaign check is opt-in (DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS=1)",
 )
 def test_v2_full_binding_e2e_with_real_failure_and_synthetic_promotions(
     tmp_path: Path,
@@ -887,8 +888,8 @@ def test_site_payload_loader_rejects_duplicates_and_preserves_decimal(
 
 
 @pytest.mark.skipif(
-    not (REAL_LLAVA7_FAILURE / "full_validation.json").is_file(),
-    reason="real prepared LLaVA7 full failure evidence is unavailable",
+    os.environ.get("DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS") != "1" or not (REAL_LLAVA7_FAILURE / "full_validation.json").is_file(),
+    reason="external historical campaign check is opt-in (DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS=1)",
 )
 def test_real_llava7_failure_preflight_and_descriptor_tamper(
     tmp_path: Path,

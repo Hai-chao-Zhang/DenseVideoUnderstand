@@ -1785,6 +1785,23 @@ code {
   }
 }
 
+.grt-comparison { margin-block: 32px; }
+.grt-comparison h3 { margin-bottom: 14px; }
+.grt-comparison > p { max-width: 95ch; margin-bottom: 18px; }
+.grt-comparison table { width: 100%; min-width: 840px; border-collapse: collapse; }
+.grt-comparison th, .grt-comparison td { padding: 12px; border-bottom: 1px solid var(--line-dark); text-align: right; }
+.grt-comparison th:first-child { text-align: left; }
+.protocol-cell { display: inline-block; min-width: 250px; max-width: 420px; white-space: normal; }
+.audit-page { padding-block: 40px; }
+.audit-page h1 { margin-block: 25px; }
+.audit-page h2 { margin-block: 40px 20px; }
+.audit-page .table-scroll { margin-block: 20px; }
+.audit-page table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.audit-page td, .audit-page th { padding: 10px; border-bottom: 1px solid var(--line-dark); text-align: right; }
+.audit-page td:first-child, .audit-page th:first-child { text-align: left; }
+.audit-page caption { text-align: left; margin-bottom: 12px; }
+.audit-page .method-id { display: block; max-width: none; white-space: normal; }
+
 @media print {
   .site-header,
   .leaderboard-filters,
