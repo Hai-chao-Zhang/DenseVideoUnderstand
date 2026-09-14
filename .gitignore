@@ -9,6 +9,9 @@ build
 dist
 *.egg-info
 venv
+.venv/
+.pytest_cache/
+.ruff_cache/
 .vscode/
 temp
 __pycache__
