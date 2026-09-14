@@ -14,6 +14,12 @@ reproduction remain unverified. See the
 [publication audit](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/release/dive-bench-minimal/docs/PUBLICATION_AUDIT.md)
 and [dataset/manuscript limitations](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/release/dive-bench-minimal/docs/DATASET_RELEASE.md).
 
+Framework integrations are submitted for review as **draft PRs**:
+[VLMEvalKit #1686](https://github.com/open-compass/VLMEvalKit/pull/1686) and
+[lmms-eval #1521](https://github.com/EvolvingLMMs-Lab/lmms-eval/pull/1521).
+These submissions are not yet merged or accepted upstream; the data-access and
+fresh GPU/judge reproduction limitations above still apply.
+
 ```bash
 git clone --branch release/dive-bench-minimal --single-branch \
   https://github.com/Hai-chao-Zhang/DenseVideoUnderstand.git DIVE-Bench
