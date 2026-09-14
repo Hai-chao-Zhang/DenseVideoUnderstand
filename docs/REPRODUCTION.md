@@ -152,8 +152,13 @@ The canonical full task is `dive_bench_high_motion_high_fps`; the historical
 website subset is explicitly `dive_bench_high_motion_high_fps_preview1000`.
 `densevideo_highmotion` remains a legacy alias with its original environment
 override behavior. Match `DENSEVIDEO_HIGHMOTION_NUM_FRAMES` to the model's actual
-uniform frame budget; the saved website row used eight frames, not all video
-frames. Preserve `egodex/<action>/<clip>.mp4` paths: numeric basenames repeat
+uniform frame budget. The historical GRT website row had an eight-frame
+maximum, but raw logs show 787/1,000 inputs used only two through seven frames
+and 148 clips were truncated at ten seconds. It is out of protocol for
+eight-frame endpoint-inclusive whole-clip targets, even though its saved
+metrics can be recomputed. Do not rank it against aligned baselines or claim
+it demonstrates a high-motion GRT improvement. Preserve
+`egodex/<action>/<clip>.mp4` paths: numeric basenames repeat
 across actions and are not global identifiers.
 
 `configs/densevideo/grt_highmotion_historical.yaml` records the saved legacy

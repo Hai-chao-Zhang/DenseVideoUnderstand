@@ -13,6 +13,10 @@ leaderboard snapshot. Per-example numerical evidence independently reconstructs
 their Open MOS and Token F1; the complete 32-row leaderboard rebuilds byte for
 byte. This verifies historical results, **not a fresh GPU rerun**. The legacy
 High-Motion result covers 1,000 preview items, not the full 3,243-item split.
+Its legacy GRT input sampler was not aligned to the target protocol: 787 of
+1,000 inputs contained fewer than eight frames, and 148 clips were truncated.
+Retain that row as historical, out-of-protocol evidence, not a fair ranked GRT
+comparison; numeric reconstruction alone does not validate model inputs.
 
 | GRT profile | Open MOS (website) | Token F1 | Reference patch compute ratio |
 | --- | ---: | ---: | ---: |
@@ -29,9 +33,10 @@ from the matched controls; do not attribute their whole score gap to GRT.
 
 Code and numeric evidence can be inspected without data access. Full inference
 requires separately licensed videos and authorized HF dataset access. At the
-access audit, Educational was gated and High-Motion was inaccessible to both
-tested callers. This repository does not grant those rights or promise that
-the High-Motion download is public.
+initial access audit, Educational was gated and High-Motion was inaccessible to
+both tested callers. Owner-authenticated follow-up confirmed that High-Motion
+is private, at revision `d44407f607fdf020c59b816884f06ed6d453cf26`.
+This repository does not grant those rights or promise a public download.
 
 ## Rebuild the published leaderboard (CPU, no data or model downloads)
 
@@ -46,8 +51,11 @@ python -m tools.densevideo.rebuild_published_leaderboard --output outputs/publis
 
 The verifier checks pinned SHA256 hashes, 634 identities per Educational method,
 all three contracted quality floors, patch counts, the 1,000-item High-Motion
-metrics, CSV/website agreement, and exact Markdown regeneration. Add `--website`
-to check the live website too. An existing output directory is refused. This
+metrics, frozen CSV/website agreement, and exact Markdown regeneration. Add
+`--website` to compare the website's retained historical `data/leaderboard.js`
+against the pinned 32-row snapshot. It does not audit the complete HTML page's
+new 56-result/12-control overlay, which has separate website tests and evidence.
+An existing output directory is refused. This
 bundle contains numeric scores and hashed identities, not reference answers,
 predictions, videos, or credentials. Non-GRT rows are preserved from the public
 snapshot; their inference is not reproduced by the minimal profiles.
@@ -85,6 +93,13 @@ model revision were not frozen, so exact new-inference equivalence is unproven.
 defaults to 1,000 but retains its old environment override; the canonical
 preview ID is fixed at 1,000. Do not mix full-split and preview scores.
 
+The owner-configured [DIVE-Bench Hub entry](https://huggingface.co/datasets/haichaozhang/DIVE-Bench)
+now has `educational_high_fps` and `high_motion_high_fps` test configurations at
+revision `d80461fccf879d5efdeece0edce8608a72d64f10`. This annotation-only entry is
+currently **private**, preserving the high-motion source's access boundary.
+The old source cards expose their corresponding named task too; source video
+archives and the evaluator's historical data pins are unchanged.
+
 Accept the [Educational access agreement](https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation)
 and authenticate with `hf auth login`. Its pinned revision is
 `5cc61a045c8e5e95d1d9c87e22ccd0f699575aea`. Load **only** `LPM_videos.parquet`:
@@ -100,7 +115,7 @@ For existing videos, set `DENSEVIDEO_DATA_ROOT` to a directory containing
 `DenseVideo-LPM/videos/<video>.mp4` and/or `egodex/<action>/<clip>.mp4`.
 Never flatten High-Motion filenames: its numeric clip ids repeat across actions.
 Missing files cause an error. Dataset licenses are distinct from the code
-licenses; see the [source terms and Hub migration recommendation](docs/DATASET_RELEASE.md).
+licenses; see the [source terms and completed Hub configuration](docs/DATASET_RELEASE.md).
 
 Example Educational evaluation (one item is a smoke test only):
 

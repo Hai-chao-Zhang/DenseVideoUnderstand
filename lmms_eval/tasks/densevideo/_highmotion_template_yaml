@@ -1,5 +1,6 @@
 dataset_path: haichaozhang/highmotion_densevideounderstand
 dataset_kwargs:
+  revision: d44407f607fdf020c59b816884f06ed6d453cf26
   data_files:
     test: "Egodex_traj.parquet"
   token: True

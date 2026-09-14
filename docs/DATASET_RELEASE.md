@@ -1,22 +1,27 @@
 # DIVE-Bench dataset release audit
 
-Read-only audit performed on 2026-09-13. No Hugging Face repository was renamed,
-merged, uploaded, deleted, or made public by this audit.
+Initial read-only audit: 2026-09-13. Owner-authorized configuration follow-up:
+2026-09-14. The follow-up created a private two-task annotation entry and updated
+only the old repositories' cards; it did not delete data, change source visibility
+or gating, or redistribute video archives. Historical observations below are
+explicitly scoped to their audit dates.
 
 ## Task names and versions
 
 The manuscript shipped at `paper/ECCV_Dense_Video_Understanding.pdf`, sections
 4.2 and 4.3, names the two scenarios **Educational High-FPS Videos** and
 **High-Motion High-FPS Videos**. Use these names in user-facing documentation.
-Recommended stable identifiers are:
+Stable identifiers are:
 
-| Paper name | Canonical task identifier | Existing compatibility alias | Proposed HF configuration |
+| Paper name | Canonical task identifier | Existing compatibility alias | HF configuration |
 | --- | --- | --- | --- |
 | Educational High-FPS Videos | `dive_bench_educational_high_fps` | `densevideo` | `educational_high_fps` |
 | High-Motion High-FPS Videos | `dive_bench_high_motion_high_fps` | `densevideo_highmotion` | `high_motion_high_fps` |
 
-These canonical identifiers are a proposed integration naming scheme, not names
-already registered by the upstream evaluation frameworks.
+The identifiers are now implemented in the submitted draft integrations
+[VLMEvalKit #1686](https://github.com/open-compass/VLMEvalKit/pull/1686) and
+[lmms-eval #1521](https://github.com/EvolvingLMMs-Lab/lmms-eval/pull/1521),
+but have not been merged upstream.
 
 The public [arXiv version 2509.14199v2](https://arxiv.org/html/2509.14199v2), dated
 2025-09-18, describes the earlier educational/subtitle benchmark; it does not
@@ -24,22 +29,62 @@ contain the later two-scenario manuscript. Updating code terminology does not
 update that paper. Cite the public version accurately and distinguish the bundled
 manuscript when describing the added high-motion track.
 
-## Current Hugging Face access
+## Hugging Face configuration completed on 2026-09-14
+
+[`haichaozhang/DIVE-Bench`](https://huggingface.co/datasets/haichaozhang/DIVE-Bench)
+now contains exactly two configurations, each with a `test` split, at revision
+`d80461fccf879d5efdeece0edce8608a72d64f10`:
+
+- `educational_high_fps`: 634 questions over 317 videos.
+- `high_motion_high_fps`: 3,243 clips; the first-1,000 preview remains a client
+  selection, not a third Hub configuration.
+
+The entry is **private** to preserve the private high-motion source's audience
+while release rights and access are resolved. It contains byte-identical source
+annotations and component-specific terms, not copied video archives. This is a
+completed owner-authorized configuration, not a claim of public data availability.
+
+Both compatibility source cards now expose their one named task explicitly:
+
+| Source | Updated card revision | Access policy (unchanged) |
+| --- | --- | --- |
+| `haichaozhang/DenseVideoEvaluation` | `c3ff65dfc37239ebee05bd190cfa5b5126f49146` | Public metadata, `gated=auto` |
+| `haichaozhang/highmotion_densevideounderstand` | `25cc1aeaef5209776625ce4e72a3ba425d4ae929` | Private |
+
+All non-card source file object hashes remained unchanged. Historical data
+revisions below remain usable, so pinned evaluation integrations do not silently
+switch to a new dataset. The explicit educational configuration excludes the
+identical slides Parquet, avoiding accidental duplication to 1,268 rows.
+Fresh-cache `datasets.load_dataset` checks passed for both configurations in
+the combined entry and each named configuration in the two source repositories:
+four actual remote loads, with exact annotation SHA-256, row counts, unique
+video/identity counts and high-motion ordered-content validation. These checks
+used the owner account and do not establish anonymous or third-party access.
+
+## Initial access observations (2026-09-13)
 
 | Repository | Anonymous observation | Standard cached-token observation |
 | --- | --- | --- |
 | [`haichaozhang/DenseVideoEvaluation`](https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation) | Metadata public, `private=false`, `gated=auto`; annotation HEAD returns 401 `GatedRepo` | Metadata public; annotation HEAD returns 403 `GatedRepo` because this authenticated account has not been granted access |
 | [`haichaozhang/highmotion_densevideounderstand`](https://huggingface.co/datasets/haichaozhang/highmotion_densevideounderstand) | Repository API and annotation HEAD return 401 | Repository API returns 404 `RepositoryNotFoundError` |
 
-The high-motion responses establish that the referenced repository is inaccessible
-to both tested callers. They do not establish whether its owner deleted it,
-renamed it, or kept it private. Do not advertise an operational public download
+Those initial high-motion responses established that the referenced repository was
+inaccessible to both tested callers, without distinguishing deletion from privacy.
+The owner-authenticated follow-up below resolves that ambiguity. Do not advertise an operational public download
 until a clean account can retrieve the annotations and required videos. Existing
 local caches do not prove public accessibility. Educational access requires the
 Hub access agreement as well as authentication; see the official
 [gated-dataset guide](https://huggingface.co/docs/hub/datasets-gated).
 
-The educational metadata currently resolves to revision
+Owner-authenticated follow-up on 2026-09-14 confirmed that the high-motion
+repository is **private**, at revision
+`d44407f607fdf020c59b816884f06ed6d453cf26`. Its original Hub Parquet SHA-256 is
+`518e2896749b4d6e957d7e9fb0ae16f75c28954e50ef84303889070253cf8ecd`.
+That serialization and the locally audited `39f9da7a...` file have identical
+ordered task content (hash `90ee915016105f6a709f391e8a03a6d0e99bc5c908f945cdf7b80d0cb289e789`).
+This resolves source identity, not anonymous access or redistribution rights.
+
+The initial educational metadata resolved to revision
 `5cc61a045c8e5e95d1d9c87e22ccd0f699575aea` and lists:
 
 | File | Bytes | Observation |
@@ -47,7 +92,7 @@ The educational metadata currently resolves to revision
 | `LPM_videos.parquet` | 16,801,231 | Release annotation table |
 | `LPM_slides.parquet` | 16,801,231 | Identical LFS object to `LPM_videos.parquet` |
 | `videos.zip` | 27,197,039,235 | Required external video archive; not downloaded by this audit |
-| `README.md` | 7,677 | Card has no explicit `configs` mapping |
+| `README.md` | 7,677 | Historical card had no explicit `configs` mapping; fixed in the follow-up |
 | `.gitattributes` | 110 | Repository metadata |
 
 Both Parquet names have SHA-256
@@ -77,7 +122,7 @@ An educational path is, for example,
 `DenseVideo-LPM/videos/dDPcUO41nkE.mp4`. Resolve it under an explicit data root;
 retain the relative path or use the known educational `videos/<basename>`
 layout. The published evaluator explicitly maps this Parquet file to a `test`
-split; the card currently does not declare that split itself.
+split; the updated source card now declares that split explicitly too.
 
 The locally available `Egodex_traj.parquet` has SHA-256
 `39f9da7aca9020d79f383953646a5893f09c6f8e5f60433560011280ee987b2d`,
@@ -92,12 +137,17 @@ list and it adds `answer_traj` (a JSON-encoded coordinate sequence string).
 coordinate sequence has exactly `frame_count` entries. All rows are 1920 by
 1080 at 30 FPS; frame counts range from 15 to 5,237. Paths have the form
 `egodex/add_remove_lid/0.mp4`; preserve the action directory to avoid basename
-collisions. The remote high-motion schema, config, revision, archive layout and
-license card could not be independently fetched.
+collisions. The initial non-owner audit could not fetch the remote source.
+The owner follow-up verified its annotation bytes, equivalent ordered task
+content, revision and source card; its archive contains all 3,243 referenced
+MP4 paths. This is not a fresh full-video decode or GPU evaluation claim.
 
-The existing public high-motion leaderboard is the **first 1,000 rows, with eight
-uniform endpoint-inclusive frames per clip**, not a full 3,243-row dense-frame
-evaluation. The legacy code selects that prefix by default. Its explicit
+The existing public high-motion leaderboard uses the **first 1,000 rows** and
+the scorer's target policy is eight uniform endpoint-inclusive frames, not a
+full 3,243-row dense-frame evaluation. Actual legacy GRT inputs do not follow
+that policy: 787/1,000 contain fewer than eight frames and 148 clips are
+truncated at ten seconds. Keep that result unranked and separate from aligned
+input protocols. The legacy code selects the prefix by default. Its explicit
 `DENSEVIDEO_HIGHMOTION_MAX_EXAMPLES=0` option selects all 3,243 examples; it does
 not change the default eight-frame budget. Report both example subset and frame
 policy with every result.
@@ -153,17 +203,17 @@ the release manifest's judge revision, generation settings, request fingerprints
 and per-example score artifacts. Disabled or failed judge calls must not be
 represented as genuine zero MOS observations.
 
-## Recommended Hub organization and compatibility
+## Hub organization and compatibility
 
-Use one discoverable `haichaozhang/DIVE-Bench` entry point with the two named
+The configured `haichaozhang/DIVE-Bench` entry point has the two named
 configurations, each with an explicit `test` split. A single repository is a
 convenience, not an HF requirement: the official
 [data-file configuration guide](https://huggingface.co/docs/hub/datasets-data-files-configuration)
 supports multiple configurations in one card. Do not concatenate the two tasks
 or average their unrelated primary metrics.
 
-Keep existing repository ids and pinned revisions usable. Add migration links to
-their cards when authorized; preserve `densevideo` and `densevideo_highmotion`
+Existing repository ids and pinned revisions remain usable; the updated source
+cards include migration links. Preserve `densevideo` and `densevideo_highmotion`
 as evaluator aliases. Preserve the exact published row order and annotate the
 1,000-row public high-motion profile explicitly; a full-split profile should have
 a distinct configuration/result label. Include stable example ids, source ids,
@@ -183,5 +233,6 @@ downloads plus deterministic annotation construction when redistribution rights
 for transformed videos or annotations have not been established. A combined
 card should not imply one new blanket license for all upstream content.
 
-This document recommends a migration; it does not assert owner permission to
-change existing repositories, grant dataset access, or redistribute assets.
+The owner authorized and completed the configuration-only migration above.
+It does not grant third-party access, resolve redistribution rights, or make the
+private high-motion annotations publicly downloadable.

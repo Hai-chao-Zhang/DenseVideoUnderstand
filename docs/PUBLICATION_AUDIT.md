@@ -39,10 +39,16 @@ is wall-clock processing throughput.
 
 ## What was checked
 
-- The live website JavaScript equals the 2026-08-20 frozen release byte for
+- At the initial audit, the live website's `data/leaderboard.js` equaled the 2026-08-20 frozen release byte for
   byte: SHA256 `c88492ec535a3bc4f47fe9e91f66bc050a857f757cd2c478db598e889d9dc1b1`.
   It contains 29 LPM rows, three High-Motion rows, and three promoted GRT
   families.
+  The 2026-09-14 complete HTML update retains that historical file unchanged
+  and adds separate audited assets for 29 Educational plus 27 High-Motion
+  results and all 12 educational candidate/control rows. Nine incompatible
+  High-Motion rows are visible but deliberately unranked. The minimal
+  verifier's `--website` option checks the retained historical file, not the
+  additional complete-page assets.
 - The audited commit's `leaderboard.md` equals the frozen Markdown byte for
   byte. The original workspace's uncommitted 2026-08-23 `leaderboard.md`
   differs: it omits all Open MOS values and all three verified GRT LPM rows,
@@ -81,8 +87,30 @@ development repository's ancestry is not distributed with the minimal code.
 The audited High-Motion task functions reproduce the saved prompt,
   target, and all five numeric metrics for every one of its 1,000 samples.
   Aggregates reproduce website values after the website's six-significant-
-  digit rounding. This verifies the task/scorer path, while fresh model
-  inference remains untested.
+  digit rounding. This verifies the task/scorer path, not alignment of the
+  frames actually passed to the model. A subsequent raw-log audit found that
+  the legacy high-motion GRT input sampler violates that target protocol.
+
+### High-motion input-protocol correction (2026-09-14)
+
+The archived GRT log SHA-256 is
+`36572368fba64a992248bb01320e732965ab49e0263e231315a7e7a2b0642cdb`.
+Its 1,000 `FPS_STATS` records contain actual sampled-frame counts
+`{2:254, 3:184, 4:162, 5:93, 6:54, 7:40, 8:213}`. Thus 787 inputs contain
+fewer than the target protocol's eight frames, and 148 records have
+`total_frames > capped_frames` under the ten-second limit. The nominal maximum
+of eight frames did not establish eight endpoint-inclusive whole-clip inputs.
+
+The historical GRT Grid Accuracy is 0.10125 versus 0.142875 for the 0.5B HF
+baseline (minus 4.1625 percentage points); its ADE, FDE, transition accuracy
+and Token-F1 are also worse. Their wrappers and input policies differ, so this
+is not a matched GRT ablation and does not establish a causal loss or gain.
+An aligned new run is required before claiming a high-motion GRT improvement.
+The old numeric archive remains unchanged for provenance, but this row must
+not participate in a protocol-aligned ranking. Six newer InternVL rows use
+midpoint rather than endpoint sampling, and two historical Gemini rows score
+full trajectories despite sparse input frames; they also require separate,
+explicitly unranked historical presentation.
 
 ## Publication and reproduction limitations
 
@@ -105,7 +133,7 @@ scores requires the original predictions/reference text and the pinned
 judge protocol, which are not included in this numeric-only package.
 
 The High-Motion website row is a historical 1,000-item preview. Its GRT
-wrapper is `llava_ov_dense_video`; the saved run used Decord, eight frames,
+wrapper is `llava_ov_dense_video`; the saved run used Decord, an eight-frame maximum,
 `dense_frame_fps=1`, a ten-second clip limit, threshold 0.05, and enabled
 scene merging. The original general leaderboard config now has different
 arguments. `configs/densevideo/grt_highmotion_historical.yaml` records the
@@ -115,10 +143,18 @@ fresh inference reproduction. Its saved Git hash identifies a base commit
 with uncommitted evaluation code; it must not be treated as a complete
 runtime source pin.
 
+Both framework integrations have since been submitted as draft PRs:
+[VLMEvalKit #1686](https://github.com/open-compass/VLMEvalKit/pull/1686) and
+[lmms-eval #1521](https://github.com/EvolvingLMMs-Lab/lmms-eval/pull/1521).
+Submission is not upstream acceptance or a completed GPU reproduction.
+
 Before describing the combined paper/code/data release as complete, align
 the paper version and two task names, make the chosen benchmark data
-revision accessible, and resolve the public website's "code forthcoming"
-and High-Motion mirror status. The current arXiv version and local ECCV
+revision accessible, and finish the new full GPU/judge reproduction.
+The website update links the published code and separates incompatible
+historical rows; the owner has configured both named Hub subtasks in a private
+combined entry while preserving source access controls. Neither update proves
+public data access. The current arXiv version and local ECCV
 paper differ in scope according to the separate paper audit. Framework
 submission should state the intended paper/version and dataset access
 requirements explicitly. No claims about framework acceptance are made
