@@ -52,6 +52,16 @@ class Qwen25GRTMetricsTest(unittest.TestCase):
         self.assertGreater(elapsed, decoding)
 
     def test_custom_loader_uses_pyav_metadata_and_preserves_eight_frame_input(self):
+        forbidden_reader = mock.Mock(
+            side_effect=AssertionError("custom PyAV loading must not instantiate Decord")
+        )
+        self._assert_custom_loader(SimpleNamespace(VideoReader=forbidden_reader))
+        forbidden_reader.assert_not_called()
+
+    def test_custom_loader_works_when_optional_decord_is_absent(self):
+        self._assert_custom_loader(None)
+
+    def _assert_custom_loader(self, decord_module):
         stream = SimpleNamespace(
             average_rate=Fraction(30, 1),
             frames=240,
@@ -83,11 +93,7 @@ class Qwen25GRTMetricsTest(unittest.TestCase):
                 "read_video_pyav_seek_base64",
                 return_value=encoded_frames,
             ) as pyav_sampler,
-            mock.patch.object(
-                qwen25_module.decord,
-                "VideoReader",
-                side_effect=AssertionError("custom PyAV loading must not instantiate Decord"),
-            ),
+            mock.patch.object(qwen25_module, "decord", decord_module),
             redirect_stdout(stream_output),
         ):
             actual = model._load_video_base64("fixture.mp4")
