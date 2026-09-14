@@ -36,7 +36,8 @@ requests with the pinned BF16 judge at batch 8 and generation cap 64. Peak
 allocated GPU memory was 83,987,359,232 bytes. This is a capacity observation,
 not an accuracy result or a guarantee for every future input.
 
-All saved reports remained `smoke_only`. A separate read-only audit recomputed
+All three reproduction reports recorded `quality.status=smoke_only`.
+A separate read-only audit recomputed
 the nine arms' configurations, identities, telemetry, MOS bindings and input
 fingerprints from their raw outputs. Receipt SHA-256 values are:
 
