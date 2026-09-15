@@ -3,12 +3,24 @@
 
   var dataset = window.DIVE_LEADERBOARD;
   var publicAudit = window.DIVE_PUBLIC_AUDIT;
+  var highmotionV2 = validatedHighmotionV2(publicAudit && publicAudit.highmotion_v2);
   if (dataset) {
     dataset = JSON.parse(JSON.stringify(dataset));
     // 2026-09-14 target/reference-consistency hold. Neither the immutable
     // archive nor a cached previously screened overlay may repopulate rankings.
     dataset.tracks.highmotion = [];
     delete dataset.tracks.highmotion_historical;
+    // Only the separately authenticated, versioned numeric summary may lift
+    // this display hold. Never merge archived High-Motion numbers into v2.
+    if (highmotionV2) {
+      dataset.tracks.highmotion = highmotionV2.rows.map(function (row) {
+        var display = Object.assign({}, row);
+        display.transition_acc = row.grid_transition_acc;
+        display.source = "open";
+        display.protocol_note = "v2 · fixed 1,000-record preview · corrected reference; cached baselines";
+        return display;
+      });
+    }
   }
   var table = document.getElementById("leaderboard-table");
   var tableHead = table ? table.querySelector("thead") : null;
@@ -23,6 +35,112 @@
   var grtQualification = document.getElementById("grt-family-qualification");
   var grtQualificationCount = document.getElementById("grt-family-qualification-count");
   var grtQualificationList = document.getElementById("grt-family-qualification-list");
+
+  function validatedHighmotionV2(payload) {
+    var metrics = ["grid_acc", "grid_ade", "grid_fde", "grid_transition_acc", "token_f1"];
+    var baselines = ["qwen3_vl_2b", "qwen3_vl_4b", "qwen3_vl_8b", "qwen3_vl_32b",
+      "qwen2_vl_2b", "qwen2_5_vl_3b", "qwen2_5_vl_7b", "qwen2_5_vl_32b", "qwen2_5_vl_72b",
+      "llava_onevision_0_5b", "llava_onevision_original", "qwen2_vl_7b", "llava_onevision_1_5_8b",
+      "llava_onevision_2_8b", "videollama3_2b", "videollama3_7b", "longva_7b", "phi4_multimodal"];
+    function object(value) { return value && typeof value === "object" && !Array.isArray(value); }
+    function hash(value) { return typeof value === "string" && /^[0-9a-f]{64}$/.test(value); }
+    function count(value, maximum) { return Number.isInteger(value) && value >= 0 && value <= maximum; }
+    function metricMap(value) {
+      return object(value) && Object.keys(value).length === 5 && metrics.every(function (key) {
+        return Object.prototype.hasOwnProperty.call(value, key);
+      });
+    }
+    function same(a, b) { return a === b || (typeof a === "number" && typeof b === "number" && Math.abs(a - b) <= 1e-15); }
+    function metricMaximum(key) { return key === "grid_ade" || key === "grid_fde" ? Math.SQRT2 : 1; }
+    try {
+      if (!object(payload) || payload.release_integrity_verified !== true || !hash(payload.release_manifest_sha256)
+          || !hash(payload.references_sha256) || !hash(payload.input_sequence_sha256)
+          || payload.status !== "numeric_reports_validated" || payload.benchmark_version !== "highmotion-right-ring-v2"
+          || payload.target_joint !== "rightRingFingerMetacarpal"
+          || payload.reference_policy !== "finite-positive-depth-in-frame-positive-confidence-v1"
+          || payload.scorer_version !== "position-preserving-masked-grid-v1"
+          || payload.source_reference_records !== 3243 || payload.scope !== "first-1000-source-rows"
+          || payload.method_count !== 19 || !Array.isArray(payload.rows) || payload.rows.length !== 19
+          || ["full_source_coverage", "inference_performed", "baseline_gpu_rerun", "automatic_publication",
+            "underlying_file_hashes_verified_by_this_function", "baseline_exact_weight_or_tensor_identity_proven",
+            "statistical_significance_claim"].some(function (key) {
+            return payload[key] !== false;
+          }) || typeof payload.comparison_caveat !== "string" || !payload.comparison_caveat.trim()) return null;
+      var comparison = payload.comparison;
+      if (!object(comparison) || comparison.baseline_method !== "llava_onevision_0_5b"
+          || typeof comparison.grt_method !== "string" || !/^[a-z][a-z0-9_.-]*$/.test(comparison.grt_method)
+          || baselines.indexOf(comparison.grt_method) !== -1 || comparison.primary_metric !== "grid_acc"
+          || comparison.point_tolerance !== 1e-12
+          || ["baseline_metrics", "grt_metrics", "grt_minus_baseline", "oriented_improvements", "metric_outperform"].some(function (key) {
+            return !metricMap(comparison[key]);
+          })) return null;
+      var methods = Object.create(null);
+      var sharedCoverage = null;
+      for (var index = 0; index < payload.rows.length; index += 1) {
+        var row = payload.rows[index];
+        if (!object(row) || typeof row.method !== "string" || methods[row.method]
+            || (baselines.indexOf(row.method) === -1 && row.method !== comparison.grt_method)
+            || typeof row.model !== "string" || !row.model.trim() || row.model.length > 300
+            || !hash(row.predictions_sha256) || row.samples !== 1000 || row.records !== 1000
+            || row.sampled_slots !== 8000 || !count(row.valid_slots, 8000)
+            || !count(row.records_with_scored_slots, 1000) || !count(row.records_without_scored_slots, 1000)
+            || row.records_with_scored_slots + row.records_without_scored_slots !== 1000
+            || row.valid_slots < row.records_with_scored_slots || row.valid_slots > 8 * row.records_with_scored_slots
+            || row.prediction_source !== (row.method === comparison.grt_method ? "new_grt" : "archived_baseline")
+            || !metricMap(row.metric_scored_records) || !metricMap(row.metric_scored_slots_or_edges)) return null;
+        for (var m = 0; m < metrics.length; m += 1) {
+          var key = metrics[m];
+          var records = row.metric_scored_records[key];
+          var slots = row.metric_scored_slots_or_edges[key];
+          var value = row[key];
+          if (!count(records, 1000) || !count(slots, key === "grid_transition_acc" ? 7000 : 8000)
+              || records > row.records_with_scored_slots || (records === 0) !== (slots === 0)
+              || (value === null) !== (records === 0)
+              || (value !== null && (typeof value !== "number" || !Number.isFinite(value) || value < 0 || value > metricMaximum(key)))) return null;
+          if (key === "grid_acc" || key === "grid_ade" || key === "token_f1") {
+            if (records !== row.records_with_scored_slots || slots !== row.valid_slots) return null;
+          } else if (key === "grid_fde") {
+            if (slots !== records) return null;
+          } else if (slots < records || slots > 7 * records) return null;
+        }
+        var coverage = [row.records_with_scored_slots, row.records_without_scored_slots, row.valid_slots].concat(
+          metrics.map(function (key) { return row.metric_scored_records[key]; }),
+          metrics.map(function (key) { return row.metric_scored_slots_or_edges[key]; })).join(",");
+        if (sharedCoverage !== null && coverage !== sharedCoverage) return null;
+        sharedCoverage = coverage;
+        if (row.grid_acc === null ? row.rank !== null : (!count(row.rank, 19) || row.rank === 0)) return null;
+        if (index > 0 && row.rank !== null && (payload.rows[index - 1].rank === null
+            || row.rank < payload.rows[index - 1].rank)) return null;
+        methods[row.method] = row;
+      }
+      if (!baselines.every(function (method) { return methods[method]; }) || !methods[comparison.grt_method]) return null;
+      // Check the supplied ranks; do not replace or recompute display ranks.
+      var ordered = payload.rows.slice().sort(function (a, b) {
+        if (a.grid_acc === null) return b.grid_acc === null ? 0 : 1;
+        if (b.grid_acc === null) return -1;
+        return b.grid_acc - a.grid_acc;
+      });
+      for (var position = 0; position < ordered.length; position += 1) {
+        var current = ordered[position];
+        if (current.grid_acc !== null && current.rank !== (position > 0 && current.grid_acc === ordered[position - 1].grid_acc
+            ? ordered[position - 1].rank : position + 1)) return null;
+      }
+      var baseline = methods[comparison.baseline_method];
+      var candidate = methods[comparison.grt_method];
+      for (var metricIndex = 0; metricIndex < metrics.length; metricIndex += 1) {
+        var metric = metrics[metricIndex];
+        var delta = candidate[metric] === null ? null : candidate[metric] - baseline[metric];
+        var oriented = delta === null ? null : (metric === "grid_ade" || metric === "grid_fde" ? -delta : delta);
+        if (!same(comparison.baseline_metrics[metric], baseline[metric]) || !same(comparison.grt_metrics[metric], candidate[metric])
+            || !same(comparison.grt_minus_baseline[metric], delta) || !same(comparison.oriented_improvements[metric], oriented)
+            || comparison.metric_outperform[metric] !== (oriented === null ? null : oriented > comparison.point_tolerance)) return null;
+      }
+      if (comparison.grid_acc_outperform !== (comparison.metric_outperform.grid_acc === true)) return null;
+      return JSON.parse(JSON.stringify(payload));
+    } catch (error) {
+      return null;
+    }
+  }
 
   var grtFamilyLabels = {
     route31: "Route31",
@@ -97,16 +215,30 @@
     ]
   };
 
+  if (highmotionV2) {
+    columns.highmotion = columns.highmotion.filter(function (column) { return column.key !== "effective_fps"; });
+    metricDefinitions.highmotion = [
+      ["Scope", "High-Motion v2 uses the fixed first 1,000 source records, not the full 3,243-record benchmark. Every method uses the same valid-reference mask; cell coverage lists scored rows and slots or edges."],
+      ["Target", "The right-hand ring-finger metacarpal (rightRingFingerMetacarpal) is the source-defined palm proxy in this version. A valid projected reference is not proof of RGB visibility."],
+      ["Grid Acc ↑", "Macro mean of per-row accuracy over valid sampled reference positions. Invalid references are excluded, not scored as correct."],
+      ["Grid ADE ↓", "Macro mean of per-row normalized grid-center distances over valid reference positions. Missing or malformed predictions receive √2."],
+      ["Grid FDE ↓", "Distance at the original final sampled position. Undefined when that reference is invalid; the last valid earlier position is not substituted."],
+      ["Transition Acc ↑", "Macro mean of accuracy over adjacent valid sampled positions only. Masked gaps are never bridged."],
+      ["Token F1 ↑", "Canonical region-label overlap on valid positions, with surplus prediction slots penalized. This is not a temporal-order metric."],
+      ["Missing values", "An em dash means undefined or unreported, never zero. Baselines are rescored archived predictions; exact historical weights and input tensors are not proven."]
+    ];
+  }
+
   var codeSamples = {
     setup: {
       filename: "setup.sh",
       value: [
-        "git clone --branch release/dive-bench-minimal --single-branch \\",
+        "git clone --branch fix/highmotion-target-v2 --single-branch \\",
         "  https://github.com/Hai-chao-Zhang/DenseVideoUnderstand.git DIVE-Bench",
         "cd DIVE-Bench",
-        "git checkout 9ee16af0d03d7f31e726b71f00e4586972afb062",
         "python -m pip install 'PyYAML>=6'",
-        "# 29 Educational results + 12 comparison rows; High-Motion results withheld.",
+        "# 29 Educational + 19 High-Motion preview + 12 comparison rows (60 CSV records).",
+        "# Pinned v2 manifest: 1f64ff54ec8eb09d72c37d6ef3a944e8ccae0a58fe5b4d45fabdfb0a7449d0dc",
         "python -m tools.densevideo.build_complete_leaderboard --verify-only",
         "python -m tools.densevideo.build_complete_leaderboard --output outputs/leaderboard-complete",
         "# Open outputs/leaderboard-complete/leaderboard.html; output must be new."
@@ -132,14 +264,17 @@
       value: [
         "Educational High-FPS Videos:",
         "  dive_bench_educational_high_fps                 # 634 QA / 317 videos",
-        "High-Motion High-FPS Videos:",
-        "  dive_bench_high_motion_high_fps                # full 3,243 items",
-        "  dive_bench_high_motion_high_fps_preview1000    # fixed first 1,000",
+        "High-Motion input-task compatibility names:",
+        "  dive_bench_high_motion_high_fps                # full 3,243 source items",
+        "  dive_bench_high_motion_high_fps_preview1000    # fixed first 1,000 source items",
         "",
         "Legacy aliases: densevideo, densevideo_highmotion",
-        "High-Motion quality results are withheld pending target/reference review.",
-        "Keep full-split, preview and historical misaligned protocols separate.",
-        "See the released docs/REPRODUCTION.md for data and frame requirements."
+        "Published High-Motion scores use highmotion-right-ring-v2 references.",
+        "Legacy task metrics are NOT corrected v2 scores; score saved predictions separately.",
+        "The current release is the fixed 1,000-record preview, not the full 3,243.",
+        "GRT improves Grid Accuracy; Transition Accuracy regresses against its 0.5B baseline.",
+        "See docs/HIGHMOTION_REFERENCE_V2.md and docs/HIGHMOTION_V2_REPRODUCTION.md.",
+        "Fresh inference requires separately authorized private source media."
       ].join("\n")
     }
   };
@@ -169,6 +304,7 @@
   }
 
   function isGrtMethod(method) {
+    if (state.track === "highmotion") return Boolean(highmotionV2 && method === highmotionV2.comparison.grt_method);
     return grtMethodIds().indexOf(method) !== -1;
   }
 
@@ -191,11 +327,18 @@
     if (column.format === "method") return '<span class="method-id" title="' + escapeHtml(value) + '">' + escapeHtml(value) + "</span>";
     if (column.format === "source") return '<span class="source-chip source-' + escapeHtml(value) + '">' + escapeHtml(value) + "</span>";
     if (column.key === "rank") {
+      if (value === null || value === undefined) return '<span title="Not ranked">—</span>';
       var medalClass = value <= 3 ? " rank-" + value : "";
       return '<span class="rank-medal' + medalClass + '">' + escapeHtml(value) + "</span>";
     }
     var formatted = formatNumber(value, column.format);
     var title = value === null || value === undefined || value === "" ? "Not reported" : escapeHtml(value);
+    var metric = column.key === "transition_acc" ? "grid_transition_acc" : column.key;
+    if (state.track === "highmotion" && highmotionV2 && Object.prototype.hasOwnProperty.call(row.metric_scored_records, metric)) {
+      var coverage = formatNumber(row.metric_scored_records[metric], "integer") + " rows · " +
+        formatNumber(row.metric_scored_slots_or_edges[metric], "integer") + (metric === "grid_transition_acc" ? " edges" : " slots");
+      return '<span title="' + title + '">' + formatted + '</span><br><small class="metric-coverage">' + coverage + '</small>';
+    }
     return '<span title="' + title + '">' + formatted + "</span>";
   }
 
@@ -250,7 +393,7 @@
   function renderBody(rows) {
     table.setAttribute("data-empty", rows.length ? "false" : "true");
     if (!rows.length) {
-      var emptyMessage = state.track === "highmotion" ? "High-Motion results withheld pending target/reference consistency review." : "No models match this filter.";
+      var emptyMessage = state.track === "highmotion" && !highmotionV2 ? "High-Motion results withheld pending target/reference consistency review." : "No models match this filter.";
       tableBody.innerHTML = '<tr class="table-empty"><td colspan="' + columns[state.track].length + '">' + emptyMessage + '</td></tr>';
       return;
     }
@@ -301,6 +444,18 @@
         summaryCard("Highest reported Open MOS (" + scoredCount + "/" + rows.length + " scored)", null, "open_mos", "Open MOS", false),
         summaryCard("Top open model", null, "open_mos", "Open MOS", false, "open"),
         '<div class="summary-card"><span>Reported GRT telemetry (' + grtRows.length + ' verified profile' + (grtRows.length === 1 ? '' : 's') + ')</span><strong>' + (telemetryGrt ? formatNumber(telemetryGrt.recompute_ratio, "ratio") : "—") + ' lowest patch recompute</strong><small>' + (telemetryGrt ? escapeHtml(telemetryGrt.model) + ' · ' : '') + (telemetryGrt ? formatNumber(telemetryGrt.reference_recompute_ratio, "ratio") : "—") + ' reference compute · ' + (telemetryGrt ? formatNumber(telemetryGrt.effective_fps, "score") : "—") + ' sampling density · ' + (telemetryGrt ? formatNumber(telemetryGrt.throughput_fps, "score") : "—") + " throughput (fps)</small></div>"
+      ].join("");
+    } else if (highmotionV2) {
+      var coverage = rows[0];
+      var delta = highmotionV2.comparison.grt_minus_baseline.grid_acc;
+      var deltaText = delta === null ? "—" : (delta > 0 ? "+" : "") + (delta === 0 ? "0" : Number(delta).toPrecision(5));
+      summary.innerHTML = [
+        '<div class="summary-card"><span>High-Motion v2 scope</span><strong>Fixed 1,000-record preview</strong><small>Not the full 3,243-record benchmark · ' +
+          formatNumber(coverage.records_with_scored_slots, "integer") + ' rows with valid references · ' + formatNumber(coverage.valid_slots, "integer") + ' valid sampled slots</small></div>',
+        '<div class="summary-card"><span>GRT vs corresponding 0.5B baseline</span><strong>' + escapeHtml(deltaText) +
+          ' Grid Acc difference</strong><small>New GRT predictions compared with the same corrected-reference rescoring of the archived baseline. No statistical-significance claim.</small></div>',
+        '<div class="summary-card"><span>Comparison evidence</span><strong>' + rows.length + ' methods · common reference mask</strong><small>' +
+          escapeHtml(highmotionV2.comparison_caveat) + '</small></div>'
       ].join("");
     } else {
       summary.innerHTML = '<div class="summary-card"><span>High-Motion release status</span><strong>Results withheld</strong><small>Target/reference consistency review is incomplete. No GRT superiority claim is supported.</small></div>';
@@ -379,8 +534,12 @@
       button.classList.toggle("is-active", selected);
       button.setAttribute("aria-pressed", String(selected));
     });
-    caption.textContent = track === "lpm" ? "DIVE-Bench Educational High-FPS Videos leaderboard" : "DIVE-Bench High-Motion High-FPS Videos: results withheld pending reference review";
-    rankingRule.textContent = track === "lpm" ? "Open MOS (reported first; missing last), then Token F1" : "No ranking: target/reference review pending";
+    caption.textContent = track === "lpm" ? "DIVE-Bench Educational High-FPS Videos leaderboard" :
+      highmotionV2 ? "DIVE-Bench High-Motion v2 · fixed 1,000-record preview (not full 3,243)" :
+        "DIVE-Bench High-Motion High-FPS Videos: results withheld pending reference review";
+    rankingRule.textContent = track === "lpm" ? "Open MOS (reported first; missing last), then Token F1" :
+      highmotionV2 ? "Validated server ranks: Grid Acc descending; exact ties share rank; undefined values last" :
+        "No ranking: target/reference review pending";
     renderSummary();
     renderGlossary();
     renderTable();

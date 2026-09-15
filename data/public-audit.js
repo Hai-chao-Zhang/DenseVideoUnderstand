@@ -193,5 +193,725 @@ window.DIVE_PUBLIC_AUDIT = {
   "highmotion_historical_protocol_screened_candidates": 18,
   "highmotion_release_eligible_rows": 0,
   "highmotion_evidence_file": "highmotion-audit.json",
-  "highmotion_evidence_sha256": "f2358a0ae2f61ae15d0e03436c640fed128b26cf591db3a9e97e668aa562683d"
+  "highmotion_evidence_sha256": "f2358a0ae2f61ae15d0e03436c640fed128b26cf591db3a9e97e668aa562683d",
+  "highmotion_v2": {
+    "status": "numeric_reports_validated",
+    "benchmark_version": "highmotion-right-ring-v2",
+    "target_joint": "rightRingFingerMetacarpal",
+    "reference_policy": "finite-positive-depth-in-frame-positive-confidence-v1",
+    "scorer_version": "position-preserving-masked-grid-v1",
+    "references_sha256": "140ae69160d5777bbf24381ea02980481c40a638cdc2e3f69b20894c95fd6f8b",
+    "input_sequence_sha256": "646509f9f1a96e4350772053d9aa75a99ae49b3111beda43ab54e1a763060509",
+    "scope": "first-1000-source-rows",
+    "source_reference_records": 3243,
+    "full_source_coverage": false,
+    "method_count": 19,
+    "rows": [
+      {
+        "method": "llava_onevision_2_8b",
+        "samples": 1000,
+        "prediction_source": "archived_baseline",
+        "predictions_sha256": "af4229d6a9013cb8c4809a217ac6ce964f60ad76a58dcb432221ecd1561c0a31",
+        "grid_acc": 0.5122794646313811,
+        "grid_ade": 0.2793131578105655,
+        "grid_fde": 0.20621202409972453,
+        "grid_transition_acc": 0.7317013190252626,
+        "token_f1": 0.5133925114761352,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 1,
+        "model": "LLaVA-OneVision-2-8B-Instruct"
+      },
+      {
+        "method": "qwen3_vl_8b",
+        "samples": 1000,
+        "prediction_source": "archived_baseline",
+        "predictions_sha256": "caa5ee6a8b93d22cdb3051723134a83d957a1a126a6e36ee18962896e29f843d",
+        "grid_acc": 0.4267449256125214,
+        "grid_ade": 0.35762433612275757,
+        "grid_fde": 0.31044310394904157,
+        "grid_transition_acc": 0.7348787167449139,
+        "token_f1": 0.4269384989768265,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 2,
+        "model": "Qwen3-VL-8B-Instruct"
+      },
+      {
+        "method": "llava_onevision_1_5_8b",
+        "samples": 1000,
+        "prediction_source": "archived_baseline",
+        "predictions_sha256": "48f30a494a409cca0b1268c4c4eceba7382b8110e6f6234e7aab08719f8807fb",
+        "grid_acc": 0.419579945799458,
+        "grid_ade": 0.37462538425672026,
+        "grid_fde": 0.3533699544676195,
+        "grid_transition_acc": 0.7297479320366643,
+        "token_f1": 0.419579945799458,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 3,
+        "model": "LLaVA-OneVision-1.5-8B-Instruct"
+      },
+      {
+        "method": "videollama3_7b",
+        "samples": 1000,
+        "prediction_source": "archived_baseline",
+        "predictions_sha256": "3fc1459e31501a82a328cfd15fb0b8b16daeb454fefe8923cea2063844aee25e",
+        "grid_acc": 0.41614678391681875,
+        "grid_ade": 0.4798981741491428,
+        "grid_fde": 0.5913126509138094,
+        "grid_transition_acc": 0.44078917952157387,
+        "token_f1": 0.46276754604280734,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 4,
+        "model": "VideoLLaMA3-7B"
+      },
+      {
+        "method": "qwen3_vl_32b",
+        "samples": 1000,
+        "prediction_source": "archived_baseline",
+        "predictions_sha256": "89e072f275782b9a31da5059990ace1cae410c95de7350ed9f6754ed968eb82c",
+        "grid_acc": 0.36090094574415127,
+        "grid_ade": 0.3844343216333489,
+        "grid_fde": 0.3926969349119925,
+        "grid_transition_acc": 0.7252598926894701,
+        "token_f1": 0.36374923953321164,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 5,
+        "model": "Qwen3-VL-32B-Instruct"
+      },
+      {
+        "method": "qwen3_vl_4b",
+        "samples": 1000,
+        "prediction_source": "archived_baseline",
+        "predictions_sha256": "a3a1cc5f8c5873f875c2ff9db4062325796e2296f6199820572ff9d63cd5a31b",
+        "grid_acc": 0.3599856202643659,
+        "grid_ade": 0.3598769095483688,
+        "grid_fde": 0.3682792596372705,
+        "grid_transition_acc": 0.7351134585289516,
+        "token_f1": 0.3599856202643659,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 6,
+        "model": "Qwen3-VL-4B-Instruct"
+      },
+      {
+        "method": "qwen3_vl_2b",
+        "samples": 1000,
+        "prediction_source": "archived_baseline",
+        "predictions_sha256": "e12009e1b4f9aa487367c409a0ec9676da793d0e499dfbd9ff357c18d4f0d15d",
+        "grid_acc": 0.27578397212543554,
+        "grid_ade": 0.4233958064752732,
+        "grid_fde": 0.47179470451587696,
+        "grid_transition_acc": 0.31308126536999775,
+        "token_f1": 0.3542802338969586,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 7,
+        "model": "Qwen3-VL-2B-Instruct"
+      },
+      {
+        "method": "qwen2_5_vl_72b",
+        "samples": 1000,
+        "prediction_source": "archived_baseline",
+        "predictions_sha256": "0c9d61a5dba105fe7e5be6f60cbcbf641272df0ce1ba67db03d05dc9ef0781e7",
+        "grid_acc": 0.23560228969636635,
+        "grid_ade": 0.5134065622303455,
+        "grid_fde": 0.569023919883263,
+        "grid_transition_acc": 0.6488793874357255,
+        "token_f1": 0.258947237431558,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 8,
+        "model": "Qwen2.5-VL-72B-Instruct"
+      },
+      {
+        "method": "qwen2_5_vl_32b",
+        "samples": 1000,
+        "prediction_source": "archived_baseline",
+        "predictions_sha256": "a8cd6ec8f3ac388d7d992696f90385331cf2b719f4b4f22d6c079877f4ed86a5",
+        "grid_acc": 0.1764836015707096,
+        "grid_ade": 0.5052190496189395,
+        "grid_fde": 0.5049833432756282,
+        "grid_transition_acc": 0.5600603621730382,
+        "token_f1": 0.18960066684036192,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 9,
+        "model": "Qwen2.5-VL-32B-Instruct"
+      },
+      {
+        "method": "longva_7b",
+        "samples": 1000,
+        "prediction_source": "archived_baseline",
+        "predictions_sha256": "ae1d1c1049a97b0d75b41eec40ec5b8ddaff16f83ad6bcedbf9a91a5d3689a21",
+        "grid_acc": 0.07606050550301421,
+        "grid_ade": 0.7704764150355778,
+        "grid_fde": 0.632580567585505,
+        "grid_transition_acc": 0.12053152246814218,
+        "token_f1": 0.15590813561196837,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 10,
+        "model": "LongVA-7B"
+      },
+      {
+        "method": "phi4_multimodal",
+        "samples": 1000,
+        "prediction_source": "archived_baseline",
+        "predictions_sha256": "d91465a3ca94f4ab56ea6592712b82aea015fe1ed4314463e67e0dd8c1932052",
+        "grid_acc": 0.07220148221890382,
+        "grid_ade": 1.1359008174217458,
+        "grid_fde": 1.214505894513635,
+        "grid_transition_acc": 0.01807511737089202,
+        "token_f1": 0.11381967421114787,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 11,
+        "model": "Phi-4-multimodal-instruct"
+      },
+      {
+        "method": "qwen2_vl_2b",
+        "samples": 1000,
+        "prediction_source": "archived_baseline",
+        "predictions_sha256": "c6a3eebe50897163bb76d4de82c2b70a5ae51040b749854676963aff0a6977ff",
+        "grid_acc": 0.06565455450472872,
+        "grid_ade": 0.7717884515471894,
+        "grid_fde": 0.6258014900195608,
+        "grid_transition_acc": 0.22587189805499666,
+        "token_f1": 0.10536671584641144,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 12,
+        "model": "Qwen2-VL-2B-Instruct"
+      },
+      {
+        "method": "llava_onevision_original",
+        "samples": 1000,
+        "prediction_source": "archived_baseline",
+        "predictions_sha256": "ea700324136e6574463ee7cb46d995726dc8b1e37eeca5d752ec2de5a680a5ab",
+        "grid_acc": 0.062477185996349764,
+        "grid_ade": 0.8811756407113336,
+        "grid_fde": 0.846690903834584,
+        "grid_transition_acc": 0.1856164766376034,
+        "token_f1": 0.11620433948779921,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 13,
+        "model": "LLaVA-OneVision HF 7B"
+      },
+      {
+        "method": "videollama3_2b",
+        "samples": 1000,
+        "prediction_source": "archived_baseline",
+        "predictions_sha256": "873e1d1614a231b0317ca5a48ab19aaf970fdd5cf4e5fb8bc8c793323958b75e",
+        "grid_acc": 0.054937503456667224,
+        "grid_ade": 1.1249133087519607,
+        "grid_fde": 1.1502064483066452,
+        "grid_transition_acc": 0.0005030181086519114,
+        "token_f1": 0.11510440949362859,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 14,
+        "model": "VideoLLaMA3-2B"
+      },
+      {
+        "method": "qwen2_vl_7b",
+        "samples": 1000,
+        "prediction_source": "archived_baseline",
+        "predictions_sha256": "c3e371971e56eb63c09f5fa6ad328ce4c2d8adce30572f7eb8cf492e6f2dc64a",
+        "grid_acc": 0.052411371052486035,
+        "grid_ade": 0.8557206423942377,
+        "grid_fde": 0.9054822721216692,
+        "grid_transition_acc": 0.30432036664431034,
+        "token_f1": 0.06989795918367347,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 15,
+        "model": "Qwen2-VL-7B-Instruct"
+      },
+      {
+        "method": "grt_llava_hf_0_5b_motion_ssim_t0001",
+        "samples": 1000,
+        "prediction_source": "new_grt",
+        "predictions_sha256": "dd3d6f45c0aa3d35e2116a367aaac1cae81fec807187180f249ff9fbaf04aaa5",
+        "grid_acc": 0.049503622587246277,
+        "grid_ade": 1.0862032974124285,
+        "grid_fde": 1.067214162928631,
+        "grid_transition_acc": 0.00534037558685446,
+        "token_f1": 0.045052470607675664,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 16,
+        "model": "GRT · LLaVA-OneVision HF 0.5B (motion SSIM 0.001)"
+      },
+      {
+        "method": "llava_onevision_0_5b",
+        "samples": 1000,
+        "prediction_source": "archived_baseline",
+        "predictions_sha256": "f9616d1effa3bf94112be04d5ce9eb090b702a346662ffd43aaaa7d68aa08bd6",
+        "grid_acc": 0.04686825949892152,
+        "grid_ade": 1.0964107152122904,
+        "grid_fde": 1.077715207452239,
+        "grid_transition_acc": 0.005684104627766599,
+        "token_f1": 0.04189832856152993,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 17,
+        "model": "LLaVA-OneVision HF 0.5B"
+      },
+      {
+        "method": "qwen2_5_vl_3b",
+        "samples": 1000,
+        "prediction_source": "archived_baseline",
+        "predictions_sha256": "aee597078b47931736538428b3ab182ed6b15bed7871dfbeb85a779580e60361",
+        "grid_acc": 0.015086278413804546,
+        "grid_ade": 0.932862975056836,
+        "grid_fde": 0.9988247731859704,
+        "grid_transition_acc": 0.5760088307623519,
+        "token_f1": 0.02018693656324318,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 18,
+        "model": "Qwen2.5-VL-3B-Instruct"
+      },
+      {
+        "method": "qwen2_5_vl_7b",
+        "samples": 1000,
+        "prediction_source": "archived_baseline",
+        "predictions_sha256": "fe61d4afc69210b933312f066e6c58b39b810b8f0c084a797b76bfa9b9269ac2",
+        "grid_acc": 0.014920358387257342,
+        "grid_ade": 1.1887622443182855,
+        "grid_fde": 1.300770002610664,
+        "grid_transition_acc": 0.5793958193606081,
+        "token_f1": 0.013571240015064262,
+        "records": 1000,
+        "records_with_scored_slots": 861,
+        "records_without_scored_slots": 139,
+        "sampled_slots": 8000,
+        "valid_slots": 6015,
+        "metric_scored_records": {
+          "grid_acc": 861,
+          "grid_ade": 861,
+          "grid_fde": 669,
+          "grid_transition_acc": 852,
+          "token_f1": 861
+        },
+        "metric_scored_slots_or_edges": {
+          "grid_acc": 6015,
+          "grid_ade": 6015,
+          "grid_fde": 669,
+          "grid_transition_acc": 5101,
+          "token_f1": 6015
+        },
+        "rank": 19,
+        "model": "Qwen2.5-VL-7B-Instruct"
+      }
+    ],
+    "ranking": "Grid Accuracy descending; exact ties share competition rank, ordered by method; null unranked",
+    "comparison": {
+      "baseline_method": "llava_onevision_0_5b",
+      "grt_method": "grt_llava_hf_0_5b_motion_ssim_t0001",
+      "primary_metric": "grid_acc",
+      "point_tolerance": 1e-12,
+      "baseline_metrics": {
+        "grid_acc": 0.04686825949892152,
+        "grid_ade": 1.0964107152122904,
+        "grid_fde": 1.077715207452239,
+        "grid_transition_acc": 0.005684104627766599,
+        "token_f1": 0.04189832856152993
+      },
+      "grt_metrics": {
+        "grid_acc": 0.049503622587246277,
+        "grid_ade": 1.0862032974124285,
+        "grid_fde": 1.067214162928631,
+        "grid_transition_acc": 0.00534037558685446,
+        "token_f1": 0.045052470607675664
+      },
+      "grt_minus_baseline": {
+        "grid_acc": 0.002635363088324759,
+        "grid_ade": -0.010207417799861895,
+        "grid_fde": -0.010501044523608005,
+        "grid_transition_acc": -0.0003437290409121392,
+        "token_f1": 0.0031541420461457317
+      },
+      "oriented_improvements": {
+        "grid_acc": 0.002635363088324759,
+        "grid_ade": 0.010207417799861895,
+        "grid_fde": 0.010501044523608005,
+        "grid_transition_acc": -0.0003437290409121392,
+        "token_f1": 0.0031541420461457317
+      },
+      "metric_outperform": {
+        "grid_acc": true,
+        "grid_ade": true,
+        "grid_fde": true,
+        "grid_transition_acc": false,
+        "token_f1": true
+      },
+      "grid_acc_outperform": true
+    },
+    "comparison_caveat": "New GRT predictions versus rescored, configuration-checked archived predictions; archived baseline weight revisions and consumed-tensor identity are unproven. This is not a freshly rerun byte-identical paired experiment or a statistical-significance claim.",
+    "underlying_file_hashes_verified_by_this_function": false,
+    "inference_performed": false,
+    "baseline_gpu_rerun": false,
+    "baseline_exact_weight_or_tensor_identity_proven": false,
+    "statistical_significance_claim": false,
+    "automatic_publication": false,
+    "release_integrity_verified": true,
+    "release_manifest_sha256": "1f64ff54ec8eb09d72c37d6ef3a944e8ccae0a58fe5b4d45fabdfb0a7449d0dc",
+    "audit_date": "2026-09-15",
+    "source_annotation_sha256": "518e2896749b4d6e957d7e9fb0ae16f75c28954e50ef84303889070253cf8ecd",
+    "source_code_sha256": {
+      "highmotion_reference_v2.py": "1ff34718c54f4fb6cf1a574af26b94d8188c8d278b58ab16f1e62cc959d0cfd7",
+      "build_highmotion_reference_v2.py": "3130848ce66665f77225f147540ca6bdc81e7ff4109eedd8b29f95b6b99902ac",
+      "highmotion_v2_scoring.py": "4a8786ba44800047d3eedafd18c6a5169ddb192e610c57f0c0683c506b837e9d",
+      "highmotion_v2_bundle.py": "ae60f97a6040eab8c948436a517dc787250920113269e0f09907fc6712aaf1c8"
+    },
+    "evidence_file_sha256": {
+      "generation_receipt.json": "29dc22b5eada6562e93af68d4a5aaa5436fc89ebdd5a43ca6dda6df3ea8adac7",
+      "numeric_reports.json.gz": "91915fe6195ff0184fdfc4507bf49c8c16a1028e1051722ebd8fd731fd5efd26",
+      "reference_audit.json": "ff4b38205210e8841b15d067a2a404211c4c8ac5d549bd1b1df803949524f272",
+      "reference_build_report.json": "b697ddcaf9dad4891de44bc7950be3bc6b2691b2316f88c9d856364e094904ca"
+    },
+    "full_frame_coverage": {
+      "all_invalid_rows": 646,
+      "frames": 826253,
+      "fully_valid_rows": 1379,
+      "invalid_frames": 195192,
+      "invalid_reason_counts": {
+        "invalid_confidence": 8846,
+        "missing_confidence": 74862,
+        "nonpositive_depth": 2885,
+        "out_of_frame": 137427
+      },
+      "rows": 3243,
+      "valid_frames": 631061
+    },
+    "uniform_eight_frame_coverage": {
+      "all_invalid_rows": 667,
+      "frames": 25944,
+      "fully_valid_rows": 1498,
+      "invalid_frames": 8005,
+      "invalid_reason_counts": {
+        "invalid_confidence": 444,
+        "missing_confidence": 3632,
+        "nonpositive_depth": 147,
+        "out_of_frame": 4966
+      },
+      "rows": 3243,
+      "valid_frames": 17939
+    },
+    "verification": "authenticated saved numeric evidence and reaggregation; no new inference, source projection or per-prediction rescoring",
+    "reference_geometry_recomputed_by_this_loader": false,
+    "raw_prediction_files_rehashed_by_this_loader": false
+  }
 };

@@ -3,48 +3,67 @@
 
 ## Project website
 
-### Public audit update — 14 September 2026
+### Public audit update — 15 September 2026
 
-The minimal evaluation/GRT code is public on
-[`release/dive-bench-minimal`](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/release/dive-bench-minimal).
+The current minimal evaluation/GRT code and corrected High-Motion release are on
+[`fix/highmotion-target-v2`](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/fix/highmotion-target-v2).
 Framework integrations are submitted Draft PRs:
 [VLMEvalKit #1686](https://github.com/open-compass/VLMEvalKit/pull/1686) and
 [lmms-eval #1521](https://github.com/EvolvingLMMs-Lab/lmms-eval/pull/1521), not merged/accepted.
 Historical README instructions below are retained as release-development history;
-use the minimal branch's current installation and reproduction instructions.
+use the current release branch's installation and reproduction instructions.
 
 `leaderboard.html` provides the current leaderboard without JavaScript:
-29 Educational results plus 12 educational GRT comparison rows (41 CSV records;
-the controls are not 12 additional methods). All High-Motion results are
-withheld pending target/reference consistency review. A bounded four-example
-reference-construction check found that archived trajectories correspond to a
-different source hand joint than the requested right-hand target; the full
-extent and original construction rules remain unresolved. This is not a GRT
-performance result or a claim that every benchmark item is affected.
+29 Educational results, 19 High-Motion v2 results, and 12 educational GRT
+comparison rows (60 CSV records; the controls are not 12 additional methods).
+High-Motion v2 uses the **fixed first 1,000 source records, not the full 3,243-record
+evaluation**. Questions and row order are unchanged. Corrected references name
+`rightRingFingerMetacarpal` explicitly as the right-palm/ring-finger-base proxy;
+invalid reference positions are masked without shifting later predictions.
+Each metric shows its own scored-row and slot/edge coverage; undefined values
+are not zero. See the
+[reference contract](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/fix/highmotion-target-v2/docs/HIGHMOTION_REFERENCE_V2.md).
+
+The v2 comparison contains 18 archived baselines rescored on CPU and one new
+fixed HF 0.5B GRT run. GRT's primary Grid Accuracy exceeds its corresponding
+archived HF 0.5B baseline under the same corrected-reference scoring, but
+**Transition Accuracy regresses**. The release retains every metric; it does
+not claim universal improvement or statistical significance. Archived baseline
+weight revisions and consumed input-tensor identity remain unproven: this is
+not a freshly rerun byte-identical paired experiment.
 
 The byte-identical 32-row `data/leaderboard.js` snapshot and complete 27-run
 `data/highmotion-audit.json` remain historical evidence. The latter retains its
-earlier 18 protocol-screened candidates and nine protocol exclusions, but none
-is currently approved for ranking. The browser ignores even cached or injected
-previously screened High-Motion overlays; HTML and CSV contain no High-Motion
-result rows. Educational numbers are unchanged.
+earlier 18 protocol-screened candidates and nine protocol exclusions; their old
+scores remain withheld and are not mixed into the corrected v2 cohort. The
+browser still ignores cached or injected legacy High-Motion overlays and accepts
+only the separately authenticated v2 summary. Educational numbers are unchanged.
 
 The educational comparison exposes all 12 candidate/control rows, including
 archived baselines, quality baselines and all-patch controls. Qwen 3B GRT improves
 Open MOS/Token F1 and patch reuse but has lower mean throughput than its all-patch
 control. The page does not claim every quality/efficiency metric improves.
 
-All six complete view/data assets come from the minimal branch's canonical
+All current leaderboard and evidence assets come from the release branch's canonical
 `tools.densevideo.build_complete_leaderboard` generator. It verifies the pinned
 release manifests, independently recomputes all 12 educational quality means
 from 7,608 numeric records, and verifies the unchanged 27-run High-Motion audit
-while withholding its rankings under the current release policy. Website JSON/CSV are outputs, not editable numeric
-sources. The JavaScript-free HTML includes its own CSS and can be viewed offline.
+while withholding its old scores. The separate
+[15 September numeric bundle](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/fix/highmotion-target-v2/release/2026-09-15)
+is authenticated and its v2 numeric contributions are reaggregated, without
+rerunning model inference or source projection. Its manifest SHA-256 is
+`1f64ff54ec8eb09d72c37d6ef3a944e8ccae0a58fe5b4d45fabdfb0a7449d0dc`.
+Website JSON/CSV are outputs, not editable numeric sources. The JavaScript-free
+HTML includes its own CSS and can be viewed offline.
 
-With a current minimal checkout and Python/PyYAML, regenerate and check the site:
+From the website checkout, clone the code separately (replace the example
+destination), then regenerate and check the site with Python/PyYAML:
 
 ```bash
+git clone --branch fix/highmotion-target-v2 --single-branch \
+  https://github.com/Hai-chao-Zhang/DenseVideoUnderstand.git /path/to/DIVE-Bench
 export DIVE_MINIMAL_ROOT=/path/to/DIVE-Bench
+python -m pip install 'PyYAML>=6'
 python scripts/build_audit_page.py
 python scripts/build_audit_page.py --check
 python -m unittest discover -s tests -v
@@ -52,10 +71,24 @@ python -m pytest tests -q
 ```
 
 Alternatively pass `--minimal-root /path/to/DIVE-Bench` to the wrapper, or install
-the minimal package. No GPU, model download, dataset access or token is used.
-The canonical command `python -m tools.densevideo.build_complete_leaderboard
---output /path/to/new-directory` creates a standalone offline view; an existing
-output directory is refused. Original release evidence remains unchanged.
+the current release package. The pinned High-Motion v2 bundle is included by
+default; no extra v2 flags are needed. This numeric rebuild requires no GPU,
+model download, dataset access or token.
+
+From the code checkout, `python -m tools.densevideo.build_complete_leaderboard
+--output /path/to/new-directory` creates the same current offline view; an
+existing output directory is refused. For the explicitly historical 41-record
+reference-hold view, use `python -m tools.densevideo.build_complete_leaderboard
+--legacy-reference-hold --output /path/to/new-legacy-directory`. Do not use that
+legacy output to replace the current site. Original release evidence remains
+unchanged.
+
+High-Motion source data remain private/access-controlled, and video/source
+licenses must be respected. Public numerical evidence does not grant source
+data access or redistribution rights. Actual reference construction and GPU
+generation require authorized inputs; use the
+[v2 reproduction recipe](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/fix/highmotion-target-v2/docs/HIGHMOTION_V2_REPRODUCTION.md),
+including its isolated original-annotation cache and model-byte checks.
 
 Four tests that inspect external, mutable Qwen3/LLaVA7 historical campaign trees are
 opt-in via `DIVE_RUN_ARCHIVED_CAMPAIGN_TESTS=1`; all synthetic validator, UI and
@@ -67,7 +100,9 @@ instead of silently skipping an explicitly requested check. The Qwen3 completion
 must be `completed.json` alongside its configured contract. Those four archival checks currently
 fail against legacy manifest paths/checksums and are **not claimed to pass**.
 The portable release's frozen numeric evidence is independently checked by its
-own verifier. Fresh full GPU/judge reproduction is not yet completed.
+own verifier. The new High-Motion GPU run covers the fixed 1,000-record preview;
+this does not establish full 3,243-record High-Motion evaluation or a fresh rerun
+of every Educational model and judge.
 
 Deployment source is this repository's `webpage` branch (GitHub Pages), not
 `main` or the minimal evaluation branch. The original live deployment was

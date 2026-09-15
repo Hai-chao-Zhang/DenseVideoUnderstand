@@ -53,7 +53,7 @@ class PublicAuditTests(unittest.TestCase):
         rendered = _render_ui(self.frozen, self.browser)
         self.assertEqual(rendered["comparisonHtml"].count("<tr>"), 12)
 
-    def test_full_27_run_evidence_is_preserved_but_all_current_hm_rows_are_withheld(self):
+    def test_full_27_run_evidence_keeps_legacy_hold_separate_from_v2(self):
         rows = self.browser["highmotion_additional"]
         self.assertEqual(rows, [])
         self.assertEqual(self.audit["highmotion_additional"], [])
@@ -68,14 +68,26 @@ class PublicAuditTests(unittest.TestCase):
         self.assertEqual(len(aligned), 18)
         self.assertIn("grt_llava_ov_0_5b", {row["method"] for row in historical})
         self.assertEqual(hashlib.sha256((ROOT / "data/highmotion-audit.json").read_bytes()).hexdigest(), "f2358a0ae2f61ae15d0e03436c640fed128b26cf591db3a9e97e668aa562683d")
+        self.assertEqual(self.audit["highmotion_v2"], self.browser["highmotion_v2"])
+        corrected = self.audit["highmotion_v2"]
+        self.assertIs(corrected["release_integrity_verified"], True)
+        self.assertEqual(corrected["release_manifest_sha256"],
+                         "1f64ff54ec8eb09d72c37d6ef3a944e8ccae0a58fe5b4d45fabdfb0a7449d0dc")
+        self.assertEqual(corrected["benchmark_version"], "highmotion-right-ring-v2")
+        self.assertEqual(corrected["scope"], "first-1000-source-rows")
+        self.assertEqual(corrected["source_reference_records"], 3243)
+        self.assertEqual(corrected["method_count"], 19)
+        self.assertIs(corrected["full_source_coverage"], False)
 
-    def test_browser_withholds_all_highmotion_rows(self):
+    def test_browser_displays_only_authenticated_highmotion_v2_rows(self):
         aligned = _render_ui(self.frozen, self.browser, "highmotion")
-        self.assertIn("Showing 0 of 0 methods", aligned["tableCount"])
-        self.assertIn("withheld pending target/reference", aligned["tableHtml"])
+        self.assertIn("Showing 19 of 19 methods", aligned["tableCount"])
+        self.assertEqual(aligned["badgeCount"], 1)
+        self.assertIn("metric-coverage", aligned["tableHtml"])
+        self.assertIn("fixed", aligned["summaryHtml"].lower())
         self.assertNotIn("grt_llava_ov_0_5b", aligned["tableHtml"])
-        for row in self.evidence["rows"]:
-            self.assertNotIn(row["method"], aligned["tableHtml"])
+        for row in self.browser["highmotion_v2"]["rows"]:
+            self.assertIn(row["method"], aligned["tableHtml"])
         unknown = _render_ui(self.frozen, self.browser, "highmotion_historical")
         self.assertEqual(unknown["tableHtml"].count("<tr>"), 29)
         self.assertNotIn("grt_llava_ov_0_5b", unknown["tableHtml"])
@@ -92,12 +104,14 @@ class PublicAuditTests(unittest.TestCase):
 
     def test_browser_rejects_stale_aligned_and_noneligible_overlay_rows(self):
         poisoned = deepcopy(self.browser)
+        poisoned.pop("highmotion_v2")
         poisoned["highmotion_additional"] = deepcopy(self.evidence["rows"])
         rendered = _render_ui(self.frozen, poisoned, "highmotion")
         self.assertIn("Showing 0 of 0 methods", rendered["tableCount"])
         for key, value in (("rank_eligible", True), ("protocol_status", "aligned_preview"), ("samples", 1000)):
             with self.subTest(key=key):
                 poisoned = deepcopy(self.browser)
+                poisoned.pop("highmotion_v2")
                 poisoned["highmotion_additional"] = deepcopy(self.evidence["rows"])
                 for row in poisoned["highmotion_additional"]:
                     row[key] = value
@@ -136,6 +150,7 @@ class PublicAuditTests(unittest.TestCase):
 
     def test_withheld_notes_cannot_inject_markup_and_comparison_labels_escape_it(self):
         injected = deepcopy(self.browser)
+        injected.pop("highmotion_v2")
         injected["highmotion_additional"] = deepcopy(self.evidence["rows"])
         injected["highmotion_additional"][0]["protocol_note"] = '<img src=x onerror="alert(1)">'
         injected["highmotion_hold_reason"] = '<img src=x onerror="alert(1)">'
@@ -146,27 +161,38 @@ class PublicAuditTests(unittest.TestCase):
         self.assertIn("&lt;script", rendered["comparisonHtml"])
         self.assertNotIn("<script", rendered["comparisonHtml"])
 
-    def test_complete_html_and_csv_include_only_29_educational_results_and_12_controls(self):
+    def test_complete_html_and_csv_preserve_educational_and_append_19_v2_rows(self):
         with (ROOT / "data/leaderboard-complete.csv").open() as stream:
             rows = list(csv.DictReader(stream))
         counts = {cohort: sum(row["cohort"] == cohort for row in rows) for cohort in {row["cohort"] for row in rows}}
-        self.assertEqual(counts, {"educational_published": 29, "educational_grt_controls": 12})
-        self.assertEqual(len(rows), 41)
-        self.assertNotIn("grid_acc", rows[0])
+        self.assertEqual(counts, {"educational_published": 29, "educational_grt_controls": 12,
+                                  "highmotion_right_ring_v2_preview1000": 19})
+        self.assertEqual(len(rows), 60)
+        self.assertTrue(all(row["grid_acc"] == "" for row in rows
+                            if row["cohort"] == "educational_published"))
         main = [row for row in rows if row["cohort"] != "educational_grt_controls"]
-        self.assertEqual(len({(row["cohort"], row["method"]) for row in main}), 29)
+        self.assertEqual(len({(row["cohort"], row["method"]) for row in main}), 48)
         for row in rows:
             self.assertIn(row["method"], self.html)
         self.assertNotIn("<script", self.html)
-        self.assertEqual(self.html.count("<tbody>"), 2)
+        self.assertEqual(self.html.count("<tbody>"), 4)
         self.assertIn("Complete protocol-screened leaderboard", self.html)
         self.assertNotIn("grt_llava_ov_0_5b", self.html)
         self.assertNotIn("highmotion-historical", self.html)
         hm_html = self.html.split('<h2 id="highmotion-aligned">', 1)[1].split('<h2 id="grt-controls">', 1)[0]
-        hm_ids = {row["method"] for row in rows if row["cohort"] == "highmotion_aligned_preview1000"}
+        self.assertNotIn("highmotion_aligned_preview1000", counts)
         for row in self.evidence["rows"]:
-            self.assertNotIn(row["method"], hm_ids)
             self.assertNotIn(row["method"], hm_html)
+        corrected_rows = {row["method"]: row for row in rows
+                          if row["cohort"] == "highmotion_right_ring_v2_preview1000"}
+        for expected in self.audit["highmotion_v2"]["rows"]:
+            actual = corrected_rows[expected["method"]]
+            self.assertEqual(actual["samples"], "1000")
+            self.assertEqual(actual["rank"], "" if expected["rank"] is None else str(expected["rank"]))
+            for metric in ("grid_acc", "grid_ade", "grid_fde", "grid_transition_acc", "token_f1"):
+                self.assertEqual(actual[metric], "" if expected[metric] is None else str(expected[metric]))
+                self.assertEqual(actual[metric + "_scored_records"], str(expected["metric_scored_records"][metric]))
+                self.assertEqual(actual[metric + "_scored_slots_or_edges"], str(expected["metric_scored_slots_or_edges"][metric]))
         for page in (self.html, (ROOT / "index.html").read_text()):
             self.assertNotIn("0.10125", page)
             self.assertIn("data/highmotion-audit.json", page)
@@ -183,12 +209,9 @@ class PublicAuditTests(unittest.TestCase):
     def test_changed_result_links_are_cache_versioned(self):
         index = (ROOT / "index.html").read_text()
         assets = ("leaderboard.html", "data/leaderboard-complete.csv", "data/public-audit.json")
-        # The unchanged canonical bundle retains its source-bound cache key;
-        # the updated landing page and app use the new installation-pin key.
-        for page, version in (
-            (self.html, "?v=20260914-target-hold"),
-            (index, "?v=20260914-export-guard"),
-        ):
+        manifest_key = self.audit["highmotion_v2"]["release_manifest_sha256"][:16]
+        for page, version in ((self.html, "?v=hm-v2-" + manifest_key),
+                              (index, "?v=20260915-hm-v2")):
             links = re.findall(r'href="([^"]+)"', page)
             changed = [link for link in links if any(link.startswith(asset) for asset in assets)]
             self.assertTrue(changed)
@@ -196,7 +219,8 @@ class PublicAuditTests(unittest.TestCase):
                 self.assertIn(version, link)
                 self.assertLess(link.index(version), link.index("#") if "#" in link else len(link))
         for asset in ("app.js", "styles.css", "data/public-audit.js"):
-            self.assertIn(asset + "?v=20260914-empty-state", index)
+            self.assertIn(asset + "?v=20260915-hm-v2", index)
+        self.assertIn("data/leaderboard.js?v=1f1b5a79c74ff763", index)
         self.assertNotIn("20260914-target-hold", index)
 
     def test_paper_scope_dataset_access_and_visual_inputs_are_explicit(self):
@@ -208,21 +232,50 @@ class PublicAuditTests(unittest.TestCase):
         self.assertIn("not an audio-input protocol", index)
         self.assertNotIn("Read, listen", index)
 
-    def test_complete_reproduction_uses_new_code_pin_but_keeps_manuscript_pin(self):
+    def test_complete_reproduction_uses_current_branch_and_manifest_but_keeps_manuscript_pin(self):
         index = (ROOT / "index.html").read_text()
         app = (ROOT / "app.js").read_text()
-        code_pin = "9ee16af0d03d7f31e726b71f00e4586972afb062"
+        manifest_pin = "1f64ff54ec8eb09d72c37d6ef3a944e8ccae0a58fe5b4d45fabdfb0a7449d0dc"
         paper_pin = "2a79fcce2707b1eb74648a5ed135c469b17eb4e1"
         for source in (index, app):
-            self.assertIn("git checkout " + code_pin, source)
+            self.assertIn("git clone --branch fix/highmotion-target-v2 --single-branch", source)
+            self.assertIn(manifest_pin, source)
+            self.assertNotIn("git checkout 9ee16af0d03d7f31e726b71f00e4586972afb062", source)
             self.assertNotIn("b720d636624166638a185202fd47d3eb56e17b38", source)
             self.assertIn("build_complete_leaderboard --verify-only", source)
             self.assertIn("build_complete_leaderboard --output outputs/leaderboard-complete", source)
-            self.assertIn("29 Educational results + 12 comparison rows", source)
+            self.assertIn("29 Educational + 19 High-Motion preview + 12 comparison rows", source)
+            self.assertIn("HIGHMOTION_REFERENCE_V2.md", source)
+            self.assertIn("HIGHMOTION_V2_REPRODUCTION.md", source)
         self.assertIn("blob/" + paper_pin + "/paper/ECCV_Dense_Video_Understanding.pdf", index)
         self.assertEqual(index.count(paper_pin), 1)
         self.assertNotIn(paper_pin, app)
-        self.assertIn("29 Educational results plus 12 educational GRT comparison rows", index)
+        self.assertIn("60 CSV records", index)
+        self.assertIn("release/2026-09-15/manifest.json", index)
+        self.assertIn("release/2026-09-15/numeric_reports.json.gz", index)
+
+    def test_current_v2_claims_match_all_five_source_bound_differences(self):
+        summary = self.audit["highmotion_v2"]
+        comparison = summary["comparison"]
+        by_method = {row["method"]: row for row in summary["rows"]}
+        baseline = by_method[comparison["baseline_method"]]
+        grt = by_method[comparison["grt_method"]]
+        self.assertEqual(comparison["baseline_method"], "llava_onevision_0_5b")
+        for metric in ("grid_acc", "grid_ade", "grid_fde", "grid_transition_acc", "token_f1"):
+            delta = grt[metric] - baseline[metric]
+            oriented = -delta if metric in ("grid_ade", "grid_fde") else delta
+            self.assertEqual(comparison["grt_minus_baseline"][metric], delta)
+            self.assertEqual(comparison["oriented_improvements"][metric], oriented)
+            self.assertEqual(comparison["metric_outperform"][metric], oriented > comparison["point_tolerance"])
+        for metric in ("grid_acc", "grid_ade", "grid_fde", "token_f1"):
+            self.assertTrue(comparison["metric_outperform"][metric])
+        self.assertFalse(comparison["metric_outperform"]["grid_transition_acc"])
+        self.assertLess(comparison["grt_minus_baseline"]["grid_transition_acc"], 0)
+        index = (ROOT / "index.html").read_text()
+        self.assertIn("Transition Accuracy regresses", index)
+        self.assertIn("not a full 3,243-record evaluation", index)
+        self.assertIn("Exact historical baseline weight revisions and consumed-tensor identity remain unproven", index)
+        self.assertIn("private source videos, HDF5 files and derived annotations are not bundled", index)
 
     def test_qualification_and_comparison_headings_are_educational_on_both_tabs(self):
         index = (ROOT / "index.html").read_text()
@@ -240,7 +293,7 @@ class PublicAuditTests(unittest.TestCase):
                 rendered["qualification"]["count"], "3 of 4 Educational GRT families promoted"
             )
             self.assertEqual(rendered["comparisonHtml"].count("<tr>"), 12)
-            self.assertEqual(rendered["tableHtml"].count("<tr>"), 29 if track == "lpm" else 0)
+            self.assertEqual(rendered["tableHtml"].count("<tr>"), 29 if track == "lpm" else 19)
 
     def test_external_archive_defaults_do_not_contain_private_machine_paths(self):
         for filename, variable in (

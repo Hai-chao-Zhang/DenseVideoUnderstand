@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Newsreader:opsz,wght@6..72,500;6..72,600&amp;display=swap" rel="stylesheet">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect rx='20' width='100' height='100' fill='%2312212f'/%3E%3Cpath d='M20 64V29h25c20 0 33 12 33 35S65 91 45 91H20V64zm18 11h7c10 0 15-3 15-13 0-12-6-17-16-17h-6v30z' fill='%23f4f1e8'/%3E%3Ccircle cx='78' cy='23' r='9' fill='%23df5d3b'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=20260914-empty-state">
+  <link rel="stylesheet" href="styles.css?v=20260915-hm-v2">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -47,10 +47,10 @@
         <p class="hero-lead">DIVE-Bench tests video-language models when evidence is not confined to a few keyframes—from long-form educational content to precise high-motion trajectories.</p>
         <div class="hero-actions" role="group" aria-label="Project resources">
           <a class="button button-primary" href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/2a79fcce2707b1eb74648a5ed135c469b17eb4e1/paper/ECCV_Dense_Video_Understanding.pdf">Revised manuscript <span aria-hidden="true">↗</span></a>
-          <a class="button button-secondary" href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/release/dive-bench-minimal">Code &amp; evidence <span aria-hidden="true">↗</span></a>
+          <a class="button button-secondary" href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/fix/highmotion-target-v2">Code &amp; evidence <span aria-hidden="true">↗</span></a>
           <a class="button button-text" href="https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation">Educational dataset (gated) <span aria-hidden="true">↗</span></a>
         </div>
-        <p class="hero-meta">The <a href="https://arxiv.org/abs/2509.14199">arXiv version covers the earlier educational scope</a>. The bundled revised manuscript includes both tasks; remaining manuscript/protocol differences are listed in the <a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/release/dive-bench-minimal/docs/PUBLICATION_AUDIT.md">publication audit</a>.</p>
+        <p class="hero-meta">The <a href="https://arxiv.org/abs/2509.14199">arXiv version covers the earlier educational scope</a>. The bundled revised manuscript includes both tasks; remaining manuscript/protocol differences are listed in the <a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/fix/highmotion-target-v2/docs/PUBLICATION_AUDIT.md">publication audit</a>.</p>
         <p class="hero-meta">Haichao Zhang<sup>1</sup>, Wenhao Chai<sup>2</sup>, Shwai He<sup>3</sup>, Ang Li<sup>3</sup>, Yun Fu<sup>1</sup></p>
         <p class="affiliations"><sup>1</sup>Northeastern University &nbsp; <sup>2</sup>Princeton University &nbsp; <sup>3</sup>University of Maryland</p>
       </div>
@@ -122,9 +122,9 @@
         <article class="track-card track-motion reveal">
           <div class="track-index">B</div>
           <div>
-            <p class="track-label">High-Motion High-FPS Videos · preview</p>
+            <p class="track-label">High-Motion High-FPS Videos · v2 preview</p>
             <h3>Track fine motion at frame-level precision.</h3>
-            <p>Models predict a hand trajectory over a semantic 3×3 image grid. Quality results are temporarily withheld while target/reference consistency is reviewed. The archived 1,000-item preview is distinct from the 3,243-item test split. Video access and underlying source licenses must be checked separately.</p>
+            <p>Models predict a hand trajectory over a semantic 3×3 image grid. The corrected v2 reference uses the right-hand ring-finger metacarpal as a named palm proxy, with invalid reference positions masked. Published results cover the fixed first 1,000 source records, not the full 3,243-item test split. Source media remain separately authorized and are not bundled with the code.</p>
             <ul class="tag-list">
               <li>Trajectory</li><li>3×3 grid</li><li>Transitions</li><li>High FPS</li>
             </ul>
@@ -190,17 +190,17 @@
       <div class="section-heading leaderboard-heading reveal">
         <div>
           <h2 id="leaderboard-title">Complete protocol-screened leaderboard.</h2>
-          <p>Switch tracks, search models, filter sources, and sort any metric. A dash means that the current public artifact did not report that field. For the LPM default rank, methods without Open MOS are placed after all scored methods, then ordered by Token F1.</p>
+          <p>Switch tracks, search models, filter sources, and sort any metric. A dash means unreported or undefined under the valid-reference mask, never zero. High-Motion v2 shows metric-specific coverage; Educational methods without Open MOS sort after scored methods, then by Token F1.</p>
         </div>
         <div class="snapshot">
           <span class="snapshot-dot" aria-hidden="true"></span>
-          <div><strong>Historical result snapshot</strong><span id="snapshot-date">20 Aug 2026</span></div>
+          <div><strong>Educational historical snapshot</strong><span id="snapshot-date">20 Aug 2026</span></div>
         </div>
       </div>
 
       <div class="leader-summary" id="leader-summary" aria-live="polite"></div>
 
-      <p class="provenance-note"><strong>29 Educational results plus 12 educational GRT comparison rows (41 CSV records), audited 14 September 2026.</strong> High-Motion results are withheld pending target/reference consistency review. <a href="leaderboard.html?v=20260914-export-guard">Full HTML tables (no JavaScript)</a> · <a href="data/leaderboard-complete.csv?v=20260914-export-guard" download>Download CSV</a> · <a href="data/public-audit.json?v=20260914-export-guard">Comparison evidence</a>. Historical scores are not a fresh GPU rerun. Missing Open MOS values are not zero; no score is imputed.</p>
+      <p class="provenance-note"><strong>29 Educational results, 19 High-Motion v2 preview results and 12 educational GRT comparison rows (60 CSV records), audited 15 September 2026.</strong> <a href="leaderboard.html?v=20260915-hm-v2">Full HTML tables (no JavaScript)</a> · <a href="data/leaderboard-complete.csv?v=20260915-hm-v2" download>Download CSV</a> · <a href="data/public-audit.json?v=20260915-hm-v2">Comparison evidence</a>. Educational scores are not a fresh GPU rerun. High-Motion compares one new GRT run with 18 CPU-rescored archived baselines; baseline inference was not repeated. Missing values are not zero; no score is imputed.</p>
 
       <section class="provenance-note" id="grt-family-qualification" aria-labelledby="grt-family-qualification-title" hidden>
         <h3 id="grt-family-qualification-title">Four-family Educational GRT qualification</h3>
@@ -214,14 +214,14 @@
         <div class="table-scroll" role="region" tabindex="0" aria-label="Educational GRT matched-control comparison">
           <table id="grt-comparison-table"><caption>634 educational items per method, eight sampled frames; all controls shown</caption><thead><tr><th scope="col">Family / control</th><th scope="col">Open MOS ↑</th><th scope="col">Token F1 ↑</th><th scope="col">Patch recompute ↓</th><th scope="col">Mean throughput (fps) ↑</th><th scope="col">Mean request time (s) ↓</th></tr></thead><tbody id="grt-comparison-body"></tbody></table>
         </div>
-        <p class="provenance-note">Qwen 3B GRT is slower than its matched all-patch control on the reported mean throughput (1.673 vs 1.750 fps), despite better quality and lower patch compute. Timing is historical per-request telemetry, not repeated end-to-end speed benchmarking. Eight sampled frames do not establish high-FPS coverage; patch reuse is not end-to-end FLOPs. <a href="leaderboard.html?v=20260914-export-guard#grt-controls">Inspect exact values and all control rows</a>.</p>
+        <p class="provenance-note">Qwen 3B GRT is slower than its matched all-patch control on the reported mean throughput (1.673 vs 1.750 fps), despite better quality and lower patch compute. Timing is historical per-request telemetry, not repeated end-to-end speed benchmarking. Eight sampled frames do not establish high-FPS coverage; patch reuse is not end-to-end FLOPs. <a href="leaderboard.html?v=20260915-hm-v2#grt-controls">Inspect exact values and all control rows</a>.</p>
       </section>
 
       <div class="leaderboard-panel reveal">
         <div class="leaderboard-toolbar">
           <div class="track-tabs" role="group" aria-label="Leaderboard track">
             <button id="tab-lpm" class="track-tab is-active" type="button" aria-pressed="true" data-track="lpm">Educational / LPM <span>634</span></button>
-            <button id="tab-highmotion" class="track-tab" type="button" aria-pressed="false" data-track="highmotion">High-Motion <span>Under review</span></button>
+            <button id="tab-highmotion" class="track-tab" type="button" aria-pressed="false" data-track="highmotion">High-Motion v2 <span>1,000 preview</span></button>
           </div>
           <div class="leaderboard-filters">
             <label class="search-field">
@@ -252,8 +252,9 @@
           <p>Default rank: <strong id="ranking-rule">Open MOS (reported first; missing last), then Token F1</strong></p>
         </div>
       </div>
-      <noscript><p>The interactive table requires JavaScript. <a href="leaderboard.html?v=20260914-export-guard">The current leaderboard and all Educational GRT controls are also available as plain HTML.</a></p></noscript>
-      <p class="provenance-note"><strong>High-Motion target/reference review.</strong> A bounded check of four reference examples found a mismatch between the requested hand target and the source joint underlying the archived trajectories. Its full extent and original construction rules remain under review. A <a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/9ee16af0d03d7f31e726b71f00e4586972afb062/docs/HIGHMOTION_TARGET_HOLD.md">full 3,243-reference follow-up</a> documents non-universal coordinate/grid agreement and data issues, not a universal label-correctness finding. All High-Motion results, including the previously protocol-screened baselines, are withheld from current tables and CSV. The unchanged <a href="data/highmotion-audit.json">27-run historical protocol audit</a> is retained as evidence, not as approved rankings. No High-Motion GRT superiority claim is made.</p>
+      <noscript><p>The interactive table requires JavaScript. <a href="leaderboard.html?v=20260915-hm-v2">The current leaderboard and all Educational GRT controls are also available as plain HTML.</a></p></noscript>
+      <p class="provenance-note"><strong>High-Motion v2: corrected references, mixed metric outcomes.</strong> On the fixed 1,000-record preview, GRT exceeds its corresponding HF 0.5B baseline on observed Grid Accuracy, with improved Grid ADE, Grid FDE and Token F1; <strong>Transition Accuracy regresses</strong>. <a href="leaderboard.html?v=20260915-hm-v2#highmotion-v2-comparison">All five exact differences</a> remain visible. Both sides use the same corrected reference mask and unchanged questions. The right-ring metacarpal is an explicit palm proxy; valid projection is not proof of RGB visibility. This is not a full 3,243-record evaluation or a statistical-significance claim. Exact historical baseline weight revisions and consumed-tensor identity remain unproven.</p>
+      <p class="provenance-note">The <a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/fix/highmotion-target-v2/docs/HIGHMOTION_REFERENCE_V2.md">v2 reference/scoring contract</a>, <a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/fix/highmotion-target-v2/docs/HIGHMOTION_V2_REPRODUCTION.md">source-bound reproduction guide</a>, <a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/fix/highmotion-target-v2/release/2026-09-15/manifest.json">pinned release manifest</a> and <a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/fix/highmotion-target-v2/release/2026-09-15/numeric_reports.json.gz">numeric evidence bundle</a> document the versioned correction. Legacy High-Motion scores remain withheld; the unchanged <a href="data/highmotion-audit.json">27-run historical protocol audit</a> is evidence, not approved rankings. Original construction and access limitations remain documented in the <a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/9ee16af0d03d7f31e726b71f00e4586972afb062/docs/HIGHMOTION_TARGET_HOLD.md">historical reference review</a>.</p>
 
       <section class="metric-glossary" aria-labelledby="glossary-title">
         <div class="glossary-intro">
@@ -264,14 +265,14 @@
         <dl id="metric-definitions"></dl>
       </section>
 
-      <p class="provenance-note"><strong>Result provenance.</strong> The immutable historical snapshot was generated from <span id="source-artifact-count">21</span> evaluation artifacts on <span id="snapshot-date-long">20 August 2026</span>. Educational Open MOS uses <code id="open-mos-judge">Qwen/Qwen3-VL-32B-Instruct</code> as the open text judge. <a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/release/dive-bench-minimal/docs/PUBLICATION_AUDIT.md">Public score audit</a> · <a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/release/dive-bench-minimal/docs/REPRODUCTION.md">Pinned reproduction protocol</a>. Frozen score bytes remain available in <a href="data/leaderboard.js">the original snapshot</a>.</p>
+      <p class="provenance-note"><strong>Result provenance.</strong> The immutable historical snapshot was generated from <span id="source-artifact-count">21</span> evaluation artifacts on <span id="snapshot-date-long">20 August 2026</span>. Educational Open MOS uses <code id="open-mos-judge">Qwen/Qwen3-VL-32B-Instruct</code> as the open text judge. <a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/fix/highmotion-target-v2/docs/PUBLICATION_AUDIT.md">Public score audit</a> · <a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/fix/highmotion-target-v2/docs/REPRODUCTION.md">Educational reproduction protocol</a>. Frozen score bytes remain available in <a href="data/leaderboard.js">the original snapshot</a>; corrected High-Motion v2 uses its separate dated evidence bundle.</p>
     </section>
 
     <section class="section-shell evaluate-section" id="evaluate" aria-labelledby="evaluate-title">
       <div class="section-kicker">04 / Reproduce</div>
       <div class="section-heading reveal">
         <h2 id="evaluate-title">Public code. Explicit reproduction limits.</h2>
-        <p>The minimal code and numerical evidence are public. Rebuild the current view offline: 29 Educational results plus 12 educational GRT comparison rows, with standalone HTML, CSV and source evidence. High-Motion results are withheld pending reference review; the original 32-row snapshot remains unchanged as historical evidence. Fresh inference of the pinned three-arm educational GRT profiles and Open MOS require appropriate GPU resources and authorized data access; neither is implied by the numerical audit.</p>
+        <p>The minimal code and numerical evidence support an offline rebuild of 29 Educational results, 19 corrected High-Motion preview results and 12 educational GRT comparison rows. The original 32-row snapshot remains unchanged as historical evidence. Reaggregating saved numeric evidence does not rerun models. Fresh inference requires appropriate GPU resources and separately authorized source data; private source videos, HDF5 files and derived annotations are not bundled or licensed for redistribution by this code release.</p>
       </div>
 
       <div class="code-layout reveal">
@@ -282,12 +283,12 @@
         </div>
         <div class="code-window" id="code-panel" role="tabpanel" aria-labelledby="code-tab-setup" tabindex="0">
           <div class="code-window-bar"><span></span><span></span><span></span><p id="code-filename">setup.sh</p><button class="copy-button" type="button" data-copy-target="active-code">Copy</button></div>
-          <pre tabindex="0"><code id="active-code">git clone --branch release/dive-bench-minimal --single-branch \
+          <pre tabindex="0"><code id="active-code">git clone --branch fix/highmotion-target-v2 --single-branch \
   https://github.com/Hai-chao-Zhang/DenseVideoUnderstand.git DIVE-Bench
 cd DIVE-Bench
-git checkout 9ee16af0d03d7f31e726b71f00e4586972afb062
 python -m pip install 'PyYAML&gt;=6'
-# 29 Educational results + 12 comparison rows; High-Motion results withheld.
+# 29 Educational + 19 High-Motion preview + 12 comparison rows (60 CSV records).
+# Pinned v2 manifest: 1f64ff54ec8eb09d72c37d6ef3a944e8ccae0a58fe5b4d45fabdfb0a7449d0dc
 python -m tools.densevideo.build_complete_leaderboard --verify-only
 python -m tools.densevideo.build_complete_leaderboard --output outputs/leaderboard-complete
 # Open outputs/leaderboard-complete/leaderboard.html; output must be new.</code></pre>
@@ -329,13 +330,13 @@ python -m tools.densevideo.build_complete_leaderboard --output outputs/leaderboa
   <footer class="site-footer">
     <div class="section-shell footer-inner">
       <div><a class="brand footer-brand" href="#top"><span class="brand-mark" aria-hidden="true">D</span><span>DIVE–Bench</span></a><p>Dense evidence deserves dense understanding.</p></div>
-      <div class="footer-links"><a href="https://arxiv.org/abs/2509.14199">Earlier arXiv</a><a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/release/dive-bench-minimal">Code</a><a href="https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation">Educational dataset (gated)</a><a href="leaderboard.html?v=20260914-export-guard">Full leaderboard</a></div>
-      <p class="footer-meta">© 2026 DIVE-Bench authors<br>Historical snapshot: <span id="footer-sync-date">20 Aug 2026</span><br>Public audit: 14 Sep 2026</p>
+      <div class="footer-links"><a href="https://arxiv.org/abs/2509.14199">Earlier arXiv</a><a href="https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/fix/highmotion-target-v2">Code</a><a href="https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation">Educational dataset (gated)</a><a href="leaderboard.html?v=20260915-hm-v2">Full leaderboard</a></div>
+      <p class="footer-meta">© 2026 DIVE-Bench authors<br>Historical snapshot: <span id="footer-sync-date">20 Aug 2026</span><br>High-Motion v2 audit: 15 Sep 2026</p>
     </div>
   </footer>
 
   <script src="data/leaderboard.js?v=1f1b5a79c74ff763" defer></script>
-  <script src="data/public-audit.js?v=20260914-empty-state" defer></script>
-  <script src="app.js?v=20260914-empty-state" defer></script>
+  <script src="data/public-audit.js?v=20260915-hm-v2" defer></script>
+  <script src="app.js?v=20260915-hm-v2" defer></script>
 </body>
 </html>
