@@ -1,0 +1,13 @@
+include LICENSE LICENSE-APACHE LICENSE-BSD README.md leaderboard.md
+include setup.py
+include assets/DIVE.jpeg
+include .github/workflows/release-checks.yml
+recursive-include build_support *.py
+recursive-include release *.json *.csv *.js *.md
+include release/????-??-??/numeric_reports.json.gz
+recursive-include configs/densevideo *.yaml
+recursive-include docs *.md
+recursive-include tests/densevideo *.py
+include paper/ECCV_Dense_Video_Understanding.pdf
+global-exclude *.py[cod] .DS_Store
+prune outputs

@@ -1,0 +1,28 @@
+benchmark: DIVE-Bench
+tasks:
+  - densevideo
+
+# Full same-snapshot reproduction of the only offline composition that clears
+# both archived public metrics: PyAV OCR8 at the normal 128-token budget and a
+# prompt-routed 31-token subtitle budget. Every method is otherwise identical.
+models:
+  - method: llava_onevision_0_5b_hf_route31_base
+    display_name: LLaVA-OneVision Qwen2 0.5B (PyAV route31 base)
+    model: llava_hf
+    model_args: pretrained=llava-hf/llava-onevision-qwen2-0.5b-ov-hf,revision=74dd0bf867a4cda7950c17663794267c60cf4b40,trust_remote_code=True,device_map=auto,dtype=bfloat16,max_frames_num=8,ocr_max_frames_num=8,max_image_size=384,attn_implementation=eager,profiling=True,video_decode_backend=pyav_seek,prompt_router=densevideo_lpm_first_sentence_v1,subtitle_max_new_tokens=31,use_gated_tok=False
+    source: open
+    notes: Fresh no-GRT attribution control; subtitles use 31 generated tokens and OCR uses the driver-wide 128-token budget.
+
+  - method: llava_onevision_0_5b_hf_route31_exact
+    display_name: LLaVA-OneVision Qwen2 0.5B (PyAV route31 exact GRT control)
+    model: llava_hf
+    model_args: pretrained=llava-hf/llava-onevision-qwen2-0.5b-ov-hf,revision=74dd0bf867a4cda7950c17663794267c60cf4b40,trust_remote_code=True,device_map=auto,dtype=bfloat16,max_frames_num=8,ocr_max_frames_num=8,max_image_size=384,attn_implementation=eager,profiling=True,video_decode_backend=pyav_seek,prompt_router=densevideo_lpm_first_sentence_v1,subtitle_max_new_tokens=31,use_gated_tok=True,gate_policy=all,gate_metric=ssim,gate_diff_threshold=0.001,gate_projection_mode=native_on_full,gate_refresh_interval_frames=0
+    source: open
+    notes: Native all-patch control; all 634 predictions must be byte-identical to route31 base.
+
+  - method: grt_llava_onevision_0_5b_hf_route31_t0001
+    display_name: GRT LLaVA-OneVision 0.5B (PyAV route31 SSIM 0.001)
+    model: llava_hf
+    model_args: pretrained=llava-hf/llava-onevision-qwen2-0.5b-ov-hf,revision=74dd0bf867a4cda7950c17663794267c60cf4b40,trust_remote_code=True,device_map=auto,dtype=bfloat16,max_frames_num=8,ocr_max_frames_num=8,max_image_size=384,attn_implementation=eager,profiling=True,video_decode_backend=pyav_seek,prompt_router=densevideo_lpm_first_sentence_v1,subtitle_max_new_tokens=31,use_gated_tok=True,gate_policy=motion,gate_metric=ssim,gate_diff_threshold=0.001,gate_projection_mode=linear_consistent,gate_refresh_interval_frames=0
+    source: open
+    notes: Exact subtitle route plus the prior full-run OCR8 GRT kernel; offline cap31 composition scored 75 versus both 74-point floors.

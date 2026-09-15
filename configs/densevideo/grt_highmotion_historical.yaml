@@ -1,0 +1,13 @@
+benchmark: DIVE-Bench
+tasks:
+  - densevideo_highmotion
+models:
+  - method: grt_llava_ov_0_5b
+    display_name: GRT (LLaVA-OneVision Qwen2 0.5B, historical High-Motion preview)
+    model: llava_ov_dense_video
+    model_args: pretrained=lmms-lab/llava-onevision-qwen2-0.5b-ov,conv_template=qwen_1_5,model_name=llava_qwen,video_decode_backend=decord,max_frames_num=8,dense_frame_fps=1,clip_duration_sec=10,profiling=True,use_gated_tok=True,use_vision_merge=True,frame_sampling_strategy=uniform,gate_policy=motion,gate_metric=ssim,gate_diff_threshold=0.05,enable_visual_token_pruning=False,prune_mode=off,scene_merge_apply=True,scene_merge_keep_ratio=0.5,scene_merge_require_semantic_match=True,merge_jsd_threshold=0.02,scene_merge_min_tokens_per_frame=16
+    source: open
+    gen_kwargs:
+      max_new_tokens: 64
+      temperature: 0
+    notes: "Exact model arguments recorded in the 2026-08-14 historical 1,000-item run. This is not a newly verified inference rerun: the original run did not freeze the full source tree or model revision. See release/2026-08-20/provenance.json. Set DENSEVIDEO_HIGHMOTION_MAX_EXAMPLES=1000 and DENSEVIDEO_HIGHMOTION_NUM_FRAMES=8."

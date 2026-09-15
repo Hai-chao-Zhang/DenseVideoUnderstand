@@ -1,8 +1,8 @@
 dataset_path: haichaozhang/DenseVideoEvaluation
 dataset_kwargs:
+  revision: 5cc61a045c8e5e95d1d9c87e22ccd0f699575aea
   data_files:
     test: "LPM_videos.parquet" 
-  cache_dir: hf_dataset
   token: True
   video: True
   force_download: False
@@ -11,9 +11,12 @@ dataset_kwargs:
 lmms_eval_specific_kwargs:
   default:
     pre_prompt: ""
-    post_prompt: " Answer the question using a single word or phrase."
+    post_prompt: " Provide the most complete answer possible. For subtitle or OCR questions, reproduce the relevant text from the video instead of answering with only the video id."
 metadata:
-  version: 0.0
+  version: 1.0
+  benchmark: DIVE-Bench
+  partition: educational_dense_video
+  display_name: DIVE-Bench Educational Dense Video
   gpt_eval_model_name: gpt-3.5-turbo
 
 # dataset_path: lmms-lab/MME # The name of the dataset as listed by HF in the datasets Hub.
@@ -53,5 +56,3 @@ metadata:
 #     post_prompt: " Answer:"
 # metadata:
 #   - version: 0.0
-
-

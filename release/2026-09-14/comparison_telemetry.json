@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "description": "Historical per-request aggregate telemetry for the three educational candidates and their six matched controls; not repeated hardware speed measurements.",
+  "rows": [
+    {
+      "family": "route31",
+      "method": "llava_onevision_0_5b_hf_route31_base",
+      "patch_ratio": 1,
+      "throughput_fps": 4.819282307570976,
+      "mean_wall_time_s": 2.040101487381706,
+      "telemetry_summary_sha256": "c2903440a95be185cd487f01ea9e428bc9d84840c85f09f883a024cdfca68aa9"
+    },
+    {
+      "family": "route31",
+      "method": "llava_onevision_0_5b_hf_route31_exact",
+      "patch_ratio": 1,
+      "throughput_fps": 4.823898515772871,
+      "mean_wall_time_s": 2.009076788643532,
+      "telemetry_summary_sha256": "fd94bfb18cbcb1bc8b00225a664559a318de0141eb849d6721c832243926bc84"
+    },
+    {
+      "family": "route31",
+      "method": "grt_llava_onevision_0_5b_hf_route31_t0001",
+      "patch_ratio": 0.8671541327517492,
+      "throughput_fps": 4.865135906940061,
+      "mean_wall_time_s": 2.009110331230287,
+      "telemetry_summary_sha256": "5dc44d85018cd8728e820d2376a568719588e6f149b2c519a9ae244a60b840fd"
+    },
+    {
+      "family": "qwen3",
+      "method": "qwen2_5_vl_3b_grt_all",
+      "patch_ratio": 1,
+      "throughput_fps": 1.7499402318611985,
+      "mean_wall_time_s": 5.424607438485809,
+      "telemetry_summary_sha256": "ba6c71f1b2c4e27115d4ec7e35162e28b90cfb451ede10f56862e70cd6bf6061"
+    },
+    {
+      "family": "qwen3",
+      "method": "qwen2_5_vl_3b_quality_base",
+      "patch_ratio": 1,
+      "throughput_fps": 1.6317214921135637,
+      "mean_wall_time_s": 5.880135175078864,
+      "telemetry_summary_sha256": "56e85633e9cb0c9e52d93aaf4b6fe32729ecd23cc791247e3639ee5b5a71fc08"
+    },
+    {
+      "family": "qwen3",
+      "method": "grt_qwen2_5_vl_3b_t03",
+      "patch_ratio": 0.8856587587716475,
+      "throughput_fps": 1.6726384037854896,
+      "mean_wall_time_s": 5.7015749968454275,
+      "telemetry_summary_sha256": "baaa9acac9eaa4257995ccfc02ddef95512248473086e5b84c1dd165c0caf20f"
+    },
+    {
+      "family": "qwen7",
+      "method": "qwen2_5_vl_7b_floor_grt_all",
+      "patch_ratio": 1,
+      "throughput_fps": 2.466448772870663,
+      "mean_wall_time_s": 3.3956156119873797,
+      "telemetry_summary_sha256": "d71a80e9278f3913b5b8be9cd4d43f8f1bd8e9eba95f9de814eb35a6e44ad469"
+    },
+    {
+      "family": "qwen7",
+      "method": "qwen2_5_vl_7b_floor_quality_base",
+      "patch_ratio": 1,
+      "throughput_fps": 2.437303171924289,
+      "mean_wall_time_s": 3.435501006309151,
+      "telemetry_summary_sha256": "a7915bc97c3a0216a943337452015a2fdf3d032f6a6d5cbaf09f860bc73a3a1f"
+    },
+    {
+      "family": "qwen7",
+      "method": "grt_qwen2_5_vl_7b_dual_floor_s080_o055_cap48",
+      "patch_ratio": 0.8477193716603361,
+      "throughput_fps": 2.4804290173501595,
+      "mean_wall_time_s": 3.381258419558356,
+      "telemetry_summary_sha256": "270ff289c1c1eecf37d9b7132cf258c8a9677197a08f1e137c0d24c75de66cec"
+    }
+  ]
+}
