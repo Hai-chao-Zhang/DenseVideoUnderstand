@@ -8,10 +8,27 @@ unrelated benchmarks/models, private experiment orchestration, and raw datasets.
 
 ## Release status
 
+The 2026-09-15 release includes **19 corrected-reference High-Motion results**:
+18 cached baselines rescored on CPU and a completed 1,000-example HF 0.5B GRT
+GPU run. GRT improves Grid Accuracy from **0.0468682595 to 0.0495036226** and
+Token F1 from **0.0418983286 to 0.0450524706**. ADE and FDE also improve;
+Transition Accuracy decreases. These are preview point estimates, not a
+full 3,243-example result or a statistical-significance claim. See the
+[complete comparison and execution audit](docs/HIGHMOTION_V2_RESULTS.md).
+
+All 3,243 original questions and input slots are preserved. The corrected GT
+uses the explicitly named right-hand ring-finger-base proxy, with invalid
+references masked identically for every method. Of the fixed 1,000 preview
+records, 861 have valid references (6,015 of 8,000 sampled positions).
+**No baseline inference was repeated.** Exact historical baseline weight
+revisions and consumed tensors are unavailable; this is not a newly rerun,
+byte-identical paired experiment.
+
 The three promoted Educational GRT results match the official 2026-08-20
 leaderboard snapshot. Per-example numerical evidence independently reconstructs
 their Open MOS and Token F1; the complete 32-row leaderboard rebuilds byte for
-byte. This verifies historical results, **not a fresh GPU rerun**. The legacy
+byte as a separate historical archive. This verifies historical results,
+**not a fresh Educational GPU rerun**. The legacy
 High-Motion result covers 1,000 preview items, not the full 3,243-item split.
 Its legacy GRT input sampler was not aligned to the target protocol: 787 of
 1,000 inputs contained fewer than eight frames, and 148 clips were truncated.
@@ -19,19 +36,20 @@ That row is retained only in the historical evidence archive and is excluded
 from the current leaderboard and CSV; numeric reconstruction alone does not
 validate model inputs.
 
-As of 2026-09-14, **all High-Motion results are withheld from current release**
-pending a [target/reference consistency review](docs/HIGHMOTION_TARGET_HOLD.md).
+On 2026-09-14, all legacy High-Motion results were withheld following a
+[target/reference consistency review](docs/HIGHMOTION_TARGET_HOLD.md).
 An initial bounded check of four canonical construction references found stored
 trajectories matching a left-index joint projection while the task asks for a
 right-hand target. This is not a finding about all 3,243 items or GRT performance.
 The historical 27-run audit and 32-row snapshot remain immutable evidence, not
-current release eligibility; Educational scores, ranks and GRT gates are unchanged.
+current release eligibility. Those old scores remain excluded; only the separate
+v2 rescoring appears in the current view. Educational numbers are unchanged.
 
 The `fix/highmotion-target-v2` branch adds a separate
 [right-hand GT constructor and cached-prediction scorer](docs/HIGHMOTION_REFERENCE_V2.md).
-Original questions and input slots remain unchanged, and invalid source references
-are explicitly masked. The correction tools do not lift the High-Motion release
-hold or certify a GRT win; existing aggregate scores cannot be reused for v2.
+That document is the frozen specification written before inspecting new GRT
+outcomes, not the current score-release status. Existing aggregate scores cannot
+be reused for v2; its separately authenticated numeric bundle supplies all rows.
 The [v2 reproduction guide](docs/HIGHMOTION_V2_REPRODUCTION.md) explains how to
 verify authorized local sources, build the corrected references, and rescore
 cached predictions without a private experiment manifest or baseline inference.
@@ -64,7 +82,7 @@ This repository does not grant those rights or promise a public download.
 ## Rebuild the complete leaderboard (CPU, no data or model downloads)
 
 ```bash
-git clone --branch release/dive-bench-minimal --single-branch \
+git clone --branch fix/highmotion-target-v2 --single-branch \
   https://github.com/Hai-chao-Zhang/DenseVideoUnderstand.git DIVE-Bench
 cd DIVE-Bench
 python -m pip install 'PyYAML>=6'
@@ -72,14 +90,16 @@ python -m tools.densevideo.build_complete_leaderboard --verify-only
 python -m tools.densevideo.build_complete_leaderboard --output outputs/complete
 ```
 
-Open `outputs/complete/leaderboard.html`. This rebuilds the current 29-result
-Educational view, plus all 12 Educational GRT comparison rows. The CSV contains
-41 records. All High-Motion runs are withheld from every current table and CSV,
-including previously protocol-screened candidates; there is no unranked section.
-The standalone HTML explains the hold and needs no JavaScript or external assets.
+Open `outputs/complete/leaderboard.html`. This rebuilds **29 Educational results,
+19 High-Motion v2 preview results and 12 Educational comparison rows**: 60 CSV
+records, including controls, not 60 unique leaderboard methods. Legacy
+High-Motion scores remain excluded. All five GRT/baseline differences and each
+metric's valid-reference coverage are shown. The HTML needs no JavaScript or
+external assets.
 The [complete generation contract](docs/COMPLETE_LEADERBOARD.md) explains its
 pinned evidence, checks and limits. This is archived-result verification, not
-new GPU inference.
+new GPU inference by the numerical export command. Use `--legacy-reference-hold`
+only to reconstruct the dated 2026-09-14 41-record hold view.
 
 For the separate immutable 32-row **historical** snapshot:
 
@@ -93,13 +113,13 @@ all three contracted quality floors, patch counts, the 1,000-item High-Motion
 metrics, frozen CSV/website agreement, and exact Markdown regeneration. Add
 `--website` to compare the website's retained historical `data/leaderboard.js`
 against the pinned 32-row snapshot. It does not audit the complete HTML page's
-current 29-result/12-control view and High-Motion hold; the complete command above verifies that view.
+current 29-Educational/19-High-Motion/12-control view; the complete command above verifies that view.
 An existing output directory is refused. This
 bundle contains numeric scores and hashed identities, not reference answers,
 predictions, videos, or credentials. Non-GRT rows are preserved from the public
 snapshot; their inference is not reproduced by the minimal profiles.
 
-An installed wheel provides both dated evidence bundles as package data,
+An installed wheel provides all three dated evidence bundles as package data,
 generated from the canonical `release/` tree during the build. Both
 `dive-leaderboard-complete --verify-only` and `dive-leaderboard --verify-only`
 work outside a checkout; `--bundle` remains available for an explicit bundle.

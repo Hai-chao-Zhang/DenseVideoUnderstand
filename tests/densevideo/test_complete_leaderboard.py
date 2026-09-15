@@ -35,13 +35,69 @@ def source_objects():
     )
 
 
-def test_complete_offline_golden_bytes_and_coverage(monkeypatch):
+def test_default_current_release_is_the_authenticated_v2_preview(monkeypatch, tmp_path, capsys):
+    monkeypatch.chdir(tmp_path)
+    complete.main(["--verify-only"])
+    report = json.loads(capsys.readouterr().out)
+    assert report["release"] == "2026-09-15"
+    assert report["leaderboard_rows"] == 48 and report["highmotion_rows"] == 19
+    assert report["comparison_rows"] == 12 and report["csv_rows"] == 60
+    assert report["highmotion_v2_manifest_sha256"] == complete.HIGHMOTION_V2_MANIFEST_SHA256
+    assert report["highmotion_grid_acc_outperform"] is True
+    assert not list(tmp_path.iterdir())
+    outputs = complete.build_outputs()
+    audit = json.loads(outputs["data/public-audit.json"])
+    corrected = audit["highmotion_v2"]
+    assert corrected["release_integrity_verified"] is True
+    assert corrected["scope"] == "first-1000-source-rows"
+    comparison = corrected["comparison"]
+    assert comparison["grt_metrics"]["grid_acc"] == 0.049503622587246277
+    assert comparison["baseline_metrics"]["grid_acc"] == 0.04686825949892152
+    assert comparison["metric_outperform"] == {
+        "grid_acc": True, "grid_ade": True, "grid_fde": True,
+        "grid_transition_acc": False, "token_f1": True,
+    }
+    assert all(row["samples"] == 1000 and row["valid_slots"] == 6015
+               and row["records_with_scored_slots"] == 861 for row in corrected["rows"])
+    parser = ViewParser()
+    parser.feed(outputs["leaderboard.html"])
+    assert parser.rows_per_table == [29, 19, 5, 12]
+    assert not parser.scripts and not parser.external_styles
+    records = list(csv.DictReader(io.StringIO(outputs["data/leaderboard-complete.csv"])))
+    assert len(records) == 60
+    assert sum(row["cohort"] == "highmotion_right_ring_v2_preview1000" for row in records) == 19
+    assert "highmotion_historical_unaligned" not in outputs["data/leaderboard-complete.csv"]
+
+
+def test_current_release_never_falls_back_to_legacy_when_v2_fails(monkeypatch, tmp_path):
+    def reject(*args, **kwargs):
+        raise ValueError("Corrupt current v2 release")
+
+    monkeypatch.setattr(complete, "_load_highmotion_v2", reject)
+    output = tmp_path / "must-not-exist"
+    with pytest.raises(SystemExit) as error:
+        complete.main(["--output", str(output)])
+    assert error.value.code == 1 and not output.exists()
+    assert complete.build_outputs(include_highmotion_v2=False)
+
+
+def test_explicit_legacy_hold_refuses_corrected_bundle(monkeypatch):
+    with pytest.raises(ValueError, match="cannot accept"):
+        complete.build_outputs(highmotion_v2_bundle="unused", highmotion_v2_manifest_sha256="c" * 64,
+                               include_highmotion_v2=False)
+    with pytest.raises(SystemExit) as error:
+        complete.main(["--legacy-reference-hold", "--highmotion-v2-bundle", "unused",
+                       "--highmotion-v2-manifest-sha256", "c" * 64])
+    assert error.value.code == 2
+
+
+def test_legacy_hold_offline_golden_bytes_and_coverage(monkeypatch):
     def no_network(*args, **kwargs):
         raise AssertionError("Offline generator attempted network access")
 
     monkeypatch.setattr("urllib.request.urlopen", no_network)
     monkeypatch.setattr("tools.densevideo.rebuild_published_leaderboard.urlopen", no_network)
-    outputs = complete.build_outputs()
+    outputs = complete.build_outputs(include_highmotion_v2=False)
     assert {name: hashlib.sha256(text.encode()).hexdigest()
             for name, text in outputs.items()} == OUTPUT_HASHES
     rows = list(csv.DictReader(io.StringIO(outputs["data/leaderboard-complete.csv"])))
@@ -163,7 +219,7 @@ class ViewParser(HTMLParser):
 
 
 def test_standalone_html_needs_no_missing_assets_or_javascript():
-    outputs = complete.build_outputs()
+    outputs = complete.build_outputs(include_highmotion_v2=False)
     page = outputs["leaderboard.html"]
     parser = ViewParser()
     parser.feed(page)
@@ -268,9 +324,9 @@ def test_semantic_contract_rejects_known_failure_modes(case):
         complete.validate_contract(manifest, provenance, telemetry, evidence)
 
 
-def test_default_generation_is_offline_outside_cwd_and_refuses_overwrite(tmp_path, monkeypatch, capsys):
+def test_legacy_generation_is_offline_outside_cwd_and_refuses_overwrite(tmp_path, monkeypatch, capsys):
     monkeypatch.chdir(tmp_path)
-    complete.main(["--verify-only"])
+    complete.main(["--legacy-reference-hold", "--verify-only"])
     checked = json.loads(capsys.readouterr().out)
     assert checked["leaderboard_rows"] == 29
     assert checked["highmotion_rows"] == 0
@@ -278,13 +334,13 @@ def test_default_generation_is_offline_outside_cwd_and_refuses_overwrite(tmp_pat
     assert checked["csv_rows"] == 41
     assert not list(tmp_path.iterdir())
     output = tmp_path / "standalone"
-    complete.main(["--output", str(output)])
+    complete.main(["--legacy-reference-hold", "--output", str(output)])
     report = json.loads(capsys.readouterr().out)
     assert report["output_sha256"] == OUTPUT_HASHES
     for name, digest in OUTPUT_HASHES.items():
         assert hashlib.sha256((output / name).read_bytes()).hexdigest() == digest
     with pytest.raises(SystemExit) as exc:
-        complete.main(["--output", str(output)])
+        complete.main(["--legacy-reference-hold", "--output", str(output)])
     assert exc.value.code == 1
     with pytest.raises(SystemExit) as exc:
         complete.main(["--verify-only", "--output", str(output)])
@@ -300,6 +356,240 @@ def test_failed_verification_writes_no_output(tmp_path):
         complete.main(["--bundle", str(changed), "--output", str(output)])
     assert exc.value.code == 1
     assert not output.exists()
+
+
+def synthetic_highmotion_v2_summary(*, candidate_acc=0.625, undefined_fde=False):
+    """Mocked-loader fixture only; these values are not experimental results."""
+    from tools.densevideo.highmotion_v2_bundle import BASELINE_METHODS, COMPARISON_CAVEAT
+    from tools.densevideo.highmotion_v2_scoring import (
+        MASK_POLICY,
+        METRICS,
+        SCORER_VERSION,
+        TARGET_JOINT,
+        VERSION,
+    )
+
+    candidate_method = "synthetic_grt_v2_fixture"
+    base = {"grid_acc": 0.5, "grid_ade": 0.5, "grid_fde": None if undefined_fde else 0.5,
+            "grid_transition_acc": 0.5, "token_f1": 0.5}
+    candidate = {**base, "grid_acc": candidate_acc, "grid_ade": 0.75}
+    rows = []
+    for method in (*BASELINE_METHODS, candidate_method):
+        metric_rows = dict.fromkeys(METRICS, 1000)
+        metric_slots = dict.fromkeys(METRICS, 8000)
+        metric_slots.update(grid_fde=1000, grid_transition_acc=7000)
+        if undefined_fde:
+            metric_slots.update(grid_acc=7000, grid_ade=7000, token_f1=7000,
+                                grid_transition_acc=6000)
+            metric_rows["grid_fde"] = metric_slots["grid_fde"] = 0
+        rows.append({
+            "method": method, "samples": 1000, "records": 1000,
+            "model": "Synthetic display name: " + method,
+            "sampled_slots": 8000, "valid_slots": 7000 if undefined_fde else 8000,
+            "records_with_scored_slots": 1000, "records_without_scored_slots": 0,
+            "prediction_source": "new_grt" if method == candidate_method else "archived_baseline",
+            "predictions_sha256": hashlib.sha256(method.encode()).hexdigest(),
+            **(candidate if method == candidate_method else base),
+            "metric_scored_records": metric_rows, "metric_scored_slots_or_edges": metric_slots,
+        })
+    rows.sort(key=lambda row: (-row["grid_acc"], row["method"]))
+    previous, rank = None, None
+    for position, row in enumerate(rows, 1):
+        rank = rank if row["grid_acc"] == previous else position
+        row["rank"], previous = rank, row["grid_acc"]
+    delta = {metric: None if base[metric] is None else candidate[metric] - base[metric]
+             for metric in METRICS}
+    oriented = {metric: None if value is None else -value if metric in ("grid_ade", "grid_fde") else value
+                for metric, value in delta.items()}
+    better = {metric: None if value is None else value > 1e-12 for metric, value in oriented.items()}
+    return {
+        "status": "numeric_reports_validated", "benchmark_version": VERSION,
+        "scorer_version": SCORER_VERSION, "target_joint": TARGET_JOINT,
+        "reference_policy": MASK_POLICY, "references_sha256": "a" * 64,
+        "input_sequence_sha256": "b" * 64, "scope": "first-1000-source-rows",
+        "source_reference_records": 3243, "full_source_coverage": False,
+        "automatic_publication": False, "method_count": 19, "rows": rows,
+        "release_integrity_verified": True, "release_manifest_sha256": "c" * 64,
+        "comparison_caveat": "SYNTHETIC FIXTURE. " + COMPARISON_CAVEAT,
+        "comparison": {
+            "baseline_method": "llava_onevision_0_5b", "grt_method": candidate_method,
+            "primary_metric": "grid_acc", "point_tolerance": 1e-12,
+            "baseline_metrics": base, "grt_metrics": candidate,
+            "grt_minus_baseline": delta, "oriented_improvements": oriented,
+            "metric_outperform": better, "grid_acc_outperform": better["grid_acc"],
+        },
+        "provenance": {"fixture_only": True, "manifest_sha256": "c" * 64},
+    }
+
+
+def install_mocked_v2_loader(monkeypatch, summary):
+    calls = []
+
+    def mocked_loader(bundle, manifest_sha256):
+        calls.append((bundle, manifest_sha256))
+        return deepcopy(summary)
+
+    monkeypatch.setattr(complete, "_load_highmotion_v2", mocked_loader)
+    return calls
+
+
+def test_optional_v2_loads_only_explicit_bundle_and_retains_legacy_hold(monkeypatch):
+    summary = synthetic_highmotion_v2_summary()
+    calls = install_mocked_v2_loader(monkeypatch, summary)
+    before = complete.build_outputs(include_highmotion_v2=False)
+    assert calls == []
+    output = complete.build_outputs(highmotion_v2_bundle=Path("synthetic-not-a-real-bundle"),
+                                    highmotion_v2_manifest_sha256="c" * 64)
+    assert calls == [(Path("synthetic-not-a-real-bundle"), "c" * 64)]
+    audit = json.loads(output["data/public-audit.json"])
+    assert audit["highmotion_v2"] == summary
+    assert audit["highmotion_additional"] == []
+    assert audit["highmotion_release_eligible_rows"] == 0
+    assert audit["highmotion_release_status"] == complete.HIGHMOTION_RELEASE_STATUS
+    for name in ("data/leaderboard.js", "data/highmotion-audit.json"):
+        assert output[name] == before[name]
+    assert audit["families"] == json.loads(before["data/public-audit.json"])["families"]
+
+
+def test_optional_v2_appends_19_csv_rows_without_changing_41_educational_rows(monkeypatch):
+    original = list(csv.DictReader(io.StringIO(complete.build_outputs(include_highmotion_v2=False)["data/leaderboard-complete.csv"])))
+    summary = synthetic_highmotion_v2_summary()
+    install_mocked_v2_loader(monkeypatch, summary)
+    output = complete.build_outputs(highmotion_v2_bundle=Path("synthetic-bundle"),
+                                    highmotion_v2_manifest_sha256="c" * 64)
+    records = list(csv.DictReader(io.StringIO(output["data/leaderboard-complete.csv"])))
+    assert len(records) == 60
+    for old, current in zip(original, records[:41]):
+        assert all(current[key] == value for key, value in old.items())
+    assert {row["cohort"] for row in records[41:]} == {"highmotion_right_ring_v2_preview1000"}
+    for actual, expected in zip(records[41:], summary["rows"]):
+        assert actual["method"] == expected["method"]
+        assert actual["samples"] == "1000"
+        assert actual["benchmark_version"] == "highmotion-right-ring-v2"
+        for metric in complete.HM_METRICS:
+            assert actual[metric] == str(expected[metric])
+            assert actual[metric + "_scored_records"] == "1000"
+            assert actual[metric + "_scored_slots_or_edges"] == str(expected["metric_scored_slots_or_edges"][metric])
+        assert "metric_scored_records" not in actual
+        assert "metric_scored_slots_or_edges" not in actual
+    assert "grt_llava_ov_0_5b" not in output["data/leaderboard-complete.csv"]
+
+
+@pytest.mark.parametrize("candidate_acc", [0.625, 0.375, 0.5])
+def test_optional_v2_html_shows_all_metrics_coverage_and_negative_deltas(monkeypatch, candidate_acc):
+    summary = synthetic_highmotion_v2_summary(candidate_acc=candidate_acc)
+    install_mocked_v2_loader(monkeypatch, summary)
+    output = complete.build_outputs(highmotion_v2_bundle=Path("synthetic-bundle"),
+                                    highmotion_v2_manifest_sha256="c" * 64)
+    page = output["leaderboard.html"]
+    parser = ViewParser()
+    parser.feed(page)
+    assert parser.rows_per_table == [29, 19, 5, 12]
+    assert not parser.scripts and not parser.external_styles
+    assert {urlsplit(link).path for link in parser.local_links} <= set(output)
+    assert "60 CSV records" in page and "preview-1000" in page
+    assert "not a full 3,243-record evaluation" in page
+    assert "1000 rows / 8000 slots" in page and "1000 rows / 7000 edges" in page
+    assert "1000 rows / 1000 slots" in page
+    assert "GRT minus baseline" in page and "Oriented improvement" in page
+    assert '<td title="-0.25">-0.25</td>' in page  # GRT ADE regression is retained.
+    assert "Legacy High-Motion results remain withheld" in page
+    assert "weight revisions and consumed-tensor identity are unproven" in page
+    assert complete.V2_CODE_URL in page and complete.V2_GUIDE_URL in page
+    assert 'data/leaderboard-complete.csv?v=hm-v2-cccccccccccccccc' in page
+    assert 'data/public-audit.json?v=hm-v2-cccccccccccccccc' in page
+    if candidate_acc > 0.5:
+        assert "GRT exceeds the corresponding HF 0.5B baseline on observed Grid Accuracy." in page
+    else:
+        assert "GRT does not exceed the corresponding HF 0.5B baseline on observed Grid Accuracy." in page
+    assert "grt_llava_ov_0_5b" not in page
+
+
+def test_optional_v2_null_metrics_display_undefined_coverage_not_zero(monkeypatch):
+    install_mocked_v2_loader(monkeypatch, synthetic_highmotion_v2_summary(undefined_fde=True))
+    output = complete.build_outputs(highmotion_v2_bundle=Path("synthetic-bundle"),
+                                    highmotion_v2_manifest_sha256="c" * 64)
+    assert 'title="Undefined or unranked; see valid-reference coverage">—</td>' in output["leaderboard.html"]
+    assert "0 rows / 0 slots" in output["leaderboard.html"]
+    records = list(csv.DictReader(io.StringIO(output["data/leaderboard-complete.csv"])))
+    assert all(row["grid_fde"] == "" and row["grid_fde_scored_records"] == "0"
+               for row in records[41:])
+
+
+@pytest.mark.parametrize("kwargs", [
+    {"highmotion_v2_bundle": Path("synthetic-bundle")},
+    {"highmotion_v2_manifest_sha256": "c" * 64},
+])
+def test_optional_v2_arguments_must_be_paired_before_loading(monkeypatch, kwargs):
+    def unexpected(*args, **kwargs):
+        pytest.fail("Unpaired arguments must fail before any loader")
+
+    monkeypatch.setattr(complete, "load_data", unexpected)
+    monkeypatch.setattr(complete, "_load_highmotion_v2", unexpected)
+    with pytest.raises(ValueError, match="supplied together"):
+        complete.build_outputs(**kwargs)
+
+
+@pytest.mark.parametrize("arguments", [
+    ["--highmotion-v2-bundle", "synthetic-bundle"],
+    ["--highmotion-v2-manifest-sha256", "c" * 64],
+])
+def test_optional_v2_cli_unpaired_arguments_fail_before_writes(arguments, tmp_path):
+    output = tmp_path / "must-not-exist"
+    with pytest.raises(SystemExit) as error:
+        complete.main(arguments + ["--output", str(output)])
+    assert error.value.code == 2 and not output.exists()
+
+
+def test_optional_v2_cli_reports_actual_preview_counts_without_writing(monkeypatch, tmp_path, capsys):
+    install_mocked_v2_loader(monkeypatch, synthetic_highmotion_v2_summary(candidate_acc=0.375))
+    monkeypatch.chdir(tmp_path)
+    complete.main(["--verify-only", "--highmotion-v2-bundle", "synthetic-bundle",
+                   "--highmotion-v2-manifest-sha256", "c" * 64])
+    report = json.loads(capsys.readouterr().out)
+    assert report["leaderboard_rows"] == 48 and report["highmotion_rows"] == 19
+    assert report["csv_rows"] == 60 and report["comparison_rows"] == 12
+    assert report["highmotion_legacy_release_status"] == complete.HIGHMOTION_RELEASE_STATUS
+    assert report["highmotion_v2_scope"] == "first-1000-source-rows"
+    assert report["highmotion_grid_acc_outperform"] is False
+    assert report["automatic_publication"] is False
+    assert not list(tmp_path.iterdir())
+
+
+def test_optional_v2_loader_failure_cannot_create_output(monkeypatch, tmp_path):
+    def rejected(*args, **kwargs):
+        raise ValueError("synthetic release manifest mismatch")
+
+    monkeypatch.setattr(complete, "_load_highmotion_v2", rejected)
+    output = tmp_path / "must-not-exist"
+    with pytest.raises(SystemExit) as error:
+        complete.main(["--highmotion-v2-bundle", "synthetic-bundle",
+                       "--highmotion-v2-manifest-sha256", "c" * 64, "--output", str(output)])
+    assert error.value.code == 1 and not output.exists()
+
+
+def test_v2_cannot_be_injected_through_old_audit_field_or_bypass_legacy_guard():
+    frozen, audit, aligned, _, _ = complete.load_data()
+    summary = synthetic_highmotion_v2_summary()
+    audit["highmotion_v2"] = summary
+    with pytest.raises(ValueError, match="explicitly supplied"):
+        complete.render_outputs(frozen, audit, aligned)
+    audit["highmotion_additional"] = [{"method": "old_legacy_row"}]
+    with pytest.raises(ValueError, match="release hold forbids"):
+        complete.render_outputs(frozen, audit, aligned, highmotion_v2=summary)
+
+
+@pytest.mark.parametrize("field,value", [("status", "unchecked"), ("benchmark_version", "legacy"),
+                                        ("method_count", 18), ("full_source_coverage", True),
+                                        ("release_integrity_verified", False),
+                                        ("release_manifest_sha256", "d" * 64)])
+def test_renderer_refuses_wrong_v2_summary_schema(monkeypatch, field, value):
+    summary = synthetic_highmotion_v2_summary()
+    summary[field] = value
+    install_mocked_v2_loader(monkeypatch, summary)
+    with pytest.raises(ValueError):
+        complete.build_outputs(highmotion_v2_bundle=Path("synthetic-bundle"),
+                               highmotion_v2_manifest_sha256="c" * 64)
 
 
 def test_second_artifact_partial_write_failure_removes_only_owned_paths(tmp_path, monkeypatch):

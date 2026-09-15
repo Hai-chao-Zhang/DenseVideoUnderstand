@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = ["pytest>=8,<9", "pytest-subtests", "ruff>=0.12", "build"]
+test = ["pytest>=8,<9", "pytest-subtests", "ruff>=0.12", "build", "setuptools>=77"]
 reference = ["h5py>=3.11,<4", "pyarrow>=16,<24"]
 logging = ["wandb>=0.16"]
 legacy-decord = ["decord==0.6.0"]
@@ -51,4 +51,4 @@ line-length = 100
 
 [project.urls]
 Homepage = "https://www.zhanghaichao.xyz/DenseVideoUnderstand/"
-Repository = "https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/release/dive-bench-minimal"
+Repository = "https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/fix/highmotion-target-v2"

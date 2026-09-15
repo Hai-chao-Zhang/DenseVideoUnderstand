@@ -1,0 +1,140 @@
+{
+  "automatic_publication": false,
+  "baselines_verified": [
+    {
+      "method": "qwen3_vl_2b",
+      "report_sha256": "989c89ef7b387e274b78df8366d29a9dd26e8c701fdd8def4310fa83930a310c"
+    },
+    {
+      "method": "qwen3_vl_4b",
+      "report_sha256": "ec79a9c9fb3acd9c3857bd50f3ff6ee5b76087516645306181f84c29b5ef9d93"
+    },
+    {
+      "method": "qwen3_vl_8b",
+      "report_sha256": "2de21a72e5f64081758875f2c367ae85fc5924ae844f884bf87338e9cec618aa"
+    },
+    {
+      "method": "qwen3_vl_32b",
+      "report_sha256": "8088df93df6f1353ebdaa298219f45f8531515d9d5fdcf2209847b59ead8e52e"
+    },
+    {
+      "method": "qwen2_vl_2b",
+      "report_sha256": "592511f8cf70fcb3c70caa4b56bd7a85b923c0b751edf8f33f8028de84e6cd22"
+    },
+    {
+      "method": "qwen2_5_vl_3b",
+      "report_sha256": "49bc1c9dc30635ab628aba99bf57b57649e36bcef6d4d5097cde2db9d277e6fa"
+    },
+    {
+      "method": "qwen2_5_vl_7b",
+      "report_sha256": "ff6a03b219e4f33cc9241a48db1517592ecbd4813c8fa88c7f35ec0fff22a92b"
+    },
+    {
+      "method": "qwen2_5_vl_32b",
+      "report_sha256": "7ce1d6090c27dd01620e28746990784815fe717639ec537267685d086585d3bd"
+    },
+    {
+      "method": "qwen2_5_vl_72b",
+      "report_sha256": "e71c261223c5a9609a83d8092175eaf651e69c3f217157dce7a37a93d6eb9452"
+    },
+    {
+      "method": "llava_onevision_0_5b",
+      "report_sha256": "db12441c474ca372ddf43a88bfd26e04b06f40455e9d1893f581807f4cd739cc"
+    },
+    {
+      "method": "llava_onevision_original",
+      "report_sha256": "5be84fbedef96294cb2d6eb4cf89a94ef59f1496f6d231209b47fdf64b377b44"
+    },
+    {
+      "method": "qwen2_vl_7b",
+      "report_sha256": "0f45060ab928dd2da92ab8d64e09018008f25bb33d681a082daa1c8b1de6d1a1"
+    },
+    {
+      "method": "llava_onevision_1_5_8b",
+      "report_sha256": "25929a1028b9d6b718c2d9d9c95b28286a1813d0b8541274b27d6f2829c475a5"
+    },
+    {
+      "method": "llava_onevision_2_8b",
+      "report_sha256": "07b6d7c97ae5bcfd9e7611da96297c282ba978375b4910f5e96f1c1fe74e1198"
+    },
+    {
+      "method": "videollama3_2b",
+      "report_sha256": "9e073d28dc16686c1ef7dc4fa20097bd546864cc1f971bb28d1938744eead19a"
+    },
+    {
+      "method": "videollama3_7b",
+      "report_sha256": "7520f9707c21fc09ad97c1df78c80ce044ed3a3387bd22f6a53eb5c2a3346b97"
+    },
+    {
+      "method": "longva_7b",
+      "report_sha256": "6ff13fe34bf3e14384d93e078aa71ea2d3342e0bda2cab49fccda251e5e022d0"
+    },
+    {
+      "method": "phi4_multimodal",
+      "report_sha256": "8eac6f87fac48589ef8fb18fe9c77c71880aa3996286750cd662464199a5b1e0"
+    }
+  ],
+  "elapsed_seconds": 2.186883094997029,
+  "full_frame_coverage": {
+    "all_invalid_rows": 646,
+    "frames": 826253,
+    "fully_valid_rows": 1379,
+    "invalid_frames": 195192,
+    "invalid_reason_counts": {
+      "invalid_confidence": 8846,
+      "missing_confidence": 74862,
+      "nonpositive_depth": 2885,
+      "out_of_frame": 137427
+    },
+    "rows": 3243,
+    "valid_frames": 631061
+  },
+  "full_nonanswer_columns_equal": [
+    "video",
+    "speaker_index",
+    "frame_count",
+    "fps",
+    "width",
+    "height",
+    "segment_start",
+    "segment_end",
+    "video_path",
+    "question",
+    "qid",
+    "type",
+    "captions",
+    "ocr",
+    "ocr_answer"
+  ],
+  "gpu_inference_performed": false,
+  "grt_outputs_read": false,
+  "input_sequence_sha256": "646509f9f1a96e4350772053d9aa75a99ae49b3111beda43ab54e1a763060509",
+  "max_macro_abs_difference": 0.0,
+  "original_annotation_sha256": "518e2896749b4d6e957d7e9fb0ae16f75c28954e50ef84303889070253cf8ecd",
+  "per_prediction_metric_rescore_performed": false,
+  "prepare_summary_sha256": "5587980a571f13c35162ecfc393aca0a2a66badeac6004db153a870daf33d38d",
+  "preview_fde_rows": 669,
+  "preview_rows": 1000,
+  "preview_scored_rows": 861,
+  "preview_transition_edges": 5101,
+  "preview_transition_rows": 852,
+  "preview_valid_slots": 6015,
+  "reference_sha256": "140ae69160d5777bbf24381ea02980481c40a638cdc2e3f69b20894c95fd6f8b",
+  "sampled_full_coverage": {
+    "all_invalid_rows": 667,
+    "frames": 25944,
+    "fully_valid_rows": 1498,
+    "invalid_frames": 8005,
+    "invalid_reason_counts": {
+      "invalid_confidence": 444,
+      "missing_confidence": 3632,
+      "nonpositive_depth": 147,
+      "out_of_frame": 4966
+    },
+    "rows": 3243,
+    "valid_frames": 17939
+  },
+  "source_hdf_bindings_verified_from_pinned_manifest": true,
+  "source_hdf_projection_rerun": false,
+  "status": "passed"
+}

@@ -2,6 +2,7 @@ include LICENSE LICENSE-APACHE README.md leaderboard.md
 include setup.py
 recursive-include build_support *.py
 recursive-include release *.json *.csv *.js *.md
+include release/????-??-??/numeric_reports.json.gz
 recursive-include configs/densevideo *.yaml
 recursive-include docs *.md
 recursive-include tests/densevideo *.py

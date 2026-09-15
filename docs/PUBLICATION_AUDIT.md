@@ -4,12 +4,20 @@ Audit date: 2026-09-13. Audited evaluation-code commit:
 `78284318c9c8664df5fc6785410a0a9c4e494436`.
 Public source: [DIVE-Bench leaderboard](https://www.zhanghaichao.xyz/DenseVideoUnderstand/).
 
-Current-status addendum (2026-09-14): all High-Motion results are withheld pending
+Current-status addendum (2026-09-15): the default view now contains 29 Educational
+methods, 19 corrected-reference High-Motion preview methods and 12 Educational
+controls (60 CSV records). Only HF 0.5B GRT ran new GPU inference; 18 baselines
+were rescored from cached predictions. Grid Accuracy, F1, ADE and FDE improve;
+Transition Accuracy regresses. See the [completed v2 audit](HIGHMOTION_V2_RESULTS.md)
+for exact scores, valid-reference coverage and archived-baseline limitations.
+Old High-Motion scores remain withheld; Educational numbers are unchanged.
+
+Historical-status addendum (2026-09-14): all High-Motion results were withheld pending
 [target/reference consistency review](HIGHMOTION_TARGET_HOLD.md), including the
 18 previously protocol-screened candidates. Earlier High-Motion statements and
 numeric comparisons below document historical audits, not current release
-eligibility or semantic correctness. The current view contains 29 Educational
-results plus 12 controls (41 CSV records); Educational numbers and gates are unchanged.
+eligibility or semantic correctness. That dated hold view contained 29 Educational
+results plus 12 controls (41 CSV records).
 
 The three promoted LPM GRT scores agree with the website and the frozen
 per-sample evidence. This establishes historical score consistency. No model
@@ -53,13 +61,14 @@ is wall-clock processing throughput.
   The earlier 2026-09-14 complete HTML update, before the target-consistency hold,
   retained that historical file unchanged and added 29 Educational plus 18
   protocol-screened High-Motion results and 12 educational candidate/control rows.
-  That 47-result/12-control view is superseded: all High-Motion runs are now
-  withheld from current HTML tables and CSV, and their evidence remains historical.
+  That 47-result/12-control view was superseded by the hold: its old High-Motion
+  scores remain withheld, and their evidence remains historical. The separate
+  corrected-reference v2 now supplies the current 19 High-Motion rows.
   The minimal
   verifier's `--website` option checks the retained historical file, not the
   additional complete-page assets. The new `dive-leaderboard-complete` command
-  verifies both dated evidence bundles and generates all six complete-page
-  assets offline, now including the 41-record CSV and explicit hold status. See its
+  verifies three dated evidence bundles and generates all six complete-page
+  assets offline, including the current 60-record CSV. See its
   [source contract](COMPLETE_LEADERBOARD.md).
 - The audited commit's `leaderboard.md` equals the frozen Markdown byte for
   byte. The original workspace's uncommitted 2026-08-23 `leaderboard.md`
@@ -91,7 +100,9 @@ paper-named task aliases and a fixed preview selector, and makes video-path
 resolution fail on missing files without flattening EgoDex action directories.
 Archive downloads now preflight paths and allow only ordinary files/directories;
 the inherited YouTube helper invokes argument vectors without a shell.
-These release changes do not alter GRT kernel calculations or scoring formulas;
+Those initial release changes did not alter GRT kernel calculations or scoring formulas;
+the later v2 adds a separately versioned corrected-reference scorer and does not
+silently substitute it into historical metrics.
 the original source hashes remain historical provenance, not hashes of every
 current file. The published snapshot has a clean root commit so that the private
 development repository's ancestry is not distributed with the minimal code.

@@ -1,10 +1,9 @@
 """Rebuild the current release-policy-screened leaderboard from pinned evidence.
 
-This verifies historical artifacts, not fresh inference. The educational quality
-means are independently recomputed by the frozen-bundle verifier. The immutable
-27-run High-Motion audit is still verified, but its historical protocol screening
-does not establish current release eligibility: all High-Motion results are held
-pending target/reference consistency review. No data, network or GPU are needed.
+This verifies saved evidence, without performing inference. Educational means
+are independently recomputed by the frozen-bundle verifier. High-Motion v2 uses
+corrected-reference numeric reports for 18 cached baselines and a completed GRT
+run. Legacy High-Motion numbers remain withheld. No data, network or GPU needed.
 """
 from __future__ import annotations
 
@@ -31,6 +30,8 @@ from tools.densevideo.release_resources import resolve_release_bundle
 
 RELEASE = "2026-09-14"
 MANIFEST_SHA256 = "5767bd60a3d8efe24722d9d4b12a374c7e566d50c370cbacdc02cdfab3162232"
+HIGHMOTION_V2_RELEASE = "2026-09-15"
+HIGHMOTION_V2_MANIFEST_SHA256 = "1f64ff54ec8eb09d72c37d6ef3a944e8ccae0a58fe5b4d45fabdfb0a7449d0dc"
 HIGHMOTION_RELEASE_STATUS = "held_target_reference_consistency_review"
 HIGHMOTION_HOLD_DATE = "2026-09-14"
 HIGHMOTION_HOLD_REASON = (
@@ -42,6 +43,8 @@ HIGHMOTION_HOLD_REASON = (
     "protocol-screened archive candidates."
 )
 CODE_URL = "https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/release/dive-bench-minimal"
+V2_CODE_URL = "https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/fix/highmotion-target-v2"
+V2_GUIDE_URL = "https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/fix/highmotion-target-v2/docs/HIGHMOTION_V2_REPRODUCTION.md"
 STANDALONE_CSS = """
 :root{color-scheme:light;font-family:system-ui,sans-serif;color:#172938;background:#f6f3ec}
 *{box-sizing:border-box}body{margin:0}main{max-width:1500px;margin:auto;padding:32px 20px}
@@ -247,39 +250,186 @@ def load_data(bundle=None, *, historical_bundle=None):
     return frozen, audit, aligned, frozen_bytes, source_bytes["highmotion-audit.json"]
 
 
-def cell(value):
+def cell(value, *, missing_title="Not reported"):
     if value is None:
-        return '<td title="Not reported">—</td>'
+        return '<td title="' + html.escape(missing_title, quote=True) + '">—</td>'
     if isinstance(value, float):
         return f'<td title="{value!r}">{value:.6g}</td>'
     return "<td>" + html.escape(str(value)) + "</td>"
 
 
-def table(rows, columns, caption):
+def table(rows, columns, caption, *, missing_title="Not reported"):
     header = "".join('<th scope="col">' + html.escape(label) + "</th>" for _, label in columns)
     body = []
     for row in rows:
-        body.append("<tr>" + "".join(cell(row.get(key)) for key, _ in columns) + "</tr>")
+        body.append("<tr>" + "".join(cell(row.get(key), missing_title=missing_title)
+                                    for key, _ in columns) + "</tr>")
     return '<div class="table-scroll" role="region" tabindex="0" aria-label="' + html.escape(caption, quote=True) + '"><table><caption>' + html.escape(caption) + "</caption><thead><tr>" + header + "</tr></thead><tbody>" + "\n".join(body) + "</tbody></table></div>"
 
 
-def render_outputs(frozen, audit, aligned):
+def _load_highmotion_v2(bundle, manifest_sha256):
+    # The explicit legacy-only path remains independent of the newer bundle.
+    # Current/default and explicit v2 paths authenticate this release artifact.
+    from tools.densevideo.highmotion_v2_release import load_highmotion_v2_release
+
+    return load_highmotion_v2_release(bundle, expected_manifest_sha256=manifest_sha256)
+
+
+def _render_highmotion_v2(summary):
+    """Format an already authenticated loader result, not an alternate verifier."""
+    from tools.densevideo.highmotion_v2_bundle import BASELINE_METHODS
+    from tools.densevideo.highmotion_v2_scoring import (
+        MASK_POLICY,
+        SCORER_VERSION,
+        TARGET_JOINT,
+        VERSION,
+    )
+
+    require(isinstance(summary, dict) and summary.get("status") == "numeric_reports_validated"
+            and summary.get("benchmark_version") == VERSION
+            and summary.get("scorer_version") == SCORER_VERSION
+            and summary.get("target_joint") == TARGET_JOINT
+            and summary.get("reference_policy") == MASK_POLICY,
+            "Unsupported corrected High-Motion numeric summary")
+    require(summary.get("scope") == "first-1000-source-rows"
+            and summary.get("source_reference_records") == 3243
+            and summary.get("full_source_coverage") is False
+            and summary.get("automatic_publication") is False,
+            "Wrong corrected High-Motion scope or publication claim")
+    rows = summary.get("rows")
+    require(isinstance(rows, list) and len(rows) == summary.get("method_count") == 19,
+            "Corrected preview must contain 18 baselines and one GRT method")
+    comparison = summary["comparison"]
+    require(comparison["baseline_method"] == "llava_onevision_0_5b"
+            and comparison["grt_method"] not in BASELINE_METHODS
+            and len({row["method"] for row in rows}) == 19
+            and {row["method"] for row in rows} == set(BASELINE_METHODS) | {comparison["grt_method"]},
+            "Corrected High-Motion method topology changed")
+    labels = {
+        "grid_acc": "Grid Accuracy ↑", "grid_ade": "Grid ADE ↓", "grid_fde": "Grid FDE ↓",
+        "grid_transition_acc": "Transition Accuracy ↑", "token_f1": "Token F1 ↑",
+    }
+    columns = [("rank", "Rank"), ("model", "Model"), ("method", "Method ID"),
+               ("samples", "Cached/new records")]
+    for metric, label in labels.items():
+        columns.extend([(metric, label), (metric + "_coverage", label + " coverage")])
+    columns.append(("prediction_source", "Prediction provenance"))
+    display_rows, csv_rows = [], []
+    for row in rows:
+        require(row["samples"] == row["records"] == 1000 and row["sampled_slots"] == 8000,
+                "Corrected preview record or sampled-slot count changed")
+        display = dict(row)
+        display["model"] = row.get("model") or row["method"]
+        flat = {key: value for key, value in row.items()
+                if key not in ("metric_scored_records", "metric_scored_slots_or_edges")}
+        flat["model"] = display["model"]
+        require(all(value is None or type(value) in (str, bool, int, float) for value in flat.values()),
+                "Nested fields must not be silently stringified in CSV")
+        for metric, ceiling in HM_METRICS.items():
+            count = row["metric_scored_records"][metric]
+            slots = row["metric_scored_slots_or_edges"][metric]
+            require(type(count) is int and 0 <= count <= 1000
+                    and type(slots) is int and 0 <= slots <= 8000
+                    and (row[metric] is None) == (count == 0) == (slots == 0),
+                    "Invalid corrected metric coverage")
+            if row[metric] is not None:
+                finite_number(row[metric], "corrected " + metric, upper=ceiling)
+            unit = "edges" if metric == "grid_transition_acc" else "slots"
+            display[metric + "_coverage"] = f"{count} rows / {slots} {unit}"
+            flat[metric + "_scored_records"] = count
+            flat[metric + "_scored_slots_or_edges"] = slots
+        for key in ("benchmark_version", "scorer_version", "target_joint", "reference_policy",
+                    "references_sha256", "input_sequence_sha256", "scope"):
+            flat[key] = summary[key]
+        display_rows.append(display)
+        csv_rows.append(flat)
+    deltas = []
+    for metric, label in labels.items():
+        outcome = comparison["metric_outperform"][metric]
+        require(outcome is None or type(outcome) is bool, "Invalid point-comparison outcome")
+        deltas.append({
+            "metric": label, "baseline": comparison["baseline_metrics"][metric],
+            "grt": comparison["grt_metrics"][metric],
+            "delta": comparison["grt_minus_baseline"][metric],
+            "oriented": comparison["oriented_improvements"][metric],
+            "exceeds_tolerance": "undefined" if outcome is None else "yes" if outcome else "no",
+        })
+    require(type(comparison["grid_acc_outperform"]) is bool,
+            "Primary comparison must be an explicitly computed boolean")
+    primary = ("GRT exceeds the corresponding HF 0.5B baseline on observed Grid Accuracy."
+               if comparison["grid_acc_outperform"] else
+               "GRT does not exceed the corresponding HF 0.5B baseline on observed Grid Accuracy.")
+    missing_title = "Undefined or unranked; see valid-reference coverage"
+    sections = [
+        '<h2 id="highmotion-v2">High-Motion v2: right-ring reference correction, preview-1000</h2>',
+        ('<p>19 methods: 18 archived baselines rescored on CPU and one new HF 0.5B GRT run. '
+        'All use the same fixed first 1,000 source records, not a full 3,243-record evaluation. '
+        'The reference target is <code>rightRingFingerMetacarpal</code>, the named '
+        'right-palm/ring-finger-base proxy; questions and original sampled positions are unchanged. '
+        'This versioned correction does not claim to recover the original annotation constructor.</p>'),
+        ('<p>Rank by Grid Accuracy descending; exact ties share a competition rank and are ordered '
+        'by method ID. Null scores are unranked. Every metric is a macro mean over its defined '
+        'per-record values, with visible metric-specific row and slot/edge coverage. '
+        'A dash means undefined under the reference mask, not zero. Invalid slots never shift '
+        'later predictions; FDE uses the original final slot, and transitions require adjacent '
+        'valid original slots. Token F1 uses canonical label bags on valid positions, with surplus '
+        'outputs penalized. All 1,000 records remain counted even when no positions are scoreable.</p>'),
+        '<p>' + html.escape(summary["comparison_caveat"]) + '</p>',
+        table(display_rows, columns, "19 corrected-reference preview methods; eight slots per record",
+              missing_title=missing_title),
+        '<h3 id="highmotion-v2-comparison">GRT versus its corresponding HF 0.5B baseline</h3><p>'
+        + html.escape(primary) + ' Point tolerance: '
+        + html.escape(str(comparison["point_tolerance"]))
+        + '. Every observed difference is retained, including regressions. '
+        'This is a point-estimate comparison, not a statistical-significance claim.</p>',
+        table(deltas, [("metric", "Metric"), ("baseline", "Rescored HF 0.5B baseline"),
+                       ("grt", "GRT"), ("delta", "GRT minus baseline"),
+                       ("oriented", "Oriented improvement (positive is better)"),
+                       ("exceeds_tolerance", "Exceeds point tolerance")],
+              "All five corrected-reference GRT versus baseline differences",
+              missing_title=missing_title),
+        ('<h2 id="highmotion-aligned">Legacy High-Motion results remain withheld</h2><p>'
+        'The old target/reference hold and immutable '
+        '<a href="data/highmotion-audit.json">27-run historical protocol audit</a> remain intact. '
+        'No old High-Motion score is mixed into the corrected v2 table or its CSV cohort. '
+        'Reference, scorer, prediction and release provenance are available in '
+        '<a href="data/public-audit.json?v=hm-v2-' + summary["release_manifest_sha256"][:16]
+        + '">the versioned numeric audit</a>.</p>'),
+    ]
+    return csv_rows, sections
+
+
+def render_outputs(frozen, audit, aligned, *, highmotion_v2=None):
     require(aligned == [] and audit.get("highmotion_additional") == []
             and audit.get("highmotion_release_status") == HIGHMOTION_RELEASE_STATUS
             and audit.get("highmotion_release_eligible_rows") == 0,
             "High-Motion release hold forbids ranked or unranked numeric rows")
+    require((highmotion_v2 is None and "highmotion_v2" not in audit)
+            or (highmotion_v2 is not None and audit.get("highmotion_v2") == highmotion_v2),
+            "Corrected High-Motion payload was not explicitly supplied by the loader")
     lpm_columns = [("rank", "Rank"), ("model", "Model"), ("method", "Method ID"), ("samples", "Items"), ("open_mos", "Open MOS ↑"), ("token_f1", "Token F1 ↑"), ("cer", "CER ↓"), ("wer", "WER ↓"), ("exact_match", "Exact match ↑"), ("recompute_ratio", "Patch recompute ↓"), ("reference_recompute_ratio", "Reference patch compute ↓"), ("effective_fps", "Sampling density (fps)"), ("throughput_fps", "Mean throughput (fps) ↑"), ("source", "Source")]
     control_columns = [("family_label", "Family"), ("label", "Control"), ("method", "Method ID"), ("samples", "Items"), ("open_mos", "Open MOS ↑"), ("token_f1", "Token F1 ↑"), ("patch_ratio", "Patch recompute ↓"), ("throughput_fps", "Mean throughput (fps) ↑"), ("mean_wall_time_s", "Mean request time (s) ↓")]
     controls = [dict(row, family_label=family["label"]) for family in audit["families"] for row in family["methods"]]
+    intro = '<p>Audit and release hold: 14 September 2026. Educational scores retain the 20 August snapshot. These are historical artifacts, not a fresh GPU rerun. <a href="data/leaderboard-complete.csv?v=20260914-target-hold">Download CSV</a> · <a href="data/public-audit.json?v=20260914-target-hold">Source hashes and release status</a> · <a href="' + CODE_URL + '">Public reproduction code</a>.</p>'
+    coverage = '<p><strong>29 Educational results, plus 12 educational GRT comparison rows (41 CSV records). No High-Motion results are currently released.</strong> Educational: 634 QA / 317 videos. A dash means unreported, not zero. All numeric cells retain full precision in their title and downloadable data.</p>'
+    navigation = '<nav aria-label="Tables and release status"><a href="#educational">Educational</a> · <a href="#highmotion-aligned">High-Motion release hold</a> · <a href="#grt-controls">GRT vs all controls</a></nav>'
+    hm_sections = [
+        '<h2 id="highmotion-aligned">High-Motion High-FPS Videos: target/reference consistency audit</h2><p>' + html.escape(HIGHMOTION_HOLD_REASON) + '</p>',
+        '<p>There is no ranked or unranked High-Motion results table, and no High-Motion CSV entry. The immutable <a href="data/highmotion-audit.json">historical 27-run protocol audit</a> still verifies 18 archived protocol-screened candidates; those historical eligibility flags are not current release permission. Matching saved prompts, target labels and recomputed scores does not establish that the reference trajectory follows the body part requested by the question.</p>',
+    ]
+    hm_rows = []
+    if highmotion_v2 is not None:
+        hm_rows, hm_sections = _render_highmotion_v2(highmotion_v2)
+        cache_key = "hm-v2-" + highmotion_v2["release_manifest_sha256"][:16]
+        intro = '<p>Educational scores retain the 20 August historical snapshot. High-Motion v2 compares CPU-rescored archived baselines with one new GRT run; no baseline inference was repeated. <a href="data/leaderboard-complete.csv?v=' + cache_key + '">Download CSV</a> · <a href="data/public-audit.json?v=' + cache_key + '">Versioned source hashes and comparison limits</a> · <a href="' + V2_CODE_URL + '">Public reproduction code</a> · <a href="' + V2_GUIDE_URL + '">Corrected-reference reproduction guide</a>.</p>'
+        coverage = '<p><strong>29 Educational results, 19 corrected High-Motion preview results, and 12 educational GRT comparison rows (60 CSV records).</strong> Educational: 634 QA / 317 videos. High-Motion v2: the fixed 1,000-record preview of 3,243 source records; metric-specific valid-reference coverage is shown separately. All numeric cells retain full precision in their title and downloadable data.</p>'
+        navigation = '<nav aria-label="Tables and release status"><a href="#educational">Educational</a> · <a href="#highmotion-v2">High-Motion v2 preview</a> · <a href="#highmotion-v2-comparison">High-Motion GRT comparison</a> · <a href="#grt-controls">Educational GRT controls</a></nav>'
     pieces = ["<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>DIVE-Bench — Complete Protocol-Screened Leaderboard</title><style>" + STANDALONE_CSS + "</style></head><body><main class=\"section-shell audit-page\">",
               '<a href="https://www.zhanghaichao.xyz/DenseVideoUnderstand/#leaderboard">← Interactive project page</a><h1>Complete protocol-screened leaderboard</h1>',
-              '<p>Audit and release hold: 14 September 2026. Educational scores retain the 20 August snapshot. These are historical artifacts, not a fresh GPU rerun. <a href="data/leaderboard-complete.csv?v=20260914-target-hold">Download CSV</a> · <a href="data/public-audit.json?v=20260914-target-hold">Source hashes and release status</a> · <a href="' + CODE_URL + '">Public reproduction code</a>.</p>',
-              '<p><strong>29 Educational results, plus 12 educational GRT comparison rows (41 CSV records). No High-Motion results are currently released.</strong> Educational: 634 QA / 317 videos. A dash means unreported, not zero. All numeric cells retain full precision in their title and downloadable data.</p>',
-              '<nav aria-label="Tables and release status"><a href="#educational">Educational</a> · <a href="#highmotion-aligned">High-Motion release hold</a> · <a href="#grt-controls">GRT vs all controls</a></nav>',
+              intro, coverage, navigation,
               '<h2 id="educational">Educational High-FPS Videos</h2><p>29 published methods. Rank by reported Open MOS, then Token F1; missing Open MOS sorts last and is never filled in. Open MOS judge: Qwen/Qwen3-VL-32B-Instruct. The verified GRT profiles use eight sampled frames, not a measured high-FPS operating point.</p>',
               table(frozen["tracks"]["lpm"], lpm_columns, "29 educational methods; 634 items each"),
-              '<h2 id="highmotion-aligned">High-Motion High-FPS Videos: target/reference consistency audit</h2><p>' + html.escape(HIGHMOTION_HOLD_REASON) + '</p>',
-              '<p>There is no ranked or unranked High-Motion results table, and no High-Motion CSV entry. The immutable <a href="data/highmotion-audit.json">historical 27-run protocol audit</a> still verifies 18 archived protocol-screened candidates; those historical eligibility flags are not current release permission. Matching saved prompts, target labels and recomputed scores does not establish that the reference trajectory follows the body part requested by the question.</p>',
+              *hm_sections,
               '<h2 id="grt-controls">GRT vs archived and matched controls</h2><p>All three promoted educational candidates exceed every contracted Open MOS and Token F1 floor, with 11.43–15.23% fewer patch projections than the matched all-patch route. LLaVA-OneVision 7B failed its MOS gate and is not promoted. These are observed point estimates, not statistical-significance claims. Archived Qwen baselines differ from stronger matched controls: their entire gap must not be attributed to GRT.</p>',
               table(controls, control_columns, "All 12 educational comparison rows; 634 items and eight sampled frames per method"),
               '<p><strong>Not all metrics improve.</strong> Qwen 3B GRT reports mean throughput 1.67264 fps versus 1.74994 for its all-patch control (about 4.42% lower), even though its Open MOS, Token F1 and patch reuse improve. Route31 mean request time is essentially unchanged versus its all-patch control. Throughput is the mean of per-request sampled-frame rates, not total frames divided by total campaign time, and these single historical runs do not establish repeated speedup. Patch ratios measure patch projection only, not end-to-end FLOPs.</p>',
@@ -287,6 +437,7 @@ def render_outputs(frozen, audit, aligned):
     records = []
     for cohort, rows in [("educational_published", frozen["tracks"]["lpm"]), ("educational_grt_controls", controls)]:
         records.extend(dict(row, cohort=cohort) for row in rows)
+    records.extend(dict(row, cohort="highmotion_right_ring_v2_preview1000") for row in hm_rows)
     fields = ["cohort"] + sorted({key for row in records for key in row if key != "cohort"})
     buffer = io.StringIO()
     writer = csv.DictWriter(buffer, fieldnames=fields, lineterminator="\n")
@@ -299,12 +450,29 @@ def render_outputs(frozen, audit, aligned):
     }
 
 
-def build_outputs(bundle=None, *, historical_bundle=None):
+def build_outputs(bundle=None, *, historical_bundle=None, highmotion_v2_bundle=None,
+                  highmotion_v2_manifest_sha256=None, include_highmotion_v2=True):
     """Return every view/data asset, with no file writes or network access."""
+    require((highmotion_v2_bundle is None) == (highmotion_v2_manifest_sha256 is None),
+            "Corrected High-Motion bundle and manifest SHA-256 must be supplied together")
+    require(type(include_highmotion_v2) is bool, "include_highmotion_v2 must be boolean")
+    require(include_highmotion_v2 or highmotion_v2_bundle is None,
+            "Legacy reference-hold view cannot accept a v2 bundle")
+    if include_highmotion_v2 and highmotion_v2_bundle is None:
+        highmotion_v2_bundle = resolve_release_bundle(release=HIGHMOTION_V2_RELEASE)
+        highmotion_v2_manifest_sha256 = HIGHMOTION_V2_MANIFEST_SHA256
     frozen, audit, aligned, frozen_bytes, evidence_bytes = load_data(
         bundle, historical_bundle=historical_bundle,
     )
-    outputs = render_outputs(frozen, audit, aligned)
+    highmotion_v2 = None
+    if highmotion_v2_bundle is not None:
+        highmotion_v2 = _load_highmotion_v2(highmotion_v2_bundle, highmotion_v2_manifest_sha256)
+        require(isinstance(highmotion_v2, dict)
+                and highmotion_v2.get("release_integrity_verified") is True
+                and highmotion_v2.get("release_manifest_sha256") == highmotion_v2_manifest_sha256,
+                "Corrected High-Motion loader did not authenticate the requested release manifest")
+        audit["highmotion_v2"] = highmotion_v2
+    outputs = render_outputs(frozen, audit, aligned, highmotion_v2=highmotion_v2)
     outputs["data/public-audit.json"] = json.dumps(audit, ensure_ascii=False, indent=2) + "\n"
     outputs["data/highmotion-audit.json"] = evidence_bytes.decode("utf-8")
     outputs["data/leaderboard.js"] = frozen_bytes.decode("utf-8")
@@ -381,13 +549,26 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bundle", type=Path, help="Explicit 2026-09-14 evidence directory")
     parser.add_argument("--historical-bundle", type=Path, help="Explicit frozen 2026-08-20 bundle")
+    parser.add_argument("--highmotion-v2-bundle", type=Path,
+                        help="Optional separate corrected-reference preview release bundle")
+    parser.add_argument("--highmotion-v2-manifest-sha256",
+                        help="Reviewed immutable manifest SHA-256 for the optional v2 bundle")
+    parser.add_argument("--legacy-reference-hold", action="store_true",
+                        help="Rebuild only the dated 2026-09-14 hold view, not the current v2 leaderboard")
     parser.add_argument("--output", type=Path, help="New output directory; never overwrite an existing path")
     parser.add_argument("--verify-only", action="store_true")
     args = parser.parse_args(argv)
     if args.verify_only and args.output:
         parser.error("--verify-only and --output are mutually exclusive")
+    if (args.highmotion_v2_bundle is None) != (args.highmotion_v2_manifest_sha256 is None):
+        parser.error("--highmotion-v2-bundle and --highmotion-v2-manifest-sha256 are required together")
+    if args.legacy_reference_hold and args.highmotion_v2_bundle is not None:
+        parser.error("--legacy-reference-hold cannot be combined with a v2 bundle")
     try:
-        outputs = build_outputs(args.bundle, historical_bundle=args.historical_bundle)
+        outputs = build_outputs(args.bundle, historical_bundle=args.historical_bundle,
+                                highmotion_v2_bundle=args.highmotion_v2_bundle,
+                                highmotion_v2_manifest_sha256=args.highmotion_v2_manifest_sha256,
+                                include_highmotion_v2=not args.legacy_reference_hold)
         if args.output:
             write_outputs(args.output, outputs)
         report = {
@@ -411,6 +592,23 @@ def main(argv=None):
                 for name, value in outputs.items()
             },
         }
+        if not args.legacy_reference_hold:
+            summary = json.loads(outputs["data/public-audit.json"])["highmotion_v2"]
+            report.update({
+                "verification": "Historical Educational artifacts and authenticated corrected-reference numeric reports; no model inference performed by this command",
+                "release": summary.get("audit_date", HIGHMOTION_V2_RELEASE),
+                "leaderboard_rows": 29 + summary["method_count"],
+                "highmotion_rows": summary["method_count"], "csv_rows": 41 + summary["method_count"],
+                "highmotion_release_status": summary["status"],
+                "highmotion_legacy_release_status": HIGHMOTION_RELEASE_STATUS,
+                "highmotion_hold_reason": "Legacy High-Motion results remain withheld; the separate corrected v2 preview does not reuse their old scores",
+                "highmotion_v2_version": summary["benchmark_version"],
+                "highmotion_v2_manifest_sha256": summary["release_manifest_sha256"],
+                "highmotion_v2_references_sha256": summary["references_sha256"],
+                "highmotion_v2_scope": summary["scope"],
+                "highmotion_grid_acc_outperform": summary["comparison"]["grid_acc_outperform"],
+                "automatic_publication": False,
+            })
     except (OSError, ValueError, KeyError, TypeError) as error:
         parser.exit(1, f"Complete leaderboard verification failed: {error}\n")
     print(json.dumps(report, indent=2))

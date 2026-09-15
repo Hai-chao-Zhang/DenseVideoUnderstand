@@ -7,8 +7,11 @@ identical to the historical website. The runner reports these separately.
 
 See [PUBLICATION_AUDIT.md](PUBLICATION_AUDIT.md) for the verified historical
 numbers and [DATASET_RELEASE.md](DATASET_RELEASE.md) for data access, paper-version,
-count and license limitations. No full GPU inference or judge rerun was performed
-as part of the minimal-code release audit. A clean public-data download remains
+count and license limitations. The initial audit did not rerun full inference or
+a judge. On 2026-09-15, the separate [HF 0.5B High-Motion v2 preview](HIGHMOTION_V2_RESULTS.md)
+completed 1,000 new GRT predictions; no baseline inference was repeated. Its
+[generation and source-correction recipe](HIGHMOTION_V2_REPRODUCTION.md) is distinct
+from the Educational profiles below. A clean public-data download remains
 unverified; existing local caches are not proof of public access.
 
 ## Installation
@@ -22,7 +25,7 @@ upstream framework. From the minimal branch:
 python3.10 -m venv .venv
 . .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -e '.[test]'
+python -m pip install -e '.[test,reference]'
 python -m pytest -q
 ```
 
@@ -44,8 +47,8 @@ distributed in the numeric bundle.
 
 ## Offline published scores
 
-Generate the current 29-result Educational view and its 12 comparison rows
-(41 CSV records; all High-Motion results held):
+Generate the current 29-result Educational view, 19 corrected-reference High-Motion
+preview results and 12 Educational comparison rows (60 CSV records):
 
 ```bash
 dive-leaderboard-complete --verify-only
@@ -54,8 +57,10 @@ dive-leaderboard-complete --output /tmp/dive-complete-table
 
 Open the generated `leaderboard.html` without needing JavaScript or external
 assets. The [complete generation contract](COMPLETE_LEADERBOARD.md) describes
-which archived inputs are verified and why all High-Motion results are withheld
-pending [target/reference consistency review](HIGHMOTION_TARGET_HOLD.md).
+which saved inputs are verified. Only the separately authenticated v2 bundle can
+supply current High-Motion scores; legacy scores remain withheld following the
+[target/reference review](HIGHMOTION_TARGET_HOLD.md). Add `--legacy-reference-hold`
+to reproduce the dated 2026-09-14 41-record view rather than the current website.
 For the separate immutable 32-row historical snapshot:
 
 ```bash

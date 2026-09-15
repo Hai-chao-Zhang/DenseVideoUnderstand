@@ -11,6 +11,7 @@ from setuptools.errors import SetupError
 
 _RELEASE_DIRECTORY = re.compile(r"\d{4}-\d{2}-\d{2}")
 _ALLOWED_SUFFIXES = {".csv", ".js", ".json", ".md"}
+_NUMERIC_REPORTS_ARCHIVE = "numeric_reports.json.gz"
 
 
 class BuildPyWithReleaseData(build_py):
@@ -44,7 +45,11 @@ class BuildPyWithReleaseData(build_py):
                 if not source.is_file():
                     continue
                 relative = source.relative_to(source_root)
-                if source.suffix.lower() not in _ALLOWED_SUFFIXES or any(
+                compressed_numeric_report = (
+                    source.name == _NUMERIC_REPORTS_ARCHIVE and source.parent == release
+                )
+                if (source.suffix.lower() not in _ALLOWED_SUFFIXES
+                        and not compressed_numeric_report) or any(
                     part.startswith(".") for part in relative.parts
                 ):
                     raise SetupError(f"unexpected release artifact: {relative}")

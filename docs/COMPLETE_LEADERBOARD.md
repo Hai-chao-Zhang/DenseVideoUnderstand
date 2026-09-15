@@ -1,83 +1,78 @@
-# Complete protocol-screened leaderboard
+# Complete versioned leaderboard
 
-As of the 2026-09-14 [target/reference consistency hold](HIGHMOTION_TARGET_HOLD.md),
-the current public view contains 29 Educational results. A separate Educational
-GRT comparison shows all 12 candidate/control rows; the CSV therefore contains
-41 records, not 41 unique main-leaderboard methods. All High-Motion results are
-withheld, including the 18 previously protocol-screened archive candidates.
-There is no ranked or unranked High-Motion numeric table or current CSV row.
-The standalone High-Motion section explains the review and retains its existing
-`highmotion-aligned` anchor for link compatibility.
-
-Run with Python/PyYAML from a checkout, or with the installed minimal package:
+The default 2026-09-15 view contains 29 Educational methods, 19 corrected-reference
+High-Motion preview methods and 12 Educational GRT comparison rows: **60 CSV
+records**, not 60 distinct main-leaderboard methods. HTML and CSV show no legacy
+High-Motion result rows. All five new HF 0.5B GRT/baseline differences are visible,
+including the Transition Accuracy regression. The preview is the fixed first
+1,000 of 3,243 source records, with per-metric valid-reference coverage.
 
 ```bash
 python -m tools.densevideo.build_complete_leaderboard --verify-only
 python -m tools.densevideo.build_complete_leaderboard --output /path/to/new-directory
 ```
 
-Default resources are resolved from the source checkout or installed wheel,
-independent of the working directory. No model, dataset, credentials, network or
-GPU is needed. Existing output directories are refused. Catchable write failures
-trigger best-effort cleanup of only this invocation's created files and empty
-directories; concurrently created or replaced paths are preserved. This is not
-atomic publication or crash durability. Open `leaderboard.html`
-in the new directory: its CSS is inline, JavaScript is not required, and all
-relative data links point to included files.
-Links to current CSV and public-audit JSON carry `?v=20260914-target-hold` so cached
-pre-hold assets are not reused; immutable historical artifact links are unchanged.
+Use Python/PyYAML from the `fix/highmotion-target-v2` checkout or the installed
+minimal package. All three dated bundles are included in wheels; commands work
+outside a checkout. No model, dataset access, credentials, network or GPU is used
+by this numerical export. Open the resulting `leaderboard.html`: its CSS is inline,
+it needs no JavaScript, and relative data links point to included files.
 
-## Source contract
+Existing output directories are refused. Catchable write failures trigger
+best-effort cleanup of this invocation's own files and empty directories; other
+writers' paths are preserved. This is not atomic publication or crash durability.
 
-The generator first invokes the frozen `2026-08-20` verifier. This checks the
-immutable 32-row historical snapshot and independently recomputes Open MOS and
-Token F1 from 7,608 numeric records across all 12 educational comparison methods.
-The pinned declared precision is retained after verification, avoiding harmless
-floating-point re-summation changes to published values.
+## Source contracts
 
-The additional `2026-09-14/manifest.json` is pinned by SHA-256 in the generator.
-It binds the original frozen/provenance hashes, exact family/method/role
-coverage, and byte hashes of two new canonical inputs:
+- `2026-08-20`: immutable 32-row historical snapshot and 7,608 numeric records
+  across all 12 Educational comparison methods. Open MOS/Token F1 means are
+  independently recomputed; validated declared precision is retained.
+- `2026-09-14`: authenticated Educational telemetry and unchanged 27-run legacy
+  High-Motion protocol audit. Its old eligibility flags are historical evidence,
+  not permission to republish old scores. Original manifests remain byte-identical.
+- `2026-09-15`: five-file corrected-reference bundle, pinned by manifest SHA-256
+  `1f64ff54ec8eb09d72c37d6ef3a944e8ccae0a58fe5b4d45fabdfb0a7449d0dc`.
+  The loader verifies member bytes and constructor/scorer/validator source hashes,
+  exact 19-method/1,000-record populations, matching identities/prompts, original
+  positions, masks, metric-specific denominators and source-audit receipts.
+  It independently reaggregates all 19,000 numeric records. Hash/coverage failures
+  stop export; there is no fallback to legacy numbers.
 
-- `comparison_telemetry.json`: nine candidate/matched-control telemetry records
-  with original summary hashes. Candidate patch ratios, throughput and source
-  hashes are cross-checked against the older provenance. Archived baselines have
-  no invented telemetry. These are historical per-request aggregate measurements,
-  not repeated hardware speed measurements.
-- `highmotion-audit.json`: the immutable historical 27-run source/protocol audit.
-  Ordered identities, eight-endpoint input and target policies, sample coverage,
-  metric checks, and the exact historical 18-candidate membership are still
-  validated. Historical `rank_eligible` flags do not confer current release
-  eligibility. No High-Motion method produces a current browser or CSV row.
+The v2 bundle has no raw answers, predictions or videos. Public numeric validation
+does not rerun inference, source projection or raw-prediction scoring. The
+[actual execution/results audit](HIGHMOTION_V2_RESULTS.md) distinguishes these
+checks and records the new GPU run and independent raw-prediction rescoring.
 
-The historical manifest remains byte-identical, including its earlier
-47-result/12-control (59-record CSV) coverage contract from 2026-09-14 before the
-target hold. Current release policy is separate and hardcoded in the generator,
-with no user override flag. Current `public-audit.json` and its JavaScript contain
-an empty `highmotion_additional`, status
-`highmotion_release_status: "held_target_reference_consistency_review"`,
-`highmotion_hold_date`, a nonempty `highmotion_hold_reason`,
-`highmotion_historical_protocol_screened_candidates: 18`, and
-`highmotion_release_eligible_rows: 0`. The current CSV has 29 + 12 = 41 records.
-The retained `data/leaderboard.js` and `data/highmotion-audit.json` are explicitly
-historical artifacts; neither is a current result payload or release permission.
+Current `public-audit.json` contains a separate authenticated `highmotion_v2`
+summary. The legacy fields `highmotion_additional: []`, zero legacy eligible rows,
+and the dated legacy hold remain intact. Only `highmotion_v2` supplies current
+High-Motion rows; old `data/leaderboard.js` and `data/highmotion-audit.json` remain
+historical evidence, never current numeric inputs. CSV/audit links in the v2 HTML
+use a manifest-derived cache key.
 
-Generated `data/public-audit.json`, browser JavaScript and CSV are never accepted
-as independent numeric inputs. The website's `scripts/build_audit_page.py` is a
-thin wrapper around this same canonical module, so it can check every generated
-asset byte-for-byte without maintaining separate ranking or numeric logic.
+Website `scripts/build_audit_page.py` is a thin wrapper around this same generator.
+Its JSON, JavaScript, HTML and CSV are outputs, not independent numeric sources.
+Explicit alternative v2 bundles require both `--highmotion-v2-bundle` and
+`--highmotion-v2-manifest-sha256`; the same strict numeric contract applies.
 
-## Limits
+For the separate dated 2026-09-14 hold view only:
 
-This is reproduction and validation of archived artifacts, not fresh inference.
-The historical High-Motion audit checks saved identities, prompts, targets,
-scores and wrapper policies; it does not establish whether reference trajectories
-follow the body part requested in the question. It also does not certify decoded
-frame bytes, fully pinned model revisions, identical hardware or a fresh GPU
-replay. The first 1,000 items are not the full 3,243-item evaluation. The new
-bounded four-reference finding does not characterize every item or GRT performance.
+```bash
+python -m tools.densevideo.build_complete_leaderboard --legacy-reference-hold --verify-only
+```
 
-All three promoted educational GRT profiles exceed their contracted Open MOS and
-Token F1 floors and use fewer patch projections. This is not a significance claim
-or a win on every metric: Qwen 3B has lower reported throughput than its matched
-all-patch control. No High-Motion GRT win is claimed by the screened leaderboard.
+That historical view reproduces its original six hashes and 41 records. It cannot
+accept a v2 override. It is not the current website leaderboard.
+
+## Interpretation
+
+The new HF 0.5B GRT improves Grid Accuracy, Token F1, ADE and FDE against its
+configuration-checked archived baseline under the corrected reference; Transition
+Accuracy regresses. This is a small preview point-estimate improvement, not a
+full-split, fresh paired-baseline or statistical-significance result. Archived
+weight revisions and consumed tensors cannot be recovered by numeric checks.
+
+Educational numbers remain historical, not newly rerun. Qwen 3B's lower throughput
+than its matched all-patch control remains visible. No win on every quality or
+efficiency metric is claimed. Source access, licensing and manuscript alignment
+remain separate from numerical leaderboard reproduction.
