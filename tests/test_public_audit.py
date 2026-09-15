@@ -211,7 +211,7 @@ class PublicAuditTests(unittest.TestCase):
         assets = ("leaderboard.html", "data/leaderboard-complete.csv", "data/public-audit.json")
         manifest_key = self.audit["highmotion_v2"]["release_manifest_sha256"][:16]
         for page, version in ((self.html, "?v=hm-v2-" + manifest_key),
-                              (index, "?v=20260915-hm-v2")):
+                              (index, "?v=20260915-main-release")):
             links = re.findall(r'href="([^"]+)"', page)
             changed = [link for link in links if any(link.startswith(asset) for asset in assets)]
             self.assertTrue(changed)
@@ -219,7 +219,7 @@ class PublicAuditTests(unittest.TestCase):
                 self.assertIn(version, link)
                 self.assertLess(link.index(version), link.index("#") if "#" in link else len(link))
         for asset in ("app.js", "styles.css", "data/public-audit.js"):
-            self.assertIn(asset + "?v=20260915-hm-v2", index)
+            self.assertIn(asset + "?v=20260915-main-release", index)
         self.assertIn("data/leaderboard.js?v=1f1b5a79c74ff763", index)
         self.assertNotIn("20260914-target-hold", index)
 
@@ -238,7 +238,7 @@ class PublicAuditTests(unittest.TestCase):
         manifest_pin = "1f64ff54ec8eb09d72c37d6ef3a944e8ccae0a58fe5b4d45fabdfb0a7449d0dc"
         paper_pin = "2a79fcce2707b1eb74648a5ed135c469b17eb4e1"
         for source in (index, app):
-            self.assertIn("git clone --branch fix/highmotion-target-v2 --single-branch", source)
+            self.assertIn("git clone --branch main --single-branch", source)
             self.assertIn(manifest_pin, source)
             self.assertNotIn("git checkout 9ee16af0d03d7f31e726b71f00e4586972afb062", source)
             self.assertNotIn("b720d636624166638a185202fd47d3eb56e17b38", source)
@@ -253,6 +253,29 @@ class PublicAuditTests(unittest.TestCase):
         self.assertIn("60 CSV records", index)
         self.assertIn("release/2026-09-15/manifest.json", index)
         self.assertIn("release/2026-09-15/numeric_reports.json.gz", index)
+
+    def test_current_code_links_survive_temporary_branch_cleanup(self):
+        repository = "https://github.com/Hai-chao-Zhang/DenseVideoUnderstand"
+        sources = {name: (ROOT / name).read_text()
+                   for name in ("index.html", "app.js", "README.md", "leaderboard.html")}
+        for name, source in sources.items():
+            with self.subTest(source=name):
+                self.assertNotIn("fix/highmotion-target-v2", source)
+                if name != "leaderboard.html":
+                    self.assertIn("git clone --branch main --single-branch", source)
+                links = re.findall(re.escape(repository) + r"/(?:blob|tree)/([^\s\"<>`)]+)", source)
+                for target in links:
+                    revision = target.split("/", 1)[0]
+                    self.assertTrue(revision == "main" or re.fullmatch(r"[0-9a-f]{40}", revision),
+                                    "Code links must use main or an immutable commit: " + target)
+        index = sources["index.html"]
+        for target in ("docs/PUBLICATION_AUDIT.md", "docs/REPRODUCTION.md",
+                       "docs/HIGHMOTION_REFERENCE_V2.md", "docs/HIGHMOTION_V2_REPRODUCTION.md",
+                       "release/2026-09-15/manifest.json", "release/2026-09-15/numeric_reports.json.gz"):
+            self.assertIn(repository + "/blob/main/" + target, index)
+        self.assertIn(repository + "/tree/main", index)
+        self.assertIn(repository + "/blob/9ee16af0d03d7f31e726b71f00e4586972afb062/"
+                      "docs/HIGHMOTION_TARGET_HOLD.md", index)
 
     def test_current_v2_claims_match_all_five_source_bound_differences(self):
         summary = self.audit["highmotion_v2"]

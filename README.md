@@ -6,12 +6,12 @@
 ### Public audit update — 15 September 2026
 
 The current minimal evaluation/GRT code and corrected High-Motion release are on
-[`fix/highmotion-target-v2`](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/fix/highmotion-target-v2).
+[`main`](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/main).
 Framework integrations are submitted Draft PRs:
 [VLMEvalKit #1686](https://github.com/open-compass/VLMEvalKit/pull/1686) and
 [lmms-eval #1521](https://github.com/EvolvingLMMs-Lab/lmms-eval/pull/1521), not merged/accepted.
 Historical README instructions below are retained as release-development history;
-use the current release branch's installation and reproduction instructions.
+use the main branch's installation and reproduction instructions.
 
 `leaderboard.html` provides the current leaderboard without JavaScript:
 29 Educational results, 19 High-Motion v2 results, and 12 educational GRT
@@ -22,7 +22,7 @@ evaluation**. Questions and row order are unchanged. Corrected references name
 invalid reference positions are masked without shifting later predictions.
 Each metric shows its own scored-row and slot/edge coverage; undefined values
 are not zero. See the
-[reference contract](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/fix/highmotion-target-v2/docs/HIGHMOTION_REFERENCE_V2.md).
+[reference contract](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/main/docs/HIGHMOTION_REFERENCE_V2.md).
 
 The v2 comparison contains 18 archived baselines rescored on CPU and one new
 fixed HF 0.5B GRT run. GRT's primary Grid Accuracy exceeds its corresponding
@@ -44,12 +44,12 @@ archived baselines, quality baselines and all-patch controls. Qwen 3B GRT improv
 Open MOS/Token F1 and patch reuse but has lower mean throughput than its all-patch
 control. The page does not claim every quality/efficiency metric improves.
 
-All current leaderboard and evidence assets come from the release branch's canonical
+All current leaderboard and evidence assets come from the main branch's canonical
 `tools.densevideo.build_complete_leaderboard` generator. It verifies the pinned
 release manifests, independently recomputes all 12 educational quality means
 from 7,608 numeric records, and verifies the unchanged 27-run High-Motion audit
 while withholding its old scores. The separate
-[15 September numeric bundle](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/fix/highmotion-target-v2/release/2026-09-15)
+[15 September numeric bundle](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/main/release/2026-09-15)
 is authenticated and its v2 numeric contributions are reaggregated, without
 rerunning model inference or source projection. Its manifest SHA-256 is
 `1f64ff54ec8eb09d72c37d6ef3a944e8ccae0a58fe5b4d45fabdfb0a7449d0dc`.
@@ -60,7 +60,7 @@ From the website checkout, clone the code separately (replace the example
 destination), then regenerate and check the site with Python/PyYAML:
 
 ```bash
-git clone --branch fix/highmotion-target-v2 --single-branch \
+git clone --branch main --single-branch \
   https://github.com/Hai-chao-Zhang/DenseVideoUnderstand.git /path/to/DIVE-Bench
 export DIVE_MINIMAL_ROOT=/path/to/DIVE-Bench
 python -m pip install 'PyYAML>=6'
@@ -87,7 +87,7 @@ High-Motion source data remain private/access-controlled, and video/source
 licenses must be respected. Public numerical evidence does not grant source
 data access or redistribution rights. Actual reference construction and GPU
 generation require authorized inputs; use the
-[v2 reproduction recipe](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/fix/highmotion-target-v2/docs/HIGHMOTION_V2_REPRODUCTION.md),
+[v2 reproduction recipe](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/blob/main/docs/HIGHMOTION_V2_REPRODUCTION.md),
 including its isolated original-annotation cache and model-byte checks.
 
 Four tests that inspect external, mutable Qwen3/LLaVA7 historical campaign trees are

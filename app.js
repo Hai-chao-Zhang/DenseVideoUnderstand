@@ -233,7 +233,7 @@
     setup: {
       filename: "setup.sh",
       value: [
-        "git clone --branch fix/highmotion-target-v2 --single-branch \\",
+        "git clone --branch main --single-branch \\",
         "  https://github.com/Hai-chao-Zhang/DenseVideoUnderstand.git DIVE-Bench",
         "cd DIVE-Bench",
         "python -m pip install 'PyYAML>=6'",
