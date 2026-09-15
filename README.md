@@ -47,16 +47,6 @@ The [arXiv paper](https://arxiv.org/abs/2509.14199) introduces the earlier
 Educational scope; the [revised manuscript](paper/ECCV_Dense_Video_Understanding.pdf)
 includes both Educational and High-Motion tasks.
 
-## 📅 News
-
-- **2026/09/15** — Evaluation and GRT code are available on `main`, together with
-  the complete leaderboard and the corrected-reference High-Motion v2 preview.
-- **2026/09/14** — DIVE-Bench/GRT integration submitted to
-  [VLMEvalKit #1686](https://github.com/open-compass/VLMEvalKit/pull/1686) and
-  [lmms-eval #1521](https://github.com/EvolvingLMMs-Lab/lmms-eval/pull/1521).
-  Both are open draft submissions, not merged upstream.
-- **2025/09/18** — Initial DIVE Educational test-split release.
-
 ## 🔍 What is DIVE?
 
 **Dense Information Video Evaluation (DIVE)** studies video understanding beyond
@@ -66,46 +56,24 @@ trajectories across time.
 
 | Paper task | Evaluation task ID | Scope |
 | --- | --- | --- |
-| Educational High-FPS Videos | `dive_bench_educational_high_fps` | 634 QA / 317 videos |
-| High-Motion High-FPS Videos | `dive_bench_high_motion_high_fps` | 3,243 examples |
+| [Educational High-FPS Videos](https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation) | `dive_bench_educational_high_fps` | 634 QA / 317 videos |
+| [High-Motion High-FPS Videos](https://huggingface.co/datasets/haichaozhang/highmotion_densevideounderstand) | `dive_bench_high_motion_high_fps` | 3,243 examples |
 
 The fixed High-Motion preview uses
 `dive_bench_high_motion_high_fps_preview1000` (the first 1,000 examples).
 Preview and full-split results are separate protocols.
 
-### Datasets
-
-- [Educational High-FPS Videos](https://huggingface.co/datasets/haichaozhang/DenseVideoEvaluation)
-- [High-Motion High-FPS Videos](https://huggingface.co/datasets/haichaozhang/highmotion_densevideounderstand)
-- [Two-task DIVE-Bench entry](https://huggingface.co/datasets/haichaozhang/DIVE-Bench):
-  `educational_high_fps` and `high_motion_high_fps` test configurations.
-
-Data access is separate from this public code release. At the release audit,
-Educational was gated, and the High-Motion source and combined annotation entry
-were private. Obtain authorized access and authenticate with `hf auth login`.
-Videos and dataset rights are not redistributed by this repository. See
-[data access, pinned revisions, and source terms](docs/DATASET_RELEASE.md).
-
-Use only `LPM_videos.parquet` for Educational evaluation: `LPM_slides.parquet`
-duplicates its questions. For existing videos, set `DENSEVIDEO_DATA_ROOT` to
-the root containing `DenseVideo-LPM/videos/<video>.mp4` and/or
-`egodex/<action>/<clip>.mp4`; preserve action directories because clip IDs repeat.
-High-Motion v2 requires the [corrected-reference recipe](docs/HIGHMOTION_V2_REPRODUCTION.md),
-not the legacy GT scores emitted by the original generation task.
+Dataset access and video licenses are separate from the code release. At the
+release audit, Educational was gated; High-Motion and the combined two-task entry
+were private. See [dataset setup and task configurations](docs/DATASET_RELEASE.md).
 
 ## 🔍 What is GRT?
 
-**Gated Residual Tokenization** uses changes between sampled frames to guide
-visual patch computation. The released implementations combine motion-based
-gating with reuse of previous patch embeddings; fixed model-specific profiles
-define thresholds, routing, and generation budgets.
-
-The Educational reproduction runner includes LLaVA-OneVision **0.5B**
-(`route31`), Qwen2.5-VL **3B** (`qwen3`), and Qwen2.5-VL **7B** (`qwen7`), with
-baseline, all-patch control, and GRT arms. High-Motion has a separate fixed
-**HF LLaVA-OneVision 0.5B GRT** recipe. See the
-[Educational profiles](tools/densevideo/profiles.json) and
-[High-Motion reproduction guide](docs/HIGHMOTION_V2_REPRODUCTION.md).
+**Gated Residual Tokenization** combines motion-based gating with reuse of
+previous patch embeddings to reduce redundant visual patch computation.
+The release includes Educational profiles for LLaVA-OneVision **0.5B** (`route31`)
+and Qwen2.5-VL **3B / 7B** (`qwen3` / `qwen7`), plus a separate
+**HF LLaVA-OneVision 0.5B** High-Motion recipe.
 
 ## ⚙️ Quick start
 
@@ -123,93 +91,51 @@ python -m tools.densevideo.build_complete_leaderboard --verify-only
 python -m tools.densevideo.build_complete_leaderboard --output outputs/complete
 ```
 
-Open `outputs/complete/leaderboard.html`. It contains **29 Educational results,
-19 High-Motion v2 preview results, and 12 Educational comparison rows** (60 CSV
-records, not 60 unique methods). Choose a new output directory for each export.
-This reconstructs saved numerical results; it does not run model inference.
-See the [complete leaderboard guide](docs/COMPLETE_LEADERBOARD.md).
+Open `outputs/complete/leaderboard.html`: **29 Educational results, 19 High-Motion
+v2 preview results, and 12 comparison rows**. This verifies saved results, not
+new model inference. [Leaderboard generation details →](docs/COMPLETE_LEADERBOARD.md)
 
-### Install the evaluator
+### Evaluate and reproduce GRT
 
-From the cloned repository, use a dedicated Python **3.10 or 3.11** environment
-and a compatible CUDA/PyTorch installation for GPU evaluation:
+From the checkout, use a dedicated Python **3.10 or 3.11** environment:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install --upgrade pip
 python -m pip install -e '.[test,reference]'
-python -m lmms_eval --help
-python -m pytest -q
-```
-
-Do not install this distribution alongside upstream `lmms-eval`: both own the
-`lmms_eval` namespace. Supported profiles use PyAV, Transformers 4.57.6,
-PyTorch 2.9 / torchvision 0.24, and qwen-vl-utils 0.0.14. See
-[environment and reproduction requirements](docs/REPRODUCTION.md#installation).
-
-### Evaluate DIVE-Bench
-
-With authorized data and model access, run an Educational smoke test:
-
-```bash
-python -m lmms_eval --model llava_hf \
-  --model_args pretrained=llava-hf/llava-onevision-qwen2-0.5b-ov-hf,revision=74dd0bf867a4cda7950c17663794267c60cf4b40,device_map=auto,dtype=bfloat16,max_frames_num=8,video_decode_backend=pyav_seek \
-  --tasks dive_bench_educational_high_fps --batch_size 1 --limit 1 \
-  --gen_kwargs max_new_tokens=128,temperature=0 \
-  --log_samples --output_path outputs/educational-smoke
-```
-
-This one-item run checks execution, not published-score reproduction.
-Open MOS requires the separate pinned judge. For High-Motion, follow the
-[source verification, GRT generation, and v2 scoring steps](docs/HIGHMOTION_V2_REPRODUCTION.md).
-
-### Reproduce GRT
-
-Inspect an Educational three-arm plan without downloading models or using a GPU:
-
-```bash
 python -m tools.densevideo.reproduce_grt --profile route31 --output outputs/route31
 ```
 
-After data and model access are available, execute on one selected GPU:
+The last command prints a plan only. After authorized data/model setup and a
+compatible CUDA installation, execute the matched Educational arms:
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python -m tools.densevideo.reproduce_grt \
   --profile route31 --output outputs/route31-full --execute --with-mos
 ```
 
-Use `--profile qwen3` or `--profile qwen7` for the other Educational models.
-`--with-mos` also runs the pinned Qwen3-VL-32B text judge and needs sufficient
-GPU memory. The runner executes matched arms serially; `--limit 2` is a smoke
-test, not a leaderboard result. Full settings and validation are in the
-[reproduction guide](docs/REPRODUCTION.md).
+`--with-mos` also runs a 32B judge and requires sufficient GPU memory.
+Do not install alongside upstream `lmms-eval`; both use the same namespace.
+Use the [Educational setup and evaluation guide](docs/REPRODUCTION.md) or
+[High-Motion v2 generation and corrected-reference scoring guide](docs/HIGHMOTION_V2_REPRODUCTION.md)
+for data preparation, pinned settings, and complete commands.
 
 ## 📊 Results and reproducibility
 
 See the [interactive leaderboard](https://www.zhanghaichao.xyz/DenseVideoUnderstand/#leaderboard)
 or [complete HTML tables](https://www.zhanghaichao.xyz/DenseVideoUnderstand/leaderboard.html).
 
-On the fixed **1,000-example High-Motion v2 preview**, HF 0.5B GRT improves
-Grid Accuracy from **0.0468682595 to 0.0495036226** and Token F1 from
-**0.0418983286 to 0.0450524706**. ADE and FDE improve too; **Transition Accuracy
-decreases**. The comparison uses 18 CPU-rescored archived baselines and one new
-GRT GPU run, with the same corrected right-hand references and validity masks.
-Of 1,000 records, 861 have valid references (6,015 of 8,000 sampled positions).
-These are preview point estimates, not full 3,243-example results or a
-statistical-significance claim. Baseline inference was not repeated, and missing
-historical weight/tensor receipts prevent a newly rerun byte-identical paired
-claim. [All five metrics, coverage, and execution details →](docs/HIGHMOTION_V2_RESULTS.md)
+On the **1,000-example High-Motion v2 preview** (861 valid-reference records),
+HF 0.5B GRT improves Grid Accuracy from **0.0468682595 to 0.0495036226**.
+Four of five metrics improve; Transition Accuracy decreases. Baselines reuse
+archived predictions rescored against the corrected GT; only GRT ran new GPU
+inference. This is not a fresh byte-identical paired run or full-split result.
+[All metrics, coverage, and protocol limits →](docs/HIGHMOTION_V2_RESULTS.md)
 
-Educational results reconstruct the **2026-08-20 website snapshot**, not a fresh
-full GPU rerun. The three supported profiles passed a
-[bounded GPU smoke check](docs/GPU_SMOKE_VALIDATION.md). Archived website baselines
-and matched controls are different comparisons; their whole score gap cannot
-be attributed to GRT. Eight sampled frames do not establish high-FPS coverage,
-and patch-compute ratios are not total FLOPs or throughput. Paper-version,
-count, judge, and protocol differences are documented in the
-[publication audit](docs/PUBLICATION_AUDIT.md) and
-[dataset/manuscript notes](docs/DATASET_RELEASE.md).
+Educational scores reproduce the **2026-08-20 numerical snapshot**, not a fresh
+full GPU rerun. Paper/protocol differences, matched controls, and the limits of
+eight-frame sampling and patch-compute measurements are detailed in the
+[reproduction and publication notes](docs/PUBLICATION_AUDIT.md).
 
 ## 📜 Citation
 
@@ -227,9 +153,6 @@ paper version and evaluation protocol used:
 
 ## ⚖️ Acknowledgments and licenses
 
-Our evaluation infrastructure builds on
-[LMMS-Eval](https://github.com/EvolvingLMMs-Lab/lmms-eval). Its original MIT and
-Apache-2.0 component notices are retained in [LICENSE](LICENSE) and
-[LICENSE-APACHE](LICENSE-APACHE). The original project's BSD-3-Clause notice for
-Haichao Zhang is retained in [LICENSE-BSD](LICENSE-BSD). These notices do not
-replace one another; datasets and source videos retain their separate terms.
+Built on [LMMS-Eval](https://github.com/EvolvingLMMs-Lab/lmms-eval). Component
+notices are retained in [LICENSE](LICENSE), [LICENSE-APACHE](LICENSE-APACHE), and
+[LICENSE-BSD](LICENSE-BSD). Datasets and videos retain their separate terms.
