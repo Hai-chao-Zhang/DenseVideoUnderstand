@@ -34,6 +34,7 @@ dive-leaderboard = "tools.densevideo.rebuild_published_leaderboard:main"
 dive-leaderboard-complete = "tools.densevideo.build_complete_leaderboard:main"
 dive-highmotion-reference = "tools.densevideo.build_highmotion_reference_v2:main"
 dive-highmotion-rescore = "tools.densevideo.rescore_highmotion_v2:main"
+dive-highmotion-bind = "tools.densevideo.bind_highmotion_sources:main"
 
 [tool.setuptools.packages.find]
 include = ["lmms_eval*", "densevideo_qwen_dual_plugin*", "tools.densevideo*"]

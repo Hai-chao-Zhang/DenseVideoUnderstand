@@ -32,6 +32,9 @@ The `fix/highmotion-target-v2` branch adds a separate
 Original questions and input slots remain unchanged, and invalid source references
 are explicitly masked. The correction tools do not lift the High-Motion release
 hold or certify a GRT win; existing aggregate scores cannot be reused for v2.
+The [v2 reproduction guide](docs/HIGHMOTION_V2_REPRODUCTION.md) explains how to
+verify authorized local sources, build the corrected references, and rescore
+cached predictions without a private experiment manifest or baseline inference.
 
 On 2026-09-14, all three supported Educational profiles completed a
 [two-item, nine-arm GPU smoke check](docs/GPU_SMOKE_VALIDATION.md), including

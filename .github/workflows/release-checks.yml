@@ -52,3 +52,4 @@ jobs:
           dive-leaderboard-complete --output /tmp/dive-complete-table
           dive-highmotion-reference --help
           dive-highmotion-rescore --help
+          dive-highmotion-bind --help
