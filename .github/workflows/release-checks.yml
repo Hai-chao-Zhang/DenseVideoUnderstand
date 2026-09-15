@@ -2,7 +2,7 @@ name: Minimal release checks
 
 on:
   push:
-    branches: [release/dive-bench-minimal]
+    branches: [release/dive-bench-minimal, fix/highmotion-target-v2]
   pull_request:
   workflow_dispatch:
 
