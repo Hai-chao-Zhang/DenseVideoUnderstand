@@ -35,7 +35,7 @@ jobs:
           python-version: ${{ matrix.python }}
           cache: pip
       - run: python -m pip install torch==2.9.0 torchvision==0.24.0 --index-url https://download.pytorch.org/whl/cpu
-      - run: python -m pip install '.[test]'
+      - run: python -m pip install '.[test,reference]'
       - run: python -m pytest -q
       - run: python -m build
       - name: Install the built wheel
@@ -50,3 +50,5 @@ jobs:
           dive-leaderboard --verify-only
           dive-leaderboard-complete --verify-only
           dive-leaderboard-complete --output /tmp/dive-complete-table
+          dive-highmotion-reference --help
+          dive-highmotion-rescore --help

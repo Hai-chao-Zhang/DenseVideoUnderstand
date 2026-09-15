@@ -23,6 +23,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = ["pytest>=8,<9", "pytest-subtests", "ruff>=0.12", "build"]
+reference = ["h5py>=3.11,<4", "pyarrow>=16,<24"]
 logging = ["wandb>=0.16"]
 legacy-decord = ["decord==0.6.0"]
 
@@ -31,6 +32,8 @@ lmms-eval = "lmms_eval.__main__:cli_evaluate"
 dive-reproduce = "tools.densevideo.reproduce_grt:main"
 dive-leaderboard = "tools.densevideo.rebuild_published_leaderboard:main"
 dive-leaderboard-complete = "tools.densevideo.build_complete_leaderboard:main"
+dive-highmotion-reference = "tools.densevideo.build_highmotion_reference_v2:main"
+dive-highmotion-rescore = "tools.densevideo.rescore_highmotion_v2:main"
 
 [tool.setuptools.packages.find]
 include = ["lmms_eval*", "densevideo_qwen_dual_plugin*", "tools.densevideo*"]

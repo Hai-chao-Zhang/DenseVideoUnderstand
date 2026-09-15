@@ -27,6 +27,12 @@ right-hand target. This is not a finding about all 3,243 items or GRT performanc
 The historical 27-run audit and 32-row snapshot remain immutable evidence, not
 current release eligibility; Educational scores, ranks and GRT gates are unchanged.
 
+The `fix/highmotion-target-v2` branch adds a separate
+[right-hand GT constructor and cached-prediction scorer](docs/HIGHMOTION_REFERENCE_V2.md).
+Original questions and input slots remain unchanged, and invalid source references
+are explicitly masked. The correction tools do not lift the High-Motion release
+hold or certify a GRT win; existing aggregate scores cannot be reused for v2.
+
 On 2026-09-14, all three supported Educational profiles completed a
 [two-item, nine-arm GPU smoke check](docs/GPU_SMOKE_VALIDATION.md), including
 fresh Open MOS and matching consumed input tensors. Full 634-example inference
@@ -105,7 +111,7 @@ both own the `lmms_eval` Python namespace.
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -e '.[test]'
+python -m pip install -e '.[test,reference]'
 python -m lmms_eval --help
 python -m pytest -q
 ```
