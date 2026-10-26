@@ -3,13 +3,22 @@
 
 ## Project website
 
+### Website layout update — 26 October 2026
+
+The homepage opens with the main leaderboard. Supporting comparisons, metric
+definitions, provenance and reproduction commands are expandable. The default
+table shows primary metrics; the all-metrics control restores every published
+column. The method diagram describes the released projection-reuse pathway,
+which keeps the full token grid and does not enable scene merging.
+All numerical assets and the static full-results page are unchanged.
+
 ### Public audit update — 15 September 2026
 
 The current minimal evaluation/GRT code and corrected High-Motion release are on
 [`main`](https://github.com/Hai-chao-Zhang/DenseVideoUnderstand/tree/main).
-Framework integrations are submitted Draft PRs:
-[VLMEvalKit #1686](https://github.com/open-compass/VLMEvalKit/pull/1686) and
-[lmms-eval #1521](https://github.com/EvolvingLMMs-Lab/lmms-eval/pull/1521), not merged/accepted.
+Framework integrations (checked 26 October 2026):
+[VLMEvalKit #1686](https://github.com/open-compass/VLMEvalKit/pull/1686) is open for review;
+[lmms-eval #1521](https://github.com/EvolvingLMMs-Lab/lmms-eval/pull/1521) is a draft. Neither is merged.
 Historical README instructions below are retained as release-development history;
 use the main branch's installation and reproduction instructions.
 

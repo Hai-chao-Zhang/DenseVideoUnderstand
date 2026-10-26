@@ -35,6 +35,8 @@
   var grtQualification = document.getElementById("grt-family-qualification");
   var grtQualificationCount = document.getElementById("grt-family-qualification-count");
   var grtQualificationList = document.getElementById("grt-family-qualification-list");
+  var metricsToggle = document.getElementById("show-all-metrics");
+  var trackContext = document.getElementById("track-context");
 
   function validatedHighmotionV2(payload) {
     var metrics = ["grid_acc", "grid_ade", "grid_fde", "grid_transition_acc", "token_f1"];
@@ -221,7 +223,7 @@
       ["Scope", "High-Motion v2 uses the fixed first 1,000 source records, not the full 3,243-record benchmark. Every method uses the same valid-reference mask; cell coverage lists scored rows and slots or edges."],
       ["Target", "The right-hand ring-finger metacarpal (rightRingFingerMetacarpal) is the source-defined palm proxy in this version. A valid projected reference is not proof of RGB visibility."],
       ["Grid Acc ↑", "Macro mean of per-row accuracy over valid sampled reference positions. Invalid references are excluded, not scored as correct."],
-      ["Grid ADE ↓", "Macro mean of per-row normalized grid-center distances over valid reference positions. Missing or malformed predictions receive √2."],
+      ["Grid ADE ↓", "Macro mean of per-row distances between normalized grid indices (0, 0.5, 1) over valid reference positions. Missing or malformed predictions receive √2."],
       ["Grid FDE ↓", "Distance at the original final sampled position. Undefined when that reference is invalid; the last valid earlier position is not substituted."],
       ["Transition Acc ↑", "Macro mean of accuracy over adjacent valid sampled positions only. Masked gaps are never bridged."],
       ["Token F1 ↑", "Canonical region-label overlap on valid positions, with surplus prediction slots penalized. This is not a temporal-order metric."],
@@ -367,8 +369,16 @@
       .sort(compareRows);
   }
 
+  function visibleColumns() {
+    if (!metricsToggle || metricsToggle.checked) return columns[state.track];
+    var keys = state.track === "lpm"
+      ? ["rank", "model", "open_mos", "token_f1", "recompute_ratio", "throughput_fps"]
+      : ["rank", "model", "grid_acc", "grid_ade", "grid_fde", "transition_acc", "token_f1"];
+    return columns[state.track].filter(function (column) { return keys.indexOf(column.key) !== -1; });
+  }
+
   function renderHead() {
-    var cells = columns[state.track].map(function (column) {
+    var cells = visibleColumns().map(function (column) {
       var active = state.sortKey === column.key;
       var ariaSort = active ? (state.sortDirection === "asc" ? "ascending" : "descending") : "none";
       var mark = active ? (state.sortDirection === "asc" ? "↑" : "↓") : "↕";
@@ -394,11 +404,11 @@
     table.setAttribute("data-empty", rows.length ? "false" : "true");
     if (!rows.length) {
       var emptyMessage = state.track === "highmotion" && !highmotionV2 ? "High-Motion results withheld pending target/reference consistency review." : "No models match this filter.";
-      tableBody.innerHTML = '<tr class="table-empty"><td colspan="' + columns[state.track].length + '">' + emptyMessage + '</td></tr>';
+      tableBody.innerHTML = '<tr class="table-empty"><td colspan="' + visibleColumns().length + '">' + emptyMessage + '</td></tr>';
       return;
     }
     tableBody.innerHTML = rows.map(function (row) {
-      var cells = columns[state.track].map(function (column) {
+      var cells = visibleColumns().map(function (column) {
         var classes = [];
         if (column.key === "rank") classes.push("rank-cell");
         if (column.primary) classes.push("metric-primary");
@@ -411,6 +421,8 @@
 
   function renderTable() {
     if (!tableHead || !tableBody) return;
+    table.setAttribute("data-view", metricsToggle && !metricsToggle.checked ? "compact" : "details");
+    table.setAttribute("data-track", state.track);
     var rows = filteredRows();
     renderHead();
     renderBody(rows);
@@ -540,6 +552,15 @@
     rankingRule.textContent = track === "lpm" ? "Open MOS (reported first; missing last), then Token F1" :
       highmotionV2 ? "Validated server ranks: Grid Acc descending; exact ties share rank; undefined values last" :
         "No ranking: target/reference review pending";
+    if (trackContext) {
+      var educationalRows = dataset.tracks.lpm;
+      var scored = educationalRows.filter(function (row) { return row.open_mos !== null && row.open_mos !== undefined; }).length;
+      trackContext.textContent = track === "lpm"
+        ? "634 QA items · Qwen3-VL-32B text judge (0–5) · MOS reported for " + scored + "/" + educationalRows.length + " methods. Historical results, not a fresh GPU rerun."
+        : highmotionV2
+          ? "v2 preview: first 1,000 of 3,243 records · " + highmotionV2.rows[0].records_with_scored_slots + " records with valid references · 18 archived baselines rescored + 1 GRT run."
+          : "High-Motion results withheld pending target/reference consistency review.";
+    }
     renderSummary();
     renderGlossary();
     renderTable();
@@ -614,6 +635,13 @@
     });
     sourceFilter.addEventListener("change", function () {
       state.source = sourceFilter.value;
+      renderTable();
+    });
+    if (metricsToggle) metricsToggle.addEventListener("change", function () {
+      if (!visibleColumns().some(function (column) { return column.key === state.sortKey; })) {
+        state.sortKey = "rank";
+        state.sortDirection = "asc";
+      }
       renderTable();
     });
     selectTrack("lpm");

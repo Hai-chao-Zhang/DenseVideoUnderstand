@@ -219,7 +219,7 @@ class PublicAuditTests(unittest.TestCase):
                 self.assertIn(version, link)
                 self.assertLess(link.index(version), link.index("#") if "#" in link else len(link))
         for asset in ("app.js", "styles.css", "data/public-audit.js"):
-            self.assertIn(asset + "?v=20260915-main-release", index)
+            self.assertIn(asset + "?v=20261026-leaderboard", index)
         self.assertIn("data/leaderboard.js?v=1f1b5a79c74ff763", index)
         self.assertNotIn("20260914-target-hold", index)
 
