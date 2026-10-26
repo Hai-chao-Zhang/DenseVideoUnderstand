@@ -320,6 +320,13 @@ pre code { display: block; color: var(--ink); font-family: var(--mono); font-siz
   #leaderboard-table th:nth-child(2), #leaderboard-table td:nth-child(2) { position: static; min-width: 215px; max-width: 215px; box-shadow: none; }
   #leaderboard-table thead th:nth-child(2) { position: sticky; top: 0; left: auto; z-index: 3; }
   .model-name { max-width: 195px; }
+  #leaderboard-table[data-view="compact"] { table-layout: fixed; width: 760px; }
+  #leaderboard-table[data-view="compact"] th:first-child, #leaderboard-table[data-view="compact"] td:first-child { width: 40px; min-width: 40px; }
+  #leaderboard-table[data-view="compact"] th:nth-child(2), #leaderboard-table[data-view="compact"] td:nth-child(2) { width: 145px; min-width: 145px; max-width: 145px; }
+  #leaderboard-table[data-view="compact"] th:nth-child(3), #leaderboard-table[data-view="compact"] td:nth-child(3) { width: 100px; }
+  #leaderboard-table[data-view="compact"] .model-name { max-width: 125px; }
+  #leaderboard-table[data-view="compact"] .metric-coverage { white-space: normal; }
+  #leaderboard-table[data-empty="true"] { width: 100%; }
   th, td { padding: 10px; }
   .table-footer { align-items: flex-start; flex-direction: column; padding: 10px; }
   .disclosure > summary { padding-block: 14px; font-size: 13px; }
